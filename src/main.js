@@ -6,36 +6,36 @@ import App from './App.vue';
 import Home from './Home.vue';
 import Login from './Login.vue';
 import Register from './Register.vue';
+import Profile from './Profile.vue';
 import Users from './Users.vue';
 import User from './User.vue';
 
 import config from './config.js';
 
+let app;
+
 firebase.initializeApp(config);
+firebase.auth().onAuthStateChanged(function(user) {
+  if (!app) {
+    app = new Vue({
+      el: '#app',
+      render: h => h(App),
+      router
+    });
+  }
+});
 
 Vue.use(VueRouter);
 
 const routes = [
   {
-    name: 'user',
-    path: '/users/:uid',
-    component: User,
-    meta: {
-      requiresAuth: true
-    }
+    path: '*',
+    redirect: '/login'
   },
   {
-    name: 'users',
-    path: '/users',
-    component: Users,
-    meta: {
-      requiresAuth: true
-    }
-  },
-  {
-    name: 'register',
-    path: '/register',
-    component: Register
+    name: 'home',
+    path: '/',
+    component: Home
   },
   {
     name: 'login',
@@ -43,9 +43,30 @@ const routes = [
     component: Login
   },
   {
-    name: 'home',
-    path: '/',
-    component: Home
+    name: 'register',
+    path: '/register',
+    component: Register
+  },
+  {
+    name: 'users',
+    path: '/users',
+    component: Users
+  },
+  {
+    name: 'profile',
+    path: '/profile',
+    component: Profile,
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
+    name: 'user',
+    path: '/user:uid',
+    component: User,
+    meta: {
+      requiresAuth: true
+    }
   }
 ];
 
@@ -53,8 +74,10 @@ const router = new VueRouter({
   routes: routes
 });
 
-new Vue({
-  el: '#app',
-  router,
-  render: h => h(App)
+router.beforeEach((to, from, next) => {
+  let currentUser = firebase.auth().currentUser;
+  let requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+
+  if (requiresAuth && !currentUser) next('login')
+  else next()
 });

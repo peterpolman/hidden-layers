@@ -1,21 +1,28 @@
 <template>
   <div class="container">
+
     <nav>
-      <router-link to="/home">Home</router-link>
-      <router-link to="/login">Login</router-link>
-      <router-link to="/register">Register</router-link>
+      <router-link to="/">Home</router-link>
       <router-link to="/users">Users</router-link>
-      <router-link :to="{ name: 'user', params: { uid: 1 }}">User 1</router-link>
-      <router-link :to="{ name: 'user', params: { uid: 2 }}">User 2</router-link>
+      <router-link to="/profile">Profile</router-link>
+      <router-link to="/login">Login</router-link>
+      <strong>|</strong>
+      <router-link :to="{ name: 'user', params: { uid: 1 } }">User 1</router-link>
+      <router-link :to="{ name: 'user', params: { uid: 2 } }">User 2</router-link>
     </nav>
+
     <router-view></router-view>
+
   </div>
 </template>
 
 <script>
+import firebase from 'firebase';
+
 export default {
   data () {
     return {
+      currentUser: firebase.auth().currentUser
     }
   }
 }
@@ -52,9 +59,24 @@ nav {
   margin: 0 -.5rem;
 }
 
-h1, h2 {
+nav a {
+  margin: 0 .2rem;
+}
+
+nav strong {
+  color: lightgray;
+}
+
+h1 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-align: left;
+}
+
+h2 {
   font-weight: normal;
-  text-align: center;
+  font-weight: bold;
+  font-size: 1.2rem;
 }
 
 ul {
@@ -75,4 +97,44 @@ a {
     text-decoration: underline;
   }
 }
+
+.section-login h1,
+.section-register h1 {
+  text-align: center;
+}
+
+form {
+  width: 220px;
+  margin: 0 auto;
+  box-sizing: content-box;
+}
+
+input[type="text"],
+input[type="password"] {
+  display: block;
+  box-sizing: border-box;
+  padding: 1rem;
+  border: 0;
+  width: 100%;
+  margin: 0 auto 1rem;
+
+  & ~ p {
+    text-align: center;
+    margin: 1rem auto
+  }
+}
+
+button {
+  box-sizing: border-box;
+  background: #42b983;
+  width: 100%;
+  display: block;
+  padding: 1rem;
+  color: white;
+  text-transform: uppercase;
+  font-weight: bold;
+  border: 0;
+  margin: auto;
+}
+
 </style>
