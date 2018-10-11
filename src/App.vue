@@ -45,7 +45,6 @@ body {
   max-width: 1200px;
   width: auto;
   margin: auto;
-  padding: 0 .5rem;
 }
 
 nav {
@@ -57,6 +56,10 @@ nav {
   padding: 1rem;
   text-align: center;
   margin: 0 -.5rem;
+  font-size: 12px;
+  position: fixed;
+  z-index: 1;
+  width: 100%;
 }
 
 nav a {

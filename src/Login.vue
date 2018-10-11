@@ -4,7 +4,7 @@
     <form v-on:submit.prevent="login">
       <input type="text" v-model="email" placeholder="E-mail">
       <input type="password" v-model="password" placeholder="password">
-      <button type="submit" v-on:click="login">Submit</button>
+      <button type="submit">Submit</button>
       <p>you don't have an account? You can <router-link to="/register">register one!</router-link></p>
     </form>
   </section>
