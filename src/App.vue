@@ -42,9 +42,7 @@ body {
 }
 
 .container {
-  max-width: 1200px;
-  width: auto;
-  margin: auto;
+  width: 100%;
 }
 
 nav {
