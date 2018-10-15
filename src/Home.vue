@@ -20,8 +20,9 @@ export default {
       currentUser: firebase.auth().currentUser,
       map: null,
       mapName: this.name + "-map",
-      markers: [{}],
-      routeMarkers: [{}]
+      markers: [],
+      routeMarkers: [],
+      routeCoords: []
     }
   },
   mounted() {
@@ -74,7 +75,7 @@ export default {
       marker.setMap(null)
 
       // We skip the first result in the array since it is the observer object
-      for (var i = 1; i < this.routeMarkers.length; i++) {
+      for (var i = 0; i < this.routeMarkers.length; i++) {
         this.routeMarkers[i].setMap(null)
         delete this.routeMarkers[i];
       }
@@ -95,15 +96,39 @@ export default {
         scale: .2
       }
 
+      this.routeCoords.push(new google.maps.LatLng({
+        lat: route.steps[0].start_location.lat(),
+        lng: route.steps[0].start_location.lng()
+      }))
+
       for (var i = 0; i < route.steps.length; i++) {
-        var id = this.getMarkerId(route.steps[i].start_location);
+        var id = this.getMarkerId(route.steps[i].end_location);
         var marker = new google.maps.Marker({
-          position: route.steps[i].start_location,
+          position: route.steps[i].end_location,
           map: this.map,
           icon: icon
         });
         this.routeMarkers.push(marker);
+
+        if (route.steps[i].start_location) {
+          var coords = new google.maps.LatLng({
+            lat: route.steps[i].end_location.lat(),
+            lng: route.steps[i].end_location.lng()
+          });
+          this.routeCoords.push(coords)
+        }
+
       }
+
+      var routePath = new google.maps.Polyline({
+        path: this.routeCoords,
+        geodesic: true,
+        strokeColor: '#FF0000',
+        strokeOpacity: .8,
+        strokeWeight: 2
+      });
+
+      routePath.setMap(this.map);
     },
     createMarker(latLng) {
       var id = this.getMarkerId(latLng);

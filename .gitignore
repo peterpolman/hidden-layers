@@ -11,3 +11,7 @@ src/config.js
 *.ntvs*
 *.njsproj
 *.sln
+
+# Firebase directories and files
+.firebase
+functions
