@@ -1,16 +1,6 @@
 <template>
   <div class="container">
 
-    <nav>
-      <router-link to="/">Home</router-link>
-      <router-link to="/users">Users</router-link>
-      <router-link to="/profile">Profile</router-link>
-      <router-link to="/login">Login</router-link>
-      <strong>|</strong>
-      <router-link :to="{ name: 'user', params: { uid: 1 } }">User 1</router-link>
-      <router-link :to="{ name: 'user', params: { uid: 2 } }">User 2</router-link>
-    </nav>
-
     <router-view></router-view>
 
   </div>

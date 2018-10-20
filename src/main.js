@@ -37,7 +37,10 @@ const routes = [
   {
     name: 'home',
     path: '/',
-    component: Home
+    component: Home,
+    meta: {
+      requiresAuth: true
+    }
   },
   {
     name: 'login',
@@ -50,25 +53,9 @@ const routes = [
     component: Register
   },
   {
-    name: 'users',
-    path: '/users',
-    component: Users
-  },
-  {
-    name: 'profile',
-    path: '/profile',
-    component: Profile,
-    meta: {
-      requiresAuth: true
-    }
-  },
-  {
-    name: 'user',
-    path: '/user:uid',
-    component: User,
-    meta: {
-      requiresAuth: true
-    }
+    name: 'logout',
+    path: '/logout',
+    
   }
 ];
 

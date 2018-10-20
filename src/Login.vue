@@ -19,17 +19,25 @@ export default {
     return {
       title: 'Login',
       email: '',
-      password: ''
+      password: '',
+      db: firebase.database()
     }
   },
   methods: {
     login: function () {
       firebase.auth().signInWithEmailAndPassword(this.email, this.password)
-        .then( (user) => {
-          this.$router.replace('profile')
+        .then( (r) => {
+          const users = this.db.ref('users');
+          users.child(r.uid).update({
+            status: 1
+          });
+          this.$router.replace('/')
          })
-        .catch( (error) => {
-          console.log(error.code + ' ' + error.message);
+        .catch( (err) => {
+          if (typeof err != 'undefined') {
+            console.log(err.code + ' ' + err.message);
+            alert('Error during authentication');
+          }
         }
       );
     }

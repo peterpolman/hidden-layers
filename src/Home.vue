@@ -3,8 +3,6 @@
 
     <div class="google-map" :id="mapName"></div>
 
-    <a v-on:click="logout" v-if="currentUser">Logout</a>
-
   </section>
 </template>
 
@@ -12,19 +10,30 @@
 import firebase from 'firebase';
 import config from './config.js';
 import GoogleMapsLoader from 'google-maps';
+import meSrc from './assets/images/user-me.png';
+import maleSrc from './assets/images/user-male.png';
+import femaleSrc from './assets/images/user-female.png';
 
 export default {
   name: 'home',
   data () {
     return {
       currentUser: firebase.auth().currentUser,
+      profile: null,
       map: null,
       mapName: this.name + "-map",
       markers: [],
       routeMarkers: [],
       routeCoords: [],
       db: firebase.database(),
-      position: {}
+      position: {},
+      assets: {
+        avatars: {
+          me: meSrc,
+          male: maleSrc,
+          female: femaleSrc
+        }
+      }
     }
   },
   mounted() {
@@ -43,11 +52,12 @@ export default {
       const options = {
         center: new google.maps.LatLng(52.5, 4.843782),
         zoom: 8,
-        gestureHandling: 'none',
+        // gestureHandling: 'none',
         zoomControl: false,
         mapTypeControl: false,
-        scrollwheel: false,
-        streetViewControl: false
+        scrollwheel: true,
+        streetViewControl: false,
+        mapTypeId: 'terrain'
       }
 
       this.map = new google.maps.Map(element, options);
@@ -57,19 +67,42 @@ export default {
       }.bind(this));
 
       this.geolocate();
+      this.initUsers();
     },
-    getMarkerId(latLng) {
+    initUsers() {
+      const users = this.db.ref('users');
+
+      users.on('child_added', function(user) {
+        const me = this.currentUser.uid;
+        if (me !== user.key) {
+          const latlng = new google.maps.LatLng(user.val().position.lat, user.val().position.lng);
+          this.createUser(latlng, user.val());
+        }
+        else {
+          this.profile = user.val();
+        }
+      }.bind(this));
+
+      users.on('child_changed', function(data) {
+        console.log('changed');
+      });
+
+      users.on('child_removed', function(data) {
+        console.log('removed');
+      });
+    },
+    createMarkerId(latLng) {
       return latLng.lat() + "_" + latLng.lng()
     },
     handleMarkerClick(e) {
-      var id = this.getMarkerId(e.latLng);
+      var id = this.createMarkerId(e.latLng);
       var marker = this.markers[id];
       var position = marker.getPosition();
 
       this.map.panTo(position);
     },
     handleMarkerRightClick(e) {
-      var id = this.getMarkerId(e.latLng);
+      var id = this.createMarkerId(e.latLng);
       var marker = this.markers[id];
       var position = marker.getPosition();
 
@@ -104,7 +137,7 @@ export default {
       }))
 
       for (var i = 0; i < route.steps.length; i++) {
-        var id = this.getMarkerId(route.steps[i].end_location);
+        var id = this.createMarkerId(route.steps[i].end_location);
         var marker = new google.maps.Marker({
           position: route.steps[i].end_location,
           map: this.map,
@@ -132,8 +165,29 @@ export default {
 
       routePath.setMap(this.map);
     },
+    createUser(latLng, user) {
+      const id = this.createMarkerId(latLng)
+      const marker = new google.maps.Marker({
+        id: id,
+        position: latLng,
+        icon: {
+          url: this.assets.avatars[user.gender],
+          size: new google.maps.Size(40, 40),
+          scaledSize: new google.maps.Size(40, 40),
+          origin: new google.maps.Point(0,0)
+        },
+        map: this.map,
+        animation: google.maps.Animation.BOUNCE
+      });
+
+      marker.addListener('click', function(e){
+        this.handleMarkerClick(e);
+      }.bind(this))
+
+      this.markers[id] = marker;
+    },
     createMarker(latLng) {
-      var id = this.getMarkerId(latLng);
+      var id = this.createMarkerId(latLng);
       var marker = new google.maps.Marker({
         id: id,
         position: latLng,
@@ -153,16 +207,10 @@ export default {
     handleMapClick(latLng) {
       this.createMarker(latLng);
 
-      var directionsService = new google.maps.DirectionsService;
-      var directionsDisplay = new google.maps.DirectionsRenderer({map: this.map});
-
-      this.calculateAndDisplayRoute(directionsDisplay, directionsService, latLng);
-      this.map.panTo(latLng);
-    },
-    calculateAndDisplayRoute(directionsDisplay, directionsService, destination) {
+      const directionsService = new google.maps.DirectionsService;
       directionsService.route({
         origin: this.position,
-        destination: destination,
+        destination: latLng,
         travelMode: 'WALKING'
       }, function(response, status) {
         if (status === 'OK') {
@@ -171,6 +219,8 @@ export default {
           window.alert('Directions request failed due to ' + status);
         }
       }.bind(this));
+
+      this.map.panTo(latLng);
     },
     geolocate: function() {
       navigator.geolocation.getCurrentPosition(function(position) {
@@ -178,17 +228,20 @@ export default {
         this.map.panTo(this.position)
         this.map.setZoom(16)
 
-        const id = this.getMarkerId(this.position);
         const marker = new google.maps.Marker({
-          id: id,
+          id: this.createMarkerId(this.position),
           position: this.position,
+          icon: {
+            url: this.assets.avatars['me'],
+            size: new google.maps.Size(40, 40),
+            scaledSize: new google.maps.Size(40, 40),
+            origin: new google.maps.Point(0,0)
+          },
           map: this.map,
           animation: google.maps.Animation.DROP
         });
 
-        const users = this.db.ref('users')
-        console.log(this.currentUser.uid)
-        users.child(this.currentUser.uid).set({
+        this.db.ref('users').child(this.currentUser.uid).update({
           'position': {
             lat: this.position.lat(),
             lng: this.position.lng()
@@ -196,11 +249,6 @@ export default {
         });
 
       }.bind(this))
-    },
-    logout: function() {
-      firebase.auth().signOut().then(() => {
-        this.$router.replace('login')
-      })
     }
   }
 }
