@@ -22,7 +22,9 @@ export default {
       mapName: this.name + "-map",
       markers: [],
       routeMarkers: [],
-      routeCoords: []
+      routeCoords: [],
+      db: firebase.database(),
+      position: {}
     }
   },
   mounted() {
@@ -176,12 +178,21 @@ export default {
         this.map.panTo(this.position)
         this.map.setZoom(16)
 
-        var id = this.getMarkerId(this.position);
-        var marker = new google.maps.Marker({
+        const id = this.getMarkerId(this.position);
+        const marker = new google.maps.Marker({
           id: id,
           position: this.position,
           map: this.map,
           animation: google.maps.Animation.DROP
+        });
+
+        const users = this.db.ref('users')
+        console.log(this.currentUser.uid)
+        users.child(this.currentUser.uid).set({
+          'position': {
+            lat: this.position.lat(),
+            lng: this.position.lng()
+          }
         });
 
       }.bind(this))
