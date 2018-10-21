@@ -39,6 +39,7 @@ export default {
         .then( (r) => {
           const usersRef = this.db.ref('users');
           usersRef.child(r.user.uid).set({
+            status: 1,
             email: r.user.email,
             gender: this.gender,
             username: this.username,

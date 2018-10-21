@@ -1,8 +1,6 @@
 <template>
   <section class="section-home">
-
     <div class="google-map" :id="mapName"></div>
-
   </section>
 </template>
 
@@ -10,9 +8,9 @@
 import firebase from 'firebase';
 import config from './config.js';
 import GoogleMapsLoader from 'google-maps';
-import meSrc from './assets/images/user-me.png';
-import maleSrc from './assets/images/user-male.png';
-import femaleSrc from './assets/images/user-female.png';
+import meSrc from './assets/img/user-me.png';
+import maleSrc from './assets/img/user-male.png';
+import femaleSrc from './assets/img/user-female.png';
 
 export default {
   name: 'home',
@@ -67,7 +65,6 @@ export default {
       }.bind(this));
 
       this.geolocate();
-      this.initUsers();
     },
     initUsers() {
       const users = this.db.ref('users');
@@ -232,7 +229,7 @@ export default {
           id: this.createMarkerId(this.position),
           position: this.position,
           icon: {
-            url: this.assets.avatars['me'],
+            url: this.assets.avatars.me,
             size: new google.maps.Size(40, 40),
             scaledSize: new google.maps.Size(40, 40),
             origin: new google.maps.Point(0,0)
@@ -247,6 +244,8 @@ export default {
             lng: this.position.lng()
           }
         });
+
+        this.initUsers();
 
       }.bind(this))
     }

@@ -27,8 +27,8 @@ export default {
     login: function () {
       firebase.auth().signInWithEmailAndPassword(this.email, this.password)
         .then( (r) => {
-          const users = this.db.ref('users');
-          users.child(r.uid).update({
+          const usersRef = this.db.ref('users');
+          usersRef.child(r.user.uid).update({
             status: 1
           });
           this.$router.replace('/')
