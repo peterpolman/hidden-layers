@@ -12,6 +12,7 @@
 
 <script>
 import firebase from 'firebase';
+import AuthService from './services/AuthService';
 
 export default {
   name: 'login',
