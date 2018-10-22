@@ -32,18 +32,26 @@ export default class UserService {
 
   onChildAdded(uid, data) {
     const marker = this.createUser(uid, data)
+    const latlng = new google.maps.LatLng(data.position.lat, data.position.lng)
 
-    marker.addListener('click', function(e){
-      this.map.panTo(e.latLng)
-    }.bind(this))
+    if (typeof marker != 'undefined') {
+      marker.addListener('click', function(e){
+        this.map.panTo(e.latLng)
+      }.bind(this))
 
-    return marker.setMap(this.map);
+      marker.setPosition(latlng)
+
+      return marker.setMap(this.map);
+    }
   }
 
   onChildChanged(uid, data) {
     const marker = this.updateUser(uid, data)
     const latlng = new google.maps.LatLng(data.position.lat, data.position.lng)
-    return marker.setPosition(latlng)
+
+    if (typeof marker != 'undefined') {
+      return marker.setPosition(latlng)
+    }
   }
 
   onChildRemoved(uid) {
@@ -51,18 +59,17 @@ export default class UserService {
   }
 
   createUser(uid, data) {
-    const me = (this.currentUser.uid === uid)
-
     this.users.child(uid).set(data)
 
     console.log(`User ${uid} created`)
 
-    return this.markerService.createUserMarker(uid, data, me)
+    return this.markerService.createUserMarker(uid, data)
   }
 
   updateUser(uid, data) {
-    const updates = {}
-    updates['/position'] = data.position;
+    const updates = {
+      '/position': data.position
+    }
 
     this.users.child(uid).update(updates);
 
@@ -73,6 +80,7 @@ export default class UserService {
 
   removeUser(uid) {
     console.log(`User ${uid} removed`)
+
     return this.users.child(uid).remove();
   }
 }

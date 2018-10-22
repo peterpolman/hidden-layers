@@ -1,5 +1,6 @@
 <template>
   <section class="section-login">
+    <div class="google-map" id="home-map"></div>
     <h1>Let's create an account</h1>
     <form v-on:submit.prevent="register">
 
@@ -20,47 +21,62 @@
 </template>
 
 <script>
-import firebase from 'firebase';
+import firebase from 'firebase'
+
+import MapService from './services/MapService';
+import UserService from './services/UserService';
+import MarkerService from './services/MarkerService';
 
 export default {
   name: 'register',
   data: function () {
     return {
+      mapService: new MapService,
+      userService: new UserService,
+      markerService: new MarkerService,
       email: '',
       password: '',
       gender: '',
       username: '',
-      db: firebase.database()
     }
+  },
+  mounted() {
+    this.mapService.init();
   },
   methods: {
     register: function () {
       firebase.auth().createUserWithEmailAndPassword(this.email, this.password)
-        .then( (r) => {
-          const usersRef = this.db.ref('users');
-          usersRef.child(r.user.uid).set({
+        .then( function(r) {
+          const data = {
             status: 1,
             email: r.user.email,
             gender: this.gender,
             username: this.username,
-          });
+          }
 
+          this.userService.createUser(r.user.uid, data)
           this.$router.replace('/')
-        })
+        }.bind(this))
         .then( (err) => {
           if (typeof err != 'undefined') {
             console.log(err.code + ' ' + err.message);
             alert('Error during registration');
           }
         }
-      );
+      )
     }
   }
 }
 </script>
 
-<style>
-button {
-  margin: 1rem 0;
-}
+<style scoped>
+  button {
+    margin: 1rem 0;
+  }
+  .google-map {
+    width: 100vw;
+    height: 30vh;
+    margin: 0 auto;
+    background: gray;
+  }
 </style>

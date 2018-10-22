@@ -3,6 +3,8 @@ import MapService from './MapService'
 
 export default class GeoService {
   constructor() {
+    this.map = null
+    this.watcher = null
     this.userService = new UserService
   }
 
@@ -14,24 +16,32 @@ export default class GeoService {
     }
 
     this.map = map
-    navigator.geolocation.watchPosition(this.onWatchPosition.bind(this), this.onError, options);
+
+    navigator.geolocation.clearWatch(this.watcher);
+
+    if (this.watcher === null) {
+      this.watcher = navigator.geolocation.watchPosition(this.onWatchPosition.bind(this), this.onError, options);
+    }
   }
 
   onWatchPosition(position) {
-    const uid = this.userService.currentUser.uid
-    const data = {
-      position: {
-        lat: position.coords.latitude,
-        lng: position.coords.longitude
+    if (this.userService.currentUser != null) {
+      const uid = this.userService.currentUser.uid
+      const data = {
+        position: {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        }
       }
-    }
 
-    this.userService.updateUser(uid, data)
-    this.map.panTo(data.position)
+      this.userService.updateUser(uid, data)
+
+      this.map.panTo(data.position)
+    }
   }
 
   onError(err) {
     console.log('ERROR(' + err.code + '): ' + err.message);
-    // this.watchPosition();
+    location.reload()
   }
 }

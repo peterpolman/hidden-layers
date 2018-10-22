@@ -1,6 +1,7 @@
 <template>
   <section class="section-home">
     <div class="google-map" id="home-map"></div>
+    <button v-on:click="logout" v-if="userService.currentUser">Logout</button>
   </section>
 </template>
 
@@ -16,13 +17,20 @@ export default {
   name: 'home',
   data () {
     return {
+      mapService: new MapService,
       userService: new UserService,
       markerService: new MarkerService,
     }
   },
   mounted() {
-    const mapService = new MapService;
-    mapService.init();
+    this.mapService.init();
+  },
+  methods: {
+    logout: function() {
+      firebase.auth().signOut().then(() => {
+        this.$router.replace('login')
+      })
+    }
   }
 }
 </script>
@@ -33,5 +41,13 @@ export default {
     height: 100vh;
     margin: 0 auto;
     background: gray;
+  }
+  button {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: black;
+    color: white;
+    padding: .7rem;
   }
 </style>

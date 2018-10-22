@@ -1,6 +1,7 @@
 <template>
   <section class="section-login">
-    <h1>{{ title }}</h1>
+    <div class="google-map" id="home-map"></div>
+    <h1>Login</h1>
     <form v-on:submit.prevent="login">
       <input type="text" v-model="email" placeholder="E-mail">
       <input type="password" v-model="password" placeholder="password">
@@ -12,26 +13,33 @@
 
 <script>
 import firebase from 'firebase';
-import AuthService from './services/AuthService';
+
+import MapService from './services/MapService';
+import UserService from './services/UserService';
+import MarkerService from './services/MarkerService';
 
 export default {
   name: 'login',
   data: function () {
     return {
-      title: 'Login',
+      mapService: new MapService,
+      userService: new UserService,
+      markerService: new MarkerService,
       email: '',
-      password: '',
-      db: firebase.database()
+      password: ''
     }
+  },
+  mounted() {
+    this.mapService.init();
   },
   methods: {
     login: function () {
       firebase.auth().signInWithEmailAndPassword(this.email, this.password)
         .then( (r) => {
-          const usersRef = this.db.ref('users');
-          usersRef.child(r.user.uid).update({
-            status: 1
-          });
+          // const data = {
+          //   '/status': 1
+          // }
+          // this.userService.updateUser(r.user.uid, data)
           this.$router.replace('/')
          })
         .catch( (err) => {
@@ -45,3 +53,15 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+  button {
+    margin: 1rem 0;
+  }
+  .google-map {
+    width: 100vw;
+    height: 30vh;
+    margin: 0 auto;
+    background: gray;
+  }
+</style>

@@ -42,7 +42,7 @@ export default class DirectionService {
 
     }
 
-    const routePath = new google.maps.Polyline({
+    this.routePath = new google.maps.Polyline({
       path: this.routeCoords,
       geodesic: true,
       strokeColor: '#FF0000',
@@ -51,7 +51,7 @@ export default class DirectionService {
     });
 
     const rp = {
-      path: routePath,
+      path: this.routePath,
       markers: this.routeMarkers
     }
 

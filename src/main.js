@@ -6,6 +6,7 @@ import App from './App.vue';
 import Home from './Home.vue';
 import Login from './Login.vue';
 import Register from './Register.vue';
+
 // import Profile from './Profile.vue';
 // import Users from './Users.vue';
 // import User from './User.vue';

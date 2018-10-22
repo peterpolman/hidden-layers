@@ -1,4 +1,3 @@
-import meSrc from '../assets/img/user-me.png';
 import maleSrc from '../assets/img/user-male.png';
 import femaleSrc from '../assets/img/user-female.png';
 
@@ -7,7 +6,6 @@ export default class MarkerService {
     this.userMarkers = []
     this.directionMarkers = []
     this.avatars = {
-      me: meSrc,
       male: maleSrc,
       female: femaleSrc
     }
@@ -17,12 +15,12 @@ export default class MarkerService {
     return latLng.lat() + "_" + latLng.lng()
   }
 
-  createUserMarker(uid, data, me) {
+  createUserMarker(uid, data) {
     const userMarker = new google.maps.Marker({
       id: uid,
       position: new google.maps.LatLng(data.position.lat, data.position.lng),
       icon: {
-        url: (me) ? this.avatars.me : this.avatars[data.gender],
+        url: this.avatars[data.gender],
         size: new google.maps.Size(40, 40),
         scaledSize: new google.maps.Size(40, 40),
         origin: new google.maps.Point(0,0)
@@ -39,7 +37,7 @@ export default class MarkerService {
     return this.userMarkers[uid]
   }
 
-  createDirectionMarker(latlng, map) {
+  createDirectionMarker(latlng) {
     const id = this.createMarkerId(latlng);
     const options = {
       id: id,
