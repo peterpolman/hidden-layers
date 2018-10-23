@@ -1,0 +1,20 @@
+[debug] [2018-10-23T11:34:06.242Z] ----------------------------------------------------------------------
+[debug] [2018-10-23T11:34:06.246Z] Command:       /Users/peterpolman/.nvm/versions/node/v8.9.2/bin/node /Users/peterpolman/.nvm/versions/node/v8.9.2/bin/firebase deploy
+[debug] [2018-10-23T11:34:06.246Z] CLI Version:   5.0.1
+[debug] [2018-10-23T11:34:06.246Z] Platform:      darwin
+[debug] [2018-10-23T11:34:06.246Z] Node Version:  v8.9.2
+[debug] [2018-10-23T11:34:06.247Z] Time:          Tue Oct 23 2018 13:34:06 GMT+0200 (CEST)
+[debug] [2018-10-23T11:34:06.247Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2018-10-23T11:34:06.259Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2018-10-23T11:34:06.259Z] > authorizing via signed-in user
+[debug] [2018-10-23T11:34:06.259Z] [iam] checking project growth-9f10c for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasedatabase.instances.update","firebasehosting.sites.update","firebaserules.releases.create","firebaserules.releases.update","firebaserules.rulesets.create"]
+[debug] [2018-10-23T11:34:06.260Z] > refreshing access token with scopes: ["email","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","openid"]
+[debug] [2018-10-23T11:34:06.261Z] >>> HTTP REQUEST POST https://www.googleapis.com/oauth2/v3/token  
+ <request body omitted>
+[debug] [2018-10-23T11:34:06.418Z] <<< HTTP RESPONSE 200
+[debug] [2018-10-23T11:34:06.425Z] >>> HTTP REQUEST POST https://cloudresourcemanager.googleapis.com/v1/projects/growth-9f10c:testIamPermissions  
+
+[debug] [2018-10-23T11:34:07.170Z] <<< HTTP RESPONSE 200
+[debug] [2018-10-23T11:34:07.171Z] >>> HTTP REQUEST GET https://admin.firebase.com/v1/projects/growth-9f10c  
+ 

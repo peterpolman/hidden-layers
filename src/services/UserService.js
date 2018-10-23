@@ -24,7 +24,6 @@ export default class UserService {
 
           connection.onDisconnect().remove();
           connection.set(true);
-
           lastOnlineRef.onDisconnect().set(firebase.database.ServerValue.TIMESTAMP);
         }
       });
@@ -48,17 +47,19 @@ export default class UserService {
   }
 
   onChildAdded(uid, data) {
-    const marker = this.createUser(uid, data)
-    const latlng = new google.maps.LatLng(data.position.lat, data.position.lng)
+    if (data.position != null) {
+      const marker = this.createUser(uid, data)
+      const latlng = new google.maps.LatLng(data.position.lat, data.position.lng)
 
-    if (typeof marker != 'undefined') {
-      marker.addListener('click', function(e){
-        this.map.panTo(e.latLng)
-      }.bind(this))
+      if (typeof marker != 'undefined') {
+        marker.addListener('click', function(e){
+          this.map.panTo(e.latLng)
+        }.bind(this))
 
-      marker.setPosition(latlng)
+        marker.setPosition(latlng)
 
-      return marker.setMap(this.map);
+        return marker.setMap(this.map);
+      }
     }
   }
 

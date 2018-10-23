@@ -18,7 +18,7 @@ export default class MarkerService {
   createUserMarker(uid, data) {
     const userMarker = new google.maps.Marker({
       id: uid,
-      position: new google.maps.LatLng(data.position.lat, data.position.lng),
+      position: (data.position != null) ? new google.maps.LatLng(data.position.lat, data.position.lng) : null,
       icon: {
         url: this.avatars[data.gender],
         size: new google.maps.Size(40, 40),

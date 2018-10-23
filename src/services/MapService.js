@@ -51,44 +51,45 @@ export default class MapService {
   }
 
   onMapClick(toLatlng) {
-    const fromLatlng = new google.maps.LatLng(this.userService.currentUser.userData.position)
-    const ds = new google.maps.DirectionsService
+    if (this.userService.currentUser != null) {
+      const fromLatlng = new google.maps.LatLng(this.userService.currentUser.userData.position)
+      const ds = new google.maps.DirectionsService
 
-    ds.route({
-      origin: fromLatlng,
-      destination: toLatlng,
-      travelMode: 'WALKING'
-    }, function(response, status) {
-      if (status === 'OK') {
+      ds.route({
+        origin: fromLatlng,
+        destination: toLatlng,
+        travelMode: 'WALKING'
+      }, function(response, status) {
+        if (status === 'OK') {
 
-        if (this.route != null) {
-          this.directionMarker.setMap(null)
-          this.route.path.setMap(null)
+          if (this.route != null) {
+            this.directionMarker.setMap(null)
+            this.route.path.setMap(null)
 
-          for (var rm of this.route.markers) {
-            rm.setMap(null)
+            for (var rm of this.route.markers) {
+              rm.setMap(null)
+            }
+
+            this.route = null
           }
 
-          this.route = null
+          this.directionMarker= this.markerService.createDirectionMarker(toLatlng);
+          this.directionMarker.setMap(this.map)
+          this.route = this.directionService.createRoute(response)
+
+          for (var rm of this.route.markers) {
+            rm.setMap(this.map)
+          }
+
+          this.route.path.setMap(this.map)
+
+          this.map.panTo(toLatlng);
+
+        } else {
+          console.warn('Directions request failed due to ' + status);
         }
-
-        this.directionMarker= this.markerService.createDirectionMarker(toLatlng);
-        this.directionMarker.setMap(this.map)
-        this.route = this.directionService.createRoute(response)
-
-        for (var rm of this.route.markers) {
-          rm.setMap(this.map)
-        }
-
-        this.route.path.setMap(this.map)
-
-        this.map.panTo(toLatlng);
-
-      } else {
-        console.warn('Directions request failed due to ' + status);
-      }
-    }.bind(this));
-
+      }.bind(this));
+    }
   }
 
   onMarkerClick(e) {

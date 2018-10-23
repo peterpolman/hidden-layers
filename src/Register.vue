@@ -25,7 +25,6 @@ import firebase from 'firebase'
 
 import MapService from './services/MapService';
 import UserService from './services/UserService';
-import MarkerService from './services/MarkerService';
 
 export default {
   name: 'register',
@@ -33,7 +32,6 @@ export default {
     return {
       mapService: new MapService,
       userService: new UserService,
-      markerService: new MarkerService,
       email: '',
       password: '',
       gender: '',
@@ -48,7 +46,6 @@ export default {
       firebase.auth().createUserWithEmailAndPassword(this.email, this.password)
         .then( function(r) {
           const data = {
-            status: 1,
             email: r.user.email,
             gender: this.gender,
             username: this.username,

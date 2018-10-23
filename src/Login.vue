@@ -16,7 +16,6 @@ import firebase from 'firebase';
 
 import MapService from './services/MapService';
 import UserService from './services/UserService';
-import MarkerService from './services/MarkerService';
 
 export default {
   name: 'login',
@@ -24,7 +23,6 @@ export default {
     return {
       mapService: new MapService,
       userService: new UserService,
-      markerService: new MarkerService,
       email: '',
       password: ''
     }
