@@ -1,5 +1,4 @@
 import UserService from './UserService'
-import MapService from './MapService'
 
 export default class GeoService {
   constructor() {
@@ -19,9 +18,7 @@ export default class GeoService {
 
     navigator.geolocation.clearWatch(this.watcher);
 
-    if (this.watcher === null) {
-      this.watcher = navigator.geolocation.watchPosition(this.onWatchPosition.bind(this), this.onError, options);
-    }
+    this.watcher = navigator.geolocation.watchPosition(this.onWatchPosition.bind(this), this.onError, options);
   }
 
   onWatchPosition(position) {
@@ -41,7 +38,9 @@ export default class GeoService {
   }
 
   onError(err) {
-    console.log('ERROR(' + err.code + '): ' + err.message);
-    location.reload()
+    if (typeof err != 'undefined') {
+      console.log('ERROR(' + err.code + '): ' + err.message);
+    }
+    // location.reload()
   }
 }

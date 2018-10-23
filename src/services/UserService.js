@@ -13,6 +13,23 @@ export default class UserService {
   listen(map) {
     this.map = map;
 
+    if (this.currentUser != null) {
+      const connectedRef = this.db.ref('.info/connected');
+      const userConnectionsRef = this.users.child(this.currentUser.uid).child('connections');
+      const lastOnlineRef = this.users.child(this.currentUser.uid).child('lastOnline');
+
+      connectedRef.on('value', function(snap) {
+        if (snap.val() === true)  {
+          const connection = userConnectionsRef.push();
+
+          connection.onDisconnect().remove();
+          connection.set(true);
+
+          lastOnlineRef.onDisconnect().set(firebase.database.ServerValue.TIMESTAMP);
+        }
+      });
+    }
+
     this.users.on('child_added', function(snap) {
       this.onChildAdded(snap.key, snap.val())
 

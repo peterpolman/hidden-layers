@@ -1,5 +1,3 @@
-import GoogleMapsLoader from 'google-maps';
-
 export default class DirectionService {
   constructor() {
     this.routePath = {}
