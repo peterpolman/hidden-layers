@@ -8,15 +8,14 @@ export default class GeoService {
   }
 
   watchPosition(map) {
-    const options = {
-      enableHighAccuracy: true,
-      timeout: 5000,
-      maximumAge: 10000
-    }
-
     this.map = map
-
     navigator.geolocation.clearWatch(this.watcher);
+
+    const options = {
+      enableHighAccuracy: false,
+      timeout: 5000,
+      maximumAge: 5000
+    }
 
     this.watcher = navigator.geolocation.watchPosition(this.onWatchPosition.bind(this), this.onError, options);
   }
@@ -39,8 +38,7 @@ export default class GeoService {
 
   onError(err) {
     if (typeof err != 'undefined') {
-      console.log('ERROR(' + err.code + '): ' + err.message);
+      console.log(`Issue with the positioning system: [${err.code}] ${err.message}`);
     }
-    // location.reload()
   }
 }

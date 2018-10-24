@@ -15,7 +15,7 @@ export default class MarkerService {
     return latLng.lat() + "_" + latLng.lng()
   }
 
-  createUserMarker(uid, data) {
+  createUserMarker(uid, data, me) {
     const userMarker = new google.maps.Marker({
       id: uid,
       position: (data.position != null) ? new google.maps.LatLng(data.position.lat, data.position.lng) : null,
@@ -23,9 +23,9 @@ export default class MarkerService {
         url: this.avatars[data.gender],
         size: new google.maps.Size(40, 40),
         scaledSize: new google.maps.Size(40, 40),
-        origin: new google.maps.Point(0,0)
+        origin: new google.maps.Point(0,0),
       },
-      animation: google.maps.Animation.BOUNCE
+      animation: (me === true) ? google.maps.Animation.DROP : null
     });
 
     return this.userMarkers[uid] = userMarker;

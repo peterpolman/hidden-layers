@@ -53,6 +53,10 @@ export default class UserService {
 
       if (typeof marker != 'undefined') {
         marker.addListener('click', function(e){
+          const options = { content: `<strong>${data.username}</strong>` , isHidden: false };
+          const infoWindow = new google.maps.InfoWindow(options);
+
+          infoWindow.open(this.map, marker);
           this.map.panTo(e.latLng)
         }.bind(this))
 
@@ -77,11 +81,13 @@ export default class UserService {
   }
 
   createUser(uid, data) {
+    const me = (this.currentUser != null && this.currentUser.uid === uid) ? true : false
+
     this.users.child(uid).set(data)
 
     console.log(`User ${uid} created`)
 
-    return this.markerService.createUserMarker(uid, data)
+    return this.markerService.createUserMarker(uid, data, me)
   }
 
   updateUser(uid, data) {
