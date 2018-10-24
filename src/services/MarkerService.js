@@ -1,8 +1,11 @@
+import firebase from 'firebase';
 import maleSrc from '../assets/img/user-male.png';
 import femaleSrc from '../assets/img/user-female.png';
 
 export default class MarkerService {
   constructor() {
+    this.map = null
+    this.markers = firebase.database().ref('markers')
     this.userMarkers = []
     this.directionMarkers = []
     this.avatars = {
@@ -11,8 +14,62 @@ export default class MarkerService {
     }
   }
 
-  createMarkerId(latLng) {
-    return latLng.lat() + "_" + latLng.lng()
+  listen(map) {
+    this.map = map
+
+    this.markers.on('child_added', function(snap) {
+      this.onChildAdded(snap.key, snap.val())
+    }.bind(this));
+
+    this.markers.on('child_changed', function(snap) {
+      this.onChildChanged(snap.key, snap.val());
+    }.bind(this));
+
+    this.markers.on('child_removed', function(snap) {
+      this.onChildRemoved(snap.key);
+    }.bind(this));
+  }
+
+  onChildAdded(key, data) {
+    const marker = new google.maps.Marker({
+      icon: {
+        id: key,
+        path: "M-20,0a20,20 0 1,0 40,0a20,20 0 1,0 -40,0",
+        fillColor: '#FF0000',
+        fillOpacity: .75,
+        anchor: new google.maps.Point(0,0),
+        strokeWeight: 0,
+        scale: .3
+      }
+    });
+
+    this.directionMarkers[key] = marker;
+
+    marker.setPosition(data.position);
+    marker.setMap(this.map);
+  }
+
+  onChildChanged(key, data) {
+    const marker = this.directionMarkers[key]
+    const latlng = new google.maps.LatLng(data.position.lat, data.position.lng)
+
+    marker.setPosition(latlng)
+  }
+
+  onChildRemoved(key) {
+    return this.directionMarkers[key].setMap(null)
+  }
+
+  createMarker(key, data) {
+    return this.markers.child(key).set(data)
+  }
+
+  updateMarker(key, data, i, length) {
+    return this.markers.child(key).update(data)
+  }
+
+  removeMarker(key) {
+    return this.markers.child(key).remove()
   }
 
   createUserMarker(uid, data, me) {
@@ -35,37 +92,6 @@ export default class MarkerService {
     this.userMarkers[uid]
 
     return this.userMarkers[uid]
-  }
-
-  createDirectionMarker(latlng) {
-    const id = this.createMarkerId(latlng);
-    const options = {
-      id: id,
-      position: latlng,
-      animation: google.maps.Animation.BOUNCE
-    }
-    const directionMarker = new google.maps.Marker(options);
-
-    return this.directionMarkers[id] = directionMarker;
-  }
-
-  onDirectionMarkerRightClick(e) {
-    var id = this.createMarkerId(e.latLng);
-    var marker = this.markers[id];
-    var position = marker.getPosition();
-
-    delete this.markers[id];
-    marker.setMap(null)
-
-    // We skip the first result in the array since it is the observer object
-    for (var i = 0; i < this.routeMarkers.length; i++) {
-      this.routeMarkers[i].setMap(null)
-      delete this.routeMarkers[i];
-    }
-
-    this.routeMarkers = [{}];
-
-    this.map.panTo(position);
   }
 
 }

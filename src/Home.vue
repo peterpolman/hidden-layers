@@ -1,7 +1,9 @@
 <template>
   <section class="section-home">
+    <span style="z-index: 9999; top: 100px;" id="test">test</span>
     <div class="google-map" id="home-map"></div>
     <button v-on:click="logout" v-if="userService.currentUser">Logout</button>
+
   </section>
 </template>
 

@@ -26,9 +26,8 @@ export default class MapService {
     this.loader.load(function(google) {
       const element = document.getElementById("home-map")
       const options = {
-        center: new google.maps.LatLng(52.5, 4.843782),
+        center: new google.maps.LatLng(52.366, 4.844),
         zoom: 16,
-        // gestureHandling: 'none',
         zoomControl: false,
         mapTypeControl: false,
         scrollwheel: true,
@@ -39,9 +38,41 @@ export default class MapService {
       this.map = new google.maps.Map(element, options)
       this.geoService.watchPosition(this.map)
       this.userService.listen(this.map)
+      this.markerService.listen(this.map)
       this.attachListeners()
 
     }.bind(this))
+  }
+
+  autoRefresh(map, pathCoords) {
+    const uid = this.userService.currentUser.uid
+    const key = this.markerService.directionMarkers.length
+    const data = {
+      id: key,
+      position: {
+        lat: pathCoords[0].lat(),
+        lng: pathCoords[0].lng()
+      }
+    }
+
+    this.markerService.createMarker(key, data)
+
+    for (var i = 0; i < pathCoords.length; i++) {
+      setTimeout(function(latlng) {
+        const data = {
+          position: {
+            lat: latlng.lat(),
+            lng: latlng.lng()
+          }
+        }
+
+        this.markerService.updateMarker(key, data)
+
+        if (latlng == pathCoords[pathCoords.length - 1]) {
+          this.markerService.removeMarker(key)
+        }
+      }.bind(this), 1000 * i, pathCoords[i]);
+    }
   }
 
   attachListeners() {
@@ -60,31 +91,8 @@ export default class MapService {
         destination: toLatlng,
         travelMode: 'WALKING'
       }, function(response, status) {
-        if (status === 'OK') {
-
-          if (this.route != null) {
-            this.directionMarker.setMap(null)
-            this.route.path.setMap(null)
-
-            for (var rm of this.route.markers) {
-              rm.setMap(null)
-            }
-
-            this.route = null
-          }
-
-          this.directionMarker= this.markerService.createDirectionMarker(toLatlng);
-          this.directionMarker.setMap(this.map)
-          this.route = this.directionService.createRoute(response)
-
-          for (var rm of this.route.markers) {
-            rm.setMap(this.map)
-          }
-
-          this.route.path.setMap(this.map)
-
-          this.map.panTo(toLatlng);
-
+        if (status === google.maps.DirectionsStatus.OK) {
+          this.autoRefresh(this.map, response.routes[0].overview_path);
         } else {
           console.warn('Directions request failed due to ' + status);
         }
