@@ -3,6 +3,7 @@ import UserService from './UserService'
 export default class GeoService {
   constructor() {
     this.map = null
+    this.signal = ''
     this.watcher = null
     this.userService = new UserService
   }
@@ -21,6 +22,8 @@ export default class GeoService {
   }
 
   onWatchPosition(position) {
+    this.signal = 'geo-on'
+
     if (this.userService.currentUser != null) {
       const uid = this.userService.currentUser.uid
       const data = {
@@ -38,6 +41,7 @@ export default class GeoService {
 
   onError(err) {
     if (typeof err != 'undefined') {
+      this.signal = 'geo-off'
       console.log(`Issue with the positioning system: [${err.code}] ${err.message}`);
     }
   }

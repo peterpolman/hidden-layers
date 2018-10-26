@@ -1,6 +1,6 @@
 <template>
   <section class="section-home">
-    <span style="z-index: 9999; top: 100px;" id="test">test</span>
+    <span :class="this.mapService.geoService.signal"></span>
     <div class="google-map" id="home-map"></div>
     <button v-on:click="logout" v-if="userService.currentUser">Logout</button>
 
@@ -44,6 +44,7 @@ export default {
     margin: 0 auto;
     background: gray;
   }
+
   button {
     position: absolute;
     top: 0;
@@ -51,5 +52,22 @@ export default {
     background: black;
     color: white;
     padding: .7rem;
+  }
+
+  .geo-on,
+  .geo-off {
+    display: block;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #f65858;
+    position: fixed;
+    top: 50px;
+    left: 1rem;
+    z-index: 1;
+  }
+
+  .geo-on {
+    background: #4df04d;
   }
 </style>
