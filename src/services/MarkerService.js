@@ -132,11 +132,7 @@ export default class MarkerService {
   }
 
   onChildChanged(key, data) {
-    // const marker = this.directionMarkers[key]
-    // const latlng = new google.maps.LatLng(data.position.lat, data.position.lng)
-    //
-    // marker.setPosition(latlng)
-    console.log(`Child changed`);
+    console.log(`Child timestamp updated`);
   }
 
   onChildRemoved(key) {

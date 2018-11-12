@@ -39,6 +39,10 @@ export default class UserService {
 
     this.users.on('child_changed', function(snap) {
       this.onChildChanged(snap.key, snap.val());
+
+      if (this.currentUser.uid === snap.key) {
+        this.currentUser['userData'] = snap.val()
+      }
     }.bind(this));
 
     this.users.on('child_removed', function(snap) {
@@ -69,10 +73,9 @@ export default class UserService {
 
   onChildChanged(uid, data) {
     const marker = this.updateUser(uid, data)
-    const latlng = new google.maps.LatLng(data.position.lat, data.position.lng)
 
     if (typeof marker != 'undefined') {
-      return marker.setPosition(latlng)
+      return marker.setPosition(new google.maps.LatLng(data.position.lat, data.position.lng))
     }
   }
 
@@ -91,11 +94,7 @@ export default class UserService {
   }
 
   updateUser(uid, data) {
-    const updates = {
-      '/position': data.position
-    }
-
-    this.users.child(uid).update(updates);
+    this.users.child(uid).update(data);
 
     console.log(`User ${uid} updated`)
 
