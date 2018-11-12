@@ -1,7 +1,6 @@
 import firebase from 'firebase'
 
 import GoogleMapsLoader from 'google-maps';
-import DirectionService from './DirectionService';
 import MarkerService from './MarkerService';
 import UserService from './UserService';
 
@@ -54,8 +53,17 @@ export default class MapService {
 
   onMapClick(toLatlng) {
     if (this.userService.currentUser != null) {
-      const fromLatlng = new google.maps.LatLng(this.userService.currentUser.userData.position)
-      this.markerService.walk(this.userService.currentUser.uid, fromLatlng, toLatlng, 'WALKING')
+      const uid = this.userService.currentUser.uid
+      const travelMode = 'WALKING'
+
+      var fromLatlng = this.userService.currentUser.userData.position
+
+      this.markerService.sendWalker(
+        uid,
+        fromLatlng,
+        toLatlng,
+        travelMode
+      )
     }
   }
 }
