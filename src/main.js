@@ -7,18 +7,12 @@ import Home from './Home.vue';
 import Login from './Login.vue';
 import Register from './Register.vue';
 
-// import Profile from './Profile.vue';
-// import Users from './Users.vue';
-// import User from './User.vue';
-
 import config from './config.js';
 
 let app;
 
 firebase.initializeApp(config.firebase);
-
 firebase.auth().onAuthStateChanged(function(user) {
-
   if (!app) {
     app = new Vue({
       el: '#app',

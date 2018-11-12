@@ -6,16 +6,20 @@ export default class MarkerService {
   constructor() {
     this.map = null
     this.markers = firebase.database().ref('markers')
+    this.offsetRef = firebase.database().ref('.info/serverTimeOffset')
+    this.estimatedServerTimeMs = null
     this.userMarkers = []
     this.directionMarkers = []
     this.avatars = {
       male: maleSrc,
       female: femaleSrc
     }
+    this.directionsService = null
   }
 
   listen(map) {
     this.map = map
+    this.directionsService = new google.maps.DirectionsService();
 
     this.markers.on('child_added', function(snap) {
       this.onChildAdded(snap.key, snap.val())
@@ -28,44 +32,123 @@ export default class MarkerService {
     this.markers.on('child_removed', function(snap) {
       this.onChildRemoved(snap.key);
     }.bind(this));
+
+    this.offsetRef.on("value", function(snap) {
+      const offset = snap.val();
+      this.estimatedServerTimeMs = new Date().getTime() + offset;
+    }.bind(this));
+  }
+
+  walk(uid, fromLatlng, toLatlng, travelMode) {
+    this.directionsService.route({
+      origin: fromLatlng,
+      destination: toLatlng,
+      travelMode: travelMode
+    }, function(response, status) {
+      if (status === google.maps.DirectionsStatus.OK) {
+
+        const data = {
+          uid: uid,
+          path: []
+        }
+
+        for (var i = 0; i < response.routes[0].overview_path.length; i++) {
+          data.path.push({
+            lat: response.routes[0].overview_path[i].lat(),
+            lng: response.routes[0].overview_path[i].lng()
+          })
+        }
+
+        const key = this.directionMarkers.length
+        this.createMarker(key, data)
+
+      } else {
+        console.warn('Directions request failed due to ' + status);
+      }
+    }.bind(this));
   }
 
   onChildAdded(key, data) {
-    const marker = new google.maps.Marker({
-      icon: {
-        id: key,
-        path: "M-20,0a20,20 0 1,0 40,0a20,20 0 1,0 -40,0",
-        fillColor: '#FF0000',
-        fillOpacity: .75,
-        anchor: new google.maps.Point(0,0),
+    this.directionMarkers[key] = data;
+
+    const sphericalLib = google.maps.geometry.spherical;
+
+    var pointDistances = [];
+    var pointZero = new google.maps.LatLng(data.path[0]);
+    var totalDist = sphericalLib.computeDistanceBetween(
+      pointZero,
+      new google.maps.LatLng(data.path[data.path.length - 1])
+    );
+
+    var path = [];
+
+    for (var i = 0; i < data.path.length; i++) {
+        var latlng = new google.maps.LatLng(data.path[i])
+        path.push(latlng)
+        pointDistances[i] = 100 * sphericalLib.computeDistanceBetween(latlng, pointZero) / totalDist;
+    }
+
+    var line = new google.maps.Polyline({
+        path: path,
+        strokeColor: '#0000FF',
+        strokeOpacity: 1.0,
         strokeWeight: 0,
-        scale: .3
-      }
+        icons: [{
+            icon: {
+              path: "M-20,0a20,20 0 1,0 40,0a20,20 0 1,0 -40,0",
+              fillColor: '#FF0000',
+              fillOpacity: .75,
+              anchor: new google.maps.Point(0,0),
+              strokeWeight: 0,
+              scale: .3
+            },
+            offset: '100%'
+        }],
     });
 
-    this.directionMarkers[key] = marker;
+    line.setMap(this.map)
 
-    marker.setPosition(data.position);
-    marker.setMap(this.map);
+    var index = 0;
+    var count = 0;
+    var offset;
+
+    var id = window.setInterval(function() {
+      count = (count + 1) % 200;
+      offset = count / 2;
+
+      var icons = line.get('icons')
+      icons[0].offset = (offset) + '%'
+
+      line.set('icons', icons)
+
+      if (line.get('icons')[0].offset == "99.5%") {
+        icons[0].offset = '100%'
+        line.set('icons', icons)
+        window.clearInterval(id)
+        line.setMap(null)
+        this.removeMarker(key)
+      }
+    }.bind(this))
   }
 
   onChildChanged(key, data) {
-    const marker = this.directionMarkers[key]
-    const latlng = new google.maps.LatLng(data.position.lat, data.position.lng)
-
-    marker.setPosition(latlng)
+    // const marker = this.directionMarkers[key]
+    // const latlng = new google.maps.LatLng(data.position.lat, data.position.lng)
+    //
+    // marker.setPosition(latlng)
+    console.log(`Child changed`);
   }
 
   onChildRemoved(key) {
-    return this.directionMarkers[key].setMap(null)
+    // this.directionMarkers[key].setMap(null)
+    // this.directionMarkers.splice(key, 1);
   }
 
   createMarker(key, data) {
-    return this.markers.child(key).set(data)
-  }
-
-  updateMarker(key, data, i, length) {
-    return this.markers.child(key).update(data)
+    this.markers.child(key).set(data)
+    this.markers.child(key).update({
+      '/timestamp': firebase.database.ServerValue.TIMESTAMP
+    });
   }
 
   removeMarker(key) {

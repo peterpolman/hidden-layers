@@ -3,7 +3,7 @@ import UserService from './UserService'
 export default class GeoService {
   constructor() {
     this.map = null
-    this.signal = ''
+    this.signal = 'geo-off'
     this.watcher = null
     this.userService = new UserService
   }
@@ -12,13 +12,13 @@ export default class GeoService {
     this.map = map
     navigator.geolocation.clearWatch(this.watcher);
 
-    const options = {
-      enableHighAccuracy: false,
-      timeout: 5000,
-      maximumAge: 5000
+    var options = {
+      enableHighAccuracy: true,
+      maximumAge: 1000,
+      timeout: 30000
     }
 
-    this.watcher = navigator.geolocation.watchPosition(this.onWatchPosition.bind(this), this.onError, options);
+    this.watcher = navigator.geolocation.watchPosition(this.onWatchPosition.bind(this), this.onError.bind(this), options);
   }
 
   onWatchPosition(position) {
@@ -29,7 +29,9 @@ export default class GeoService {
       const data = {
         position: {
           lat: position.coords.latitude,
-          lng: position.coords.longitude
+          lng: position.coords.longitude,
+          speed: position.coords.speed,
+          accuracy: position.coords.accuracy
         }
       }
 

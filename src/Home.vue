@@ -1,6 +1,6 @@
 <template>
   <section class="section-home">
-    <span :class="this.mapService.geoService.signal"></span>
+    <span v-on:click="onSignalClick" :class="this.geoService.signal"></span>
     <div class="google-map" id="home-map"></div>
     <button v-on:click="logout" v-if="userService.currentUser">Logout</button>
 
@@ -11,6 +11,8 @@
 import firebase from 'firebase';
 import config from './config.js';
 
+import GeoService from './services/GeoService';
+
 import MapService from './services/MapService';
 import UserService from './services/UserService';
 import MarkerService from './services/MarkerService';
@@ -19,6 +21,7 @@ export default {
   name: 'home',
   data () {
     return {
+      geoService: new GeoService,
       mapService: new MapService,
       userService: new UserService,
       markerService: new MarkerService,
@@ -28,6 +31,9 @@ export default {
     this.mapService.init();
   },
   methods: {
+    onSignalClick: function() {
+      this.geoService.watchPosition(this.mapService.map)
+    },
     logout: function() {
       firebase.auth().signOut().then(() => {
         this.$router.replace('login')
