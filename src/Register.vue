@@ -46,6 +46,7 @@ export default {
       firebase.auth().createUserWithEmailAndPassword(this.email, this.password)
         .then( function(r) {
           const data = {
+            uid: r.user.uid,
             email: r.user.email,
             gender: this.gender,
             username: this.username,

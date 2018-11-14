@@ -1,7 +1,7 @@
 import firebase from 'firebase'
 
 import GoogleMapsLoader from 'google-maps';
-import MarkerService from './MarkerService';
+import ScoutService from './ScoutService';
 import UserService from './UserService';
 
 import config from '../config.js'
@@ -11,7 +11,7 @@ export default class MapService {
   constructor() {
     this.map = null
     this.route = null
-    this.markerService = new MarkerService
+    this.scoutService = new ScoutService
     this.userService = new UserService
     this.loader = GoogleMapsLoader
     this.mapStyles = MapStyles
@@ -28,24 +28,27 @@ export default class MapService {
       const options = {
         center: new google.maps.LatLng(52.366, 4.844),
         zoom: 16,
-        zoomControl: false,
+        zoomControl: true,
+        disableDoubleClickZoom: true,
         mapTypeControl: false,
         scrollwheel: true,
         streetViewControl: false,
-        styles: this.mapStyles
+        tilt: 45,
+        styles: this.mapStyles,
       }
 
       this.map = new google.maps.Map(element, options)
 
-      this.markerService.listen(this.map)
-      this.userService.listen(this.map)
-
-      this.attachListeners()
-
+      if (this.userService.currentUser != null) {
+        this.attachListeners()
+      }
     }.bind(this))
   }
 
   attachListeners() {
+    this.scoutService.listen(this.map)
+    this.userService.listen(this.map)
+
     this.map.addListener('click', function(e) {
       this.onMapClick(e.latLng);
     }.bind(this))
@@ -54,16 +57,16 @@ export default class MapService {
   onMapClick(toLatlng) {
     if (this.userService.currentUser != null) {
       const uid = this.userService.currentUser.uid
-      const travelMode = 'WALKING'
+      const travelMode = "WALKING"
+      const fromLatlng = new google.maps.LatLng(this.userService.currentUser.position)
+      const path = this.scoutService.pathService.paths[uid]
 
-      var fromLatlng = this.userService.currentUser.userData.position
-
-      this.markerService.sendWalker(
-        uid,
-        fromLatlng,
-        toLatlng,
-        travelMode
-      )
+      if (typeof path == 'undefined' || path == null) {
+        this.scoutService.send(uid, fromLatlng, toLatlng, travelMode)
+      }
+      else {
+        console.log(`Chill dude...`)
+      }
     }
   }
 }

@@ -36,8 +36,6 @@ export default class GeoService {
       }
 
       this.userService.updateUser(uid, data)
-
-      this.map.panTo(data.position)
     }
   }
 

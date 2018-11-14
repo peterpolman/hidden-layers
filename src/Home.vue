@@ -1,9 +1,13 @@
 <template>
-  <section class="section-home">
-    <span v-on:click="onSignalClick" :class="this.geoService.signal"></span>
+  <section class="section section-home">
+    <span v-on:click="onSignalClick" :class="geoService.signal"></span>
     <div class="google-map" id="home-map"></div>
-    <button v-on:click="logout" v-if="userService.currentUser">Logout</button>
-
+    <button class="btn-logout" v-on:click="logout" v-if="currentUser">
+      Logout
+    </button>
+    <!-- <button class="btn-pan" v-on:click="onPanClick" v-if="showPanBtn">
+      Pan
+    </button> -->
   </section>
 </template>
 
@@ -12,26 +16,31 @@ import firebase from 'firebase';
 import config from './config.js';
 
 import GeoService from './services/GeoService';
-
 import MapService from './services/MapService';
 import UserService from './services/UserService';
-import MarkerService from './services/MarkerService';
 
 export default {
   name: 'home',
   data () {
     return {
+      currentUser: {},
+      // showPanBtn: false,
       geoService: new GeoService,
       mapService: new MapService,
       userService: new UserService,
-      markerService: new MarkerService,
     }
   },
   mounted() {
     this.mapService.init();
+    this.currentUser = this.userService.currentUser
   },
   methods: {
+    // onPanClick: function() {
+    //   const latlng = new google.maps.LatLng(this.userService.currentUser.position)
+    //   this.mapService.map.panTo(latlng)
+    // },
     onSignalClick: function() {
+      // this.showPanBtn = true
       this.geoService.watchPosition(this.mapService.map)
     },
     logout: function() {
@@ -45,23 +54,54 @@ export default {
 
 <style scoped>
   .google-map {
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     margin: 0 auto;
     background: gray;
+    display: block;
   }
 
-  button {
+  .btn-logout {
     position: absolute;
     bottom: .5rem;
     left: .5rem;
     font-size: 10px;
-    width: 80px;
+    width: 120px;
     border-radius: 5px;
     width: 60px;
     height: 30px;
     padding: 0 5px;
     background-color: black;
+  }
+
+  .btn-pan {
+    background: white;
+    border: 0px;
+    margin: 10px;
+    padding: 0px;
+    position: absolute;
+    cursor: pointer;
+    user-select: none;
+    border-radius: 2px;
+    height: 40px;
+    width: 40px;
+    box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px;
+    overflow: hidden;
+    top: 0px;
+    right: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .btn-pan:before {
+    content: "";
+    display: inline-block;
+    background: #333;
+    width: 7px;
+    height: 7px;
+    position: relative;
+    left: 11px
   }
 
   .geo-on,

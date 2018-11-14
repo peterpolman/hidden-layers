@@ -1,22 +1,22 @@
 import firebase from 'firebase';
-import MarkerService from './MarkerService';
+import User from '../models/User'
 
 export default class UserService {
   constructor() {
     this.map = null
-    this.db = firebase.database()
-    this.users = this.db.ref('users')
+    this.usersRef = firebase.database().ref('users')
+    this.userMarkers = []
     this.currentUser = firebase.auth().currentUser
-    this.markerService = new MarkerService
   }
 
   listen(map) {
     this.map = map;
 
     if (this.currentUser != null) {
-      const connectedRef = this.db.ref('.info/connected');
-      const userConnectionsRef = this.users.child(this.currentUser.uid).child('connections');
-      const lastOnlineRef = this.users.child(this.currentUser.uid).child('lastOnline');
+      const connectedRef = firebase.database().ref('.info/connected');
+
+      const userConnectionsRef = this.usersRef.child(this.currentUser.uid).child('connections');
+      const lastOnlineRef = this.usersRef.child(this.currentUser.uid).child('lastOnline');
 
       connectedRef.on('value', function(snap) {
         if (snap.val() === true)  {
@@ -29,23 +29,23 @@ export default class UserService {
       });
     }
 
-    this.users.on('child_added', function(snap) {
+    this.usersRef.on('child_added', function(snap) {
       this.onChildAdded(snap.key, snap.val())
 
       if (this.currentUser.uid === snap.key) {
-        this.currentUser['userData'] = snap.val()
+        this.currentUser = snap.val()
       }
     }.bind(this));
 
-    this.users.on('child_changed', function(snap) {
+    this.usersRef.on('child_changed', function(snap) {
       this.onChildChanged(snap.key, snap.val());
 
       if (this.currentUser.uid === snap.key) {
-        this.currentUser['userData'] = snap.val()
+        this.currentUser = snap.val()
       }
     }.bind(this));
 
-    this.users.on('child_removed', function(snap) {
+    this.usersRef.on('child_removed', function(snap) {
       this.onChildRemoved(snap.key);
     }.bind(this));
   }
@@ -57,7 +57,11 @@ export default class UserService {
 
       if (typeof marker != 'undefined') {
         marker.addListener('click', function(e){
-          const options = { content: `<strong>${data.username}</strong>` , isHidden: false };
+          const options = {
+            content: `<strong>${data.username}</strong><br>
+                      <small>Last online: ${new Date(data.lastOnline).toLocaleString("nl-NL")}</small>`,
+            isHidden: false
+          }
           const infoWindow = new google.maps.InfoWindow(options);
 
           infoWindow.open(this.map, marker);
@@ -86,24 +90,34 @@ export default class UserService {
   createUser(uid, data) {
     const me = (this.currentUser != null && this.currentUser.uid === uid) ? true : false
 
-    this.users.child(uid).set(data)
+    this.usersRef.child(uid).set(data)
 
     console.log(`User ${uid} created`)
 
-    return this.markerService.createUserMarker(uid, data, me)
+    return this.createUserMarker(uid, data, me)
   }
 
   updateUser(uid, data) {
-    this.users.child(uid).update(data);
+    this.usersRef.child(uid).update(data);
 
     console.log(`User ${uid} updated`)
 
-    return this.markerService.updateUserMarker(uid, data)
+    return this.updateUserMarker(uid, data)
   }
 
   removeUser(uid) {
     console.log(`User ${uid} removed`)
 
-    return this.users.child(uid).remove();
+    return this.usersRef.child(uid).remove();
+  }
+
+  createUserMarker(uid, data, me) {
+    return this.userMarkers[uid] = new User(uid, data.position, data.gender, 40, me);
+  }
+
+  updateUserMarker(uid, data) {
+    this.userMarkers[uid]
+
+    return this.userMarkers[uid]
   }
 }

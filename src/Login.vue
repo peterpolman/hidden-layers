@@ -34,12 +34,8 @@ export default {
     login: function () {
       firebase.auth().signInWithEmailAndPassword(this.email, this.password)
         .then( (r) => {
-          // const data = {
-          //   '/status': 1
-          // }
-          // this.userService.updateUser(r.user.uid, data)
           this.$router.replace('/')
-         })
+        })
         .catch( (err) => {
           if (typeof err != 'undefined') {
             console.log(err.code + ' ' + err.message);

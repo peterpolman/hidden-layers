@@ -33,29 +33,12 @@ body {
 
 .container {
   width: 100%;
+  height: 100%;
 }
 
-nav {
-  background: #EFEFEF;
-  border-bottom: 1px solid #999;
-  color: white;
-  width: auto;
-  display: block;
-  padding: 1rem;
-  text-align: center;
-  margin: 0 -.5rem;
-  font-size: 12px;
-  position: fixed;
-  z-index: 1;
+.section {
   width: 100%;
-}
-
-nav a {
-  margin: 0 .2rem;
-}
-
-nav strong {
-  color: lightgray;
+  height: 100%;
 }
 
 h1 {
