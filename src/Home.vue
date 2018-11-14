@@ -40,8 +40,12 @@ export default {
     //   this.mapService.map.panTo(latlng)
     // },
     onSignalClick: function() {
-      // this.showPanBtn = true
-      this.geoService.watchPosition(this.mapService.map)
+      const uid = this.mapService.userService.currentUser.uid;
+      if (typeof this.mapService.userService.userMarkers[uid].position != 'undefined') {
+        this.mapService.map.panTo(this.mapService.userService.userMarkers[uid].position)
+      }
+
+      this.geoService.watchPosition()
     },
     logout: function() {
       firebase.auth().signOut().then(() => {

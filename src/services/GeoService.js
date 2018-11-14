@@ -2,14 +2,12 @@ import UserService from './UserService'
 
 export default class GeoService {
   constructor() {
-    this.map = null
     this.signal = 'geo-off'
     this.watcher = null
     this.userService = new UserService
   }
 
-  watchPosition(map) {
-    this.map = map
+  watchPosition() {
     navigator.geolocation.clearWatch(this.watcher);
 
     var options = {
