@@ -49,6 +49,8 @@ export default class MapService {
     this.scoutService.listen(this.map)
     this.userService.listen(this.map)
 
+    this.scoutService.userMarkers = this.userService.userMarkers
+
     this.map.addListener('click', function(e) {
       this.onMapClick(e.latLng);
     }.bind(this))

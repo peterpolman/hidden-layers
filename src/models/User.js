@@ -6,6 +6,8 @@ export default class User {
     uid,
     position,
     gender,
+    username,
+    email,
     size,
     me
   ) {
@@ -16,6 +18,8 @@ export default class User {
     return new google.maps.Marker({
       uid: uid,
       position: new google.maps.LatLng(position.lat, position.lng),
+      username: username,
+      email: email,
       icon: {
         url: this.avatars[gender],
         size: new google.maps.Size(size, size),

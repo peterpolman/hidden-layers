@@ -24,7 +24,6 @@ export default {
   data () {
     return {
       currentUser: {},
-      // showPanBtn: false,
       geoService: new GeoService,
       mapService: new MapService,
       userService: new UserService,
@@ -35,16 +34,11 @@ export default {
     this.currentUser = this.userService.currentUser
   },
   methods: {
-    // onPanClick: function() {
-    //   const latlng = new google.maps.LatLng(this.userService.currentUser.position)
-    //   this.mapService.map.panTo(latlng)
-    // },
     onSignalClick: function() {
       const uid = this.mapService.userService.currentUser.uid;
       if (typeof this.mapService.userService.userMarkers[uid].position != 'undefined') {
         this.mapService.map.panTo(this.mapService.userService.userMarkers[uid].position)
       }
-
       this.geoService.watchPosition()
     },
     logout: function() {
@@ -78,7 +72,7 @@ export default {
     background-color: black;
   }
 
-  .btn-pan {
+  .btn-default {
     background: white;
     border: 0px;
     margin: 10px;

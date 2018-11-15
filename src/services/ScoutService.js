@@ -9,11 +9,17 @@ export default class ScoutService {
 
     this.scoutsRef = firebase.database().ref('scouts')
     this.scoutMarkers = []
+    this.userMarkers = []
+
+    this.infoWindow = null
   }
 
   listen(map) {
     this.map = map
     this.pathService.listen(this.map)
+    this.infoWindow = new google.maps.InfoWindow({
+      isHidden: false
+    });
 
     this.scoutsRef.on('child_added', function(snap) {
       this.onChildAdded(snap.key, snap.val())
@@ -26,6 +32,15 @@ export default class ScoutService {
 
   onChildAdded(uid, data) {
     this.scoutMarkers[uid] = new Scout(uid, data.position, this.map, 30, "STANDING");
+    this.scoutMarkers[uid].addListener('click', function(e) {
+      const username = this.userMarkers[data.uid].username
+      const content = `<strong>Scout [${username}]</strong><br><small>Last move: ${new Date(data.timestamp).toLocaleString("nl-NL")}</small>`
+
+      this.infoWindow.setContent(content);
+      this.infoWindow.open(this.map, this.scoutMarkers[uid]);
+
+      this.map.panTo(e.latLng)
+    }.bind(this))
 
     console.log(`[ADD] SCOUT ${uid}`)
   }
