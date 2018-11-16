@@ -31,7 +31,7 @@ export default class ScoutService {
   }
 
   onChildAdded(uid, data) {
-    this.scoutMarkers[uid] = new Scout(uid, data.position, this.map, 30, "STANDING");
+    this.scoutMarkers[uid] = new Scout(uid, data.position, this.map, 30, data.mode);
     this.scoutMarkers[uid].addListener('click', function(e) {
       const username = this.userMarkers[data.uid].username
       const content = `<strong>Scout [${username}]</strong><br><small>Last move: ${new Date(data.timestamp).toLocaleString("nl-NL")}</small>`
@@ -65,6 +65,7 @@ export default class ScoutService {
       }
     }
 
+    // If the user has no scout spawn a new one
     if (typeof this.scoutMarkers[uid] == 'undefined') {
       this.create(uid, data)
     }

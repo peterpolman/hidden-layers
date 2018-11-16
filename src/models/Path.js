@@ -4,7 +4,6 @@ export default class Path {
     path,
     strokeColor,
     iconColor,
-    offset,
     map
   ) {
     return new google.maps.Polyline({
@@ -22,7 +21,7 @@ export default class Path {
             strokeWeight: 0,
             scale: .3
           },
-          offset: offset
+          offset: "0%"
         }],
         map: map
     });

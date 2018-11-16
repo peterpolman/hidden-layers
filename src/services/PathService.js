@@ -15,23 +15,40 @@ export default class PathService {
     this.map = map
     this.directionsService = new google.maps.DirectionsService()
 
+    this.scoutsRef.on('child_added', function(snap) {
+      this.onPathAdded(snap.key, snap.val())
+    }.bind(this))
+
     this.scoutsRef.on('child_changed', function(snap) {
       this.onPathChanged(snap.key, snap.val())
     }.bind(this))
 
   }
 
+  onPathAdded(uid, data) {
+    if (data.mode == "WALKING") {
+      if (typeof this.paths[uid] == 'undefined' || this.paths[uid] == null) {
+        this.paths[uid] = new Path(uid, data.path, '#3D91CB', '#3D91CB', this.map);
+        this.move(uid, data)
+
+        console.log(`[UPDATE] is_walking ${uid}`);
+      }
+    }
+  }
+
   onPathChanged(uid, data) {
     if (data.mode == "WALKING") {
       if (typeof this.paths[uid] == 'undefined' || this.paths[uid] == null) {
-        this.paths[uid] = new Path(uid, data.path, '#3D91CB', '#3D91CB', "0%", this.map);
+        this.paths[uid] = new Path(uid, data.path, '#3D91CB', '#3D91CB', this.map);
         this.move(uid, data)
 
         console.log(`[UPDATE] is_walking ${uid}`);
       }
     }
     if (data.mode == "STANDING") {
+      this.paths[uid].setMap(null)
       this.paths[uid] = null
+      // Also clear running timers of broken paths (should be no problem when timers pick up on the existing paths agains)
 
       console.log(`[UPDATE] is_standing ${uid}`);
     }
@@ -42,11 +59,7 @@ export default class PathService {
   }
 
   move(uid, data) {
-    var offset = 0
-
-    // totalDistInSeconds = (totalDist / 1.4)
-    // elapsedTimeInSeconds = (currentTime - startTime)
-    // currentOffsetPerct = (elapsedTimeInSeconds / totalDistInSeconds) * 100
+    var offset = (((new Date).getTime() - data.timestamp) / 1000) * 1.4
 
     var intervalIndex = window.setInterval(function() {
       offset = offset + (1.4 / (1000 / this.config.fps)); // Walking speed should be 1.4m per second
