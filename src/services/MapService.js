@@ -60,7 +60,7 @@ export default class MapService {
     if (this.userService.currentUser != null) {
       const uid = this.userService.currentUser.uid
       const travelMode = "WALKING"
-      const fromLatlng = new google.maps.LatLng(this.userService.currentUser.position)
+      const fromLatlng = this.userService.currentUser.position
       const path = this.scoutService.pathService.paths[uid]
 
       if (typeof path == 'undefined' || path == null) {

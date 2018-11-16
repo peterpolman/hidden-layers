@@ -11,7 +11,7 @@ export default class Scout {
     return new google.maps.Marker({
       uid: uid,
       mode: mode,
-      position: new google.maps.LatLng(position),
+      position: position,
       map: map,
       icon: {
         url: scoutSrc,

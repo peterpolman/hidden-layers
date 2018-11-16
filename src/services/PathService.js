@@ -16,17 +16,19 @@ export default class PathService {
     this.directionsService = new google.maps.DirectionsService()
 
     this.scoutsRef.on('child_changed', function(snap) {
-      this.onChildChanged(snap.key, snap.val())
+      this.onPathChanged(snap.key, snap.val())
     }.bind(this))
 
   }
 
-  onChildChanged(uid, data) {
+  onPathChanged(uid, data) {
     if (data.mode == "WALKING") {
-      this.paths[uid] = new Path(uid, data.path, '#3D91CB', '#3D91CB', "0%", this.map);
-      this.move(uid, data)
+      if (typeof this.paths[uid] == 'undefined' || this.paths[uid] == null) {
+        this.paths[uid] = new Path(uid, data.path, '#3D91CB', '#3D91CB', "0%", this.map);
+        this.move(uid, data)
 
-      console.log(`[UPDATE] is_walking ${uid}`);
+        console.log(`[UPDATE] is_walking ${uid}`);
+      }
     }
     if (data.mode == "STANDING") {
       this.paths[uid] = null
@@ -40,7 +42,11 @@ export default class PathService {
   }
 
   move(uid, data) {
-    var offset = data.offset
+    var offset = 0
+
+    // totalDistInSeconds = (totalDist / 1.4)
+    // elapsedTimeInSeconds = (currentTime - startTime)
+    // currentOffsetPerct = (elapsedTimeInSeconds / totalDistInSeconds) * 100
 
     var intervalIndex = window.setInterval(function() {
       offset = offset + (1.4 / (1000 / this.config.fps)); // Walking speed should be 1.4m per second
@@ -68,7 +74,7 @@ export default class PathService {
 
   route(uid, fromLatlng, toLatlng, travelMode) {
     this.directionsService.route({
-      origin: fromLatlng,
+      origin: new google.maps.LatLng(fromLatlng),
       destination: toLatlng,
       travelMode: travelMode
     }, function(response, status) {
@@ -78,9 +84,8 @@ export default class PathService {
         const data = {
           mode: travelMode,
           uid: uid,
-          offset: 0,
           totalDist: sphericalLib.computeDistanceBetween( route[0], route[route.length - 1]),
-          // timestamp: firebase.database.ServerValue.TIMESTAMP,
+          timestamp: firebase.database.ServerValue.TIMESTAMP,
           path: []
         }
 
