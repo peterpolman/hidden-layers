@@ -59,7 +59,10 @@ export default class ScoutService {
   send(uid, fromLatlng, toLatlng, travelMode) {
     const data = {
       'uid': uid,
-      'position': fromLatlng
+      'position': {
+        'lat': fromLatlng.lat(),
+        'lng': fromLatlng.lng()
+      }
     }
 
     if (typeof this.scoutMarkers[uid] == 'undefined') {

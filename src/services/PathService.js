@@ -74,7 +74,7 @@ export default class PathService {
 
   route(uid, fromLatlng, toLatlng, travelMode) {
     this.directionsService.route({
-      origin: new google.maps.LatLng(fromLatlng),
+      origin: fromLatlng,
       destination: toLatlng,
       travelMode: travelMode
     }, function(response, status) {
@@ -84,6 +84,10 @@ export default class PathService {
         const data = {
           mode: travelMode,
           uid: uid,
+          position: {
+            lat: fromLatlng.lat(),
+            lng: fromLatlng.lng()
+          },
           totalDist: sphericalLib.computeDistanceBetween( route[0], route[route.length - 1]),
           timestamp: firebase.database.ServerValue.TIMESTAMP,
           path: []
