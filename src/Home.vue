@@ -144,4 +144,8 @@ export default {
     height: 20px;
     padding: 0 5px;
   }
+
+  .gm-style-cc {
+    display:none; 
+  }
 </style>
