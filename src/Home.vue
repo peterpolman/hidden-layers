@@ -1,13 +1,12 @@
 <template>
   <section class="section section-home">
-    <span v-on:click="onSignalClick" :class="geoService.signal"></span>
+    <button v-on:click="onSignalClick" :class="geoService.signal"></button>
     <div class="google-map" id="home-map"></div>
-    <button class="btn-logout" v-on:click="logout" v-if="currentUser">
+    <button class="btn btn-logout" v-on:click="logout" v-if="currentUser">
       Logout
     </button>
-    <!-- <button class="btn-pan" v-on:click="onPanClick" v-if="showPanBtn">
-      Pan
-    </button> -->
+    <button class="btn-default" v-on:click="onStopClick">
+    </button>
   </section>
 </template>
 
@@ -27,13 +26,19 @@ export default {
       geoService: new GeoService,
       mapService: new MapService,
       userService: new UserService,
+      isWalking: null
     }
   },
   mounted() {
     this.mapService.init();
     this.currentUser = this.userService.currentUser
+    this.isWalking = this.mapService.scoutService.pathService.isWalking
   },
   methods: {
+    onStopClick: function() {
+      const uid = this.mapService.userService.currentUser.uid;
+      this.mapService.scoutService.pathService.remove(uid)
+    },
     onSignalClick: function() {
       const uid = this.mapService.userService.currentUser.uid;
       if (typeof this.mapService.userService.userMarkers[uid].position != 'undefined') {
@@ -59,19 +64,7 @@ export default {
     display: block;
   }
 
-  .btn-logout {
-    position: absolute;
-    bottom: .5rem;
-    left: .5rem;
-    font-size: 10px;
-    width: 120px;
-    border-radius: 5px;
-    width: 60px;
-    height: 30px;
-    padding: 0 5px;
-    background-color: black;
-  }
-
+  .btn-logout,
   .btn-default {
     background: white;
     border: 0px;
@@ -86,39 +79,51 @@ export default {
     box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px;
     overflow: hidden;
     top: 0px;
-    right: 60px;
+    right: 0px;
     display: flex;
     justify-content: center;
     align-items: center;
   }
 
-  .btn-pan:before {
+
+  .btn-logout {
+    top: 0;
+    left: 0;
+    font-size: 10px;
+    color: #666;
+    width: 60px;
+    height: 30px;
+  }
+
+  .btn-default:before {
     content: "";
     display: inline-block;
-    background: #333;
-    width: 7px;
-    height: 7px;
+    background: #666;
+    width: 14px;
+    height: 14px;
     position: relative;
-    left: 11px
   }
 
   .geo-on,
   .geo-off {
-    position: fixed;
-    top: 1rem;
-    left: 1rem;
+    position: absolute;
+    display: flex;
+    margin: 10px;
+    padding: 0;
+    left: 0;
+    bottom: 0;
     z-index: 1;
   }
 
   .geo-on:before,
   .geo-off:before {
     content: "";
-    display: block;
+    display: inline-flex;
     width: 20px;
     height: 20px;
     border-radius: 50%;
     background: #f65858;
-    position: absolute;
+    position: relative;
   }
 
   .geo-on:before {
@@ -127,12 +132,11 @@ export default {
 
   .geo-off:after {
     content: "Tap to enable GPS";
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
 
-    position: absolute;
-    left: 20px;
+    position: relative;
     margin-left: .5rem;
 
     background-color: rgba(0,0,0,0.5);
@@ -145,7 +149,4 @@ export default {
     padding: 0 5px;
   }
 
-  .gm-style-cc {
-    display:none; 
-  }
 </style>

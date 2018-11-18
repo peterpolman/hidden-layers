@@ -5,6 +5,7 @@ export default class UserService {
   constructor() {
     this.map = null
     this.usersRef = firebase.database().ref('users')
+    this.connectedRef = firebase.database().ref('.info/connected')
     this.userMarkers = []
     this.currentUser = firebase.auth().currentUser
     this.infoWindow = null
@@ -16,21 +17,18 @@ export default class UserService {
       isHidden: false
     });
 
-    if (this.currentUser != null) {
-      const connectedRef = firebase.database().ref('.info/connected');
-      const userConnectionsRef = this.usersRef.child(this.currentUser.uid).child('connections');
-      const lastOnlineRef = this.usersRef.child(this.currentUser.uid).child('lastOnline');
+    const userConnectionsRef = this.usersRef.child(this.currentUser.uid).child('connections');
+    const lastOnlineRef = this.usersRef.child(this.currentUser.uid).child('lastOnline');
 
-      connectedRef.on('value', function(snap) {
-        if (snap.val() === true)  {
-          const connection = userConnectionsRef.push();
+    this.connectedRef.on('value', function(snap) {
+      if (snap.val() === true)  {
+        const connection = userConnectionsRef.push();
 
-          connection.onDisconnect().remove();
-          connection.set(true);
-          lastOnlineRef.onDisconnect().set(firebase.database.ServerValue.TIMESTAMP);
-        }
-      });
-    }
+        connection.onDisconnect().remove();
+        connection.set(true);
+        lastOnlineRef.onDisconnect().set(firebase.database.ServerValue.TIMESTAMP);
+      }
+    });
 
     this.usersRef.on('child_added', function(snap) {
       this.onChildAdded(snap.key, snap.val())
@@ -55,22 +53,18 @@ export default class UserService {
   }
 
   onChildAdded(uid, data) {
-    if (data.position != null) {
-      const me = (this.currentUser != null && this.currentUser.uid === uid) ? true : false
+    const me = (this.currentUser != null && this.currentUser.uid === uid) ? true : false
+    this.userMarkers[uid] = new User(uid, data.position, data.gender, data.username, data.email, 40, me);
+    this.userMarkers[uid].addListener('click', function(e){
+      const content = `<strong>${data.username}</strong><br><small>Last online: ${new Date(data.lastOnline).toLocaleString("nl-NL")}</small>`
 
-      this.userMarkers[uid] = new User(uid, data.position, data.gender, data.username, data.email, 40, me);
+      this.infoWindow.setContent(content);
+      this.infoWindow.open(this.map, this.userMarkers[uid]);
 
-      this.userMarkers[uid].addListener('click', function(e){
-        const content = `<strong>${data.username}</strong><br><small>Last online: ${new Date(data.lastOnline).toLocaleString("nl-NL")}</small>`
+      this.map.panTo(e.latLng)
+    }.bind(this))
 
-        this.infoWindow.setContent(content);
-        this.infoWindow.open(this.map, this.userMarkers[uid]);
-
-        this.map.panTo(e.latLng)
-      }.bind(this))
-
-      this.userMarkers[uid].setMap(this.map);
-    }
+    this.userMarkers[uid].setMap(this.map);
   }
 
   onChildChanged(uid, data) {

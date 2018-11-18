@@ -14,7 +14,7 @@
       <label for="gender-male">Male</label>
       <input name="gender" id="gender-female" type="radio" value="female" v-model="gender">
       <label for="gender-female">Female</label>
-      <button type="submit">Register</button>
+      <button  class="btn" type="submit">Register</button>
       <p>or go back to <router-link to="/login">Login</router-link></p>
     </form>
   </section>
@@ -48,6 +48,10 @@ export default {
           const data = {
             uid: r.user.uid,
             email: r.user.email,
+            position: {
+              lat: 52.366,
+              lng: 4.844
+            },
             gender: this.gender,
             username: this.username,
           }

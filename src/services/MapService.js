@@ -33,6 +33,7 @@ export default class MapService {
         mapTypeControl: false,
         scrollwheel: true,
         streetViewControl: false,
+        fullscreenControl: false,
         styles: this.mapStyles,
       }
 

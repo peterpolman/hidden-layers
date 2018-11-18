@@ -8,7 +8,7 @@ export default class PathService {
     this.scoutsRef = firebase.database().ref('scouts')
     this.paths = []
     this.directionsService = null
-    this.intervalIndex = null
+    this.pathTimer = []
   }
 
   listen(map) {
@@ -46,12 +46,19 @@ export default class PathService {
       }
     }
     if (data.mode == "STANDING") {
+      if (typeof this.pathTimer[uid] != 'undefined') {
+        window.clearInterval(this.pathTimer[uid])
+      }
       this.paths[uid].setMap(null)
       this.paths[uid] = null
       // Also clear running timers of broken paths (should be no problem when timers pick up on the existing paths agains)
 
       console.log(`[UPDATE] is_standing ${uid}`);
     }
+  }
+
+  remove(uid) {
+    return this.scoutsRef.child(uid).update({mode: "STANDING", path: null})
   }
 
   update(uid, data) {
@@ -61,7 +68,7 @@ export default class PathService {
   move(uid, data) {
     var offset = (((new Date).getTime() - data.timestamp) / 1000) * 1.4
 
-    var intervalIndex = window.setInterval(function() {
+    this.pathTimer[uid] = window.setInterval(function() {
       offset = offset + (1.4 / (1000 / this.config.fps)); // Walking speed should be 1.4m per second
 
       var currentOffsetPerct = (offset / data.totalDist) * 100
@@ -72,7 +79,7 @@ export default class PathService {
       this.paths[uid].set('icons', icons)
 
       if (offset >= data.totalDist) {
-        window.clearInterval(intervalIndex)
+        window.clearInterval(this.pathTimer[uid])
         this.paths[uid].setMap(null)
 
         this.update(uid, {
@@ -94,23 +101,32 @@ export default class PathService {
       if (status === google.maps.DirectionsStatus.OK) {
         const sphericalLib = google.maps.geometry.spherical
         const route = response.routes[0].overview_path
-        const data = {
-          mode: travelMode,
-          uid: uid,
-          position: {
-            lat: fromLatlng.lat(),
-            lng: fromLatlng.lng()
-          },
-          totalDist: sphericalLib.computeDistanceBetween( route[0], route[route.length - 1]),
-          timestamp: firebase.database.ServerValue.TIMESTAMP,
-          path: []
+        const totalDist = sphericalLib.computeDistanceBetween( route[0], route[route.length - 1])
+
+        if (totalDist < 5000) {
+          const data = {
+            mode: travelMode,
+            uid: uid,
+            position: {
+              lat: fromLatlng.lat(),
+              lng: fromLatlng.lng()
+            },
+            totalDist: totalDist,
+            timestamp: firebase.database.ServerValue.TIMESTAMP,
+            path: []
+          }
+
+          for (var i = 0; i < route.length; i++) {
+            data.path[i] = { lat: route[i].lat(), lng: route[i].lng() }
+          }
+
+          this.update(uid, data)
+          console.log(`Let's walk ${totalDist}m`);
+        }
+        else {
+          console.log(`Don't go so far! 200m is max.`);
         }
 
-        for (var i = 0; i < route.length; i++) {
-          data.path[i] = { lat: route[i].lat(), lng: route[i].lng() }
-        }
-
-        this.update(uid, data)
 
       } else {
         console.warn('Directions request failed due to ' + status);

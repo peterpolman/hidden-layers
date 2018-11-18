@@ -1,8 +1,6 @@
 <template>
   <div class="container">
-
     <router-view></router-view>
-
   </div>
 </template>
 
@@ -98,7 +96,15 @@ input[type="password"] {
   }
 }
 
-button {
+#home-map iframe + div {
+  display: none;
+}
+
+.gm-style-cc {
+  display:none;
+}
+
+.btn {
   box-sizing: border-box;
   background: #42b983;
   width: 100%;
