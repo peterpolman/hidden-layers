@@ -1,11 +1,19 @@
 <template>
   <section class="section section-home">
     <button v-on:click="onSignalClick" :class="geoService.signal"></button>
+
+    <button v-on:click="onPanUserClick" class="btn-user" v-if="mapService.userService.userMarkers[userService.currentUser.uid]">
+      {{mapService.userService.userMarkers[userService.currentUser.uid].username}}
+    </button>
+    <button v-on:click="onPanScoutClick" class="btn-scout">
+      Scout
+    </button>
+
     <div class="google-map" id="home-map"></div>
     <button class="btn btn-logout" v-on:click="logout">
       Logout
     </button>
-    <button class="btn-default" v-on:click="onStopClick">
+    <button class="btn-default" v-on:click="onStopClick" v-if="this.mapService.scoutService.isWalking">
     </button>
   </section>
 </template>
@@ -22,7 +30,6 @@ export default {
   name: 'home',
   data () {
     return {
-      currentUser: {},
       geoService: new GeoService,
       mapService: new MapService,
       userService: new UserService,
@@ -31,7 +38,7 @@ export default {
   },
   mounted() {
     this.mapService.init();
-    this.isWalking = this.mapService.scoutService.pathService.isWalking
+    const uid = this.mapService.userService.currentUser.uid;
   },
   methods: {
     onStopClick: function() {
@@ -39,11 +46,19 @@ export default {
       this.mapService.scoutService.pathService.remove(uid)
     },
     onSignalClick: function() {
+      this.geoService.watchPosition()
+    },
+    onPanUserClick: function() {
       const uid = this.mapService.userService.currentUser.uid;
       if (typeof this.mapService.userService.userMarkers[uid].position != 'undefined') {
         this.mapService.map.panTo(this.mapService.userService.userMarkers[uid].position)
       }
-      this.geoService.watchPosition()
+    },
+    onPanScoutClick: function() {
+      const uid = this.mapService.userService.currentUser.uid;
+      if (typeof this.mapService.scoutService.scoutMarkers[uid].position != 'undefined') {
+        this.mapService.map.panTo(this.mapService.scoutService.scoutMarkers[uid].position)
+      }
     },
     logout: function() {
       firebase.auth().signOut().then(() => {
@@ -63,6 +78,8 @@ export default {
     display: block;
   }
 
+  .btn-user,
+  .btn-scout,
   .btn-logout,
   .btn-default {
     background: white;
@@ -77,11 +94,27 @@ export default {
     width: 40px;
     box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px;
     overflow: hidden;
-    top: 0px;
+    bottom: 0px;
     right: 0px;
     display: flex;
     justify-content: center;
     align-items: center;
+  }
+
+  .btn-user,
+  .btn-scout {
+    top: 0;
+    right: 0;
+    font-size: 10px;
+    color: #666;
+    width: 60px;
+    height: 30px;
+    z-index: 1;
+    font-weight: bold;
+  }
+
+  .btn-scout  {
+    top: 35px;
   }
 
   .btn-logout {

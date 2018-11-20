@@ -13,6 +13,8 @@ export default class ScoutService {
     this.userMarkers = []
 
     this.infoWindow = null
+
+    this.isWalking = false
   }
 
   listen(map) {
@@ -46,6 +48,10 @@ export default class ScoutService {
     const bounds = this.map.getBounds()
     this.setGrid(bounds)
 
+    if (typeof this.scoutMarkers[this.uid] != 'undefined') {
+      this.isWalking = (this.scoutMarkers[this.uid].mode == "WALKING")
+    }
+
     console.log(`[ADD] SCOUT ${uid}`)
   }
 
@@ -55,6 +61,10 @@ export default class ScoutService {
 
     const bounds = this.map.getBounds()
     this.setGrid(bounds)
+
+    if (typeof this.scoutMarkers[this.uid] != 'undefined') {
+      this.isWalking = (this.scoutMarkers[this.uid].mode == "WALKING")
+    }
 
     console.log(`[UPDATE] SCOUT position ${uid}`);
   }
