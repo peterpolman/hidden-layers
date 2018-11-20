@@ -27,11 +27,11 @@ export default class MapService {
       const element = document.getElementById("home-map")
       const options = {
         center: new google.maps.LatLng(52.366, 4.844),
-        zoom: 18,
-        zoomControl: true,
+        zoom: 17,
+        zoomControl: false,
         disableDoubleClickZoom: true,
         mapTypeControl: false,
-        scrollwheel: true,
+        scrollwheel: false,
         streetViewControl: false,
         fullscreenControl: false,
         styles: this.mapStyles,
@@ -42,6 +42,7 @@ export default class MapService {
       if (this.userService.currentUser != null) {
         this.attachListeners()
       }
+
     }.bind(this))
   }
 
@@ -54,6 +55,12 @@ export default class MapService {
     this.map.addListener('click', function(e) {
       this.onMapClick(e.latLng);
     }.bind(this))
+
+    this.map.addListener('bounds_changed', function(e) {
+      const bounds = this.map.getBounds()
+      this.scoutService.setGrid(bounds)
+    }.bind(this))
+
   }
 
   onMapClick(toLatlng) {

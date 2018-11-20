@@ -2,7 +2,7 @@
   <section class="section section-home">
     <button v-on:click="onSignalClick" :class="geoService.signal"></button>
     <div class="google-map" id="home-map"></div>
-    <button class="btn btn-logout" v-on:click="logout" v-if="currentUser">
+    <button class="btn btn-logout" v-on:click="logout">
       Logout
     </button>
     <button class="btn-default" v-on:click="onStopClick">
@@ -31,7 +31,6 @@ export default {
   },
   mounted() {
     this.mapService.init();
-    this.currentUser = this.userService.currentUser
     this.isWalking = this.mapService.scoutService.pathService.isWalking
   },
   methods: {
@@ -85,7 +84,6 @@ export default {
     align-items: center;
   }
 
-
   .btn-logout {
     top: 0;
     left: 0;
@@ -113,6 +111,9 @@ export default {
     left: 0;
     bottom: 0;
     z-index: 1;
+    -webkit-appearance: none;
+    background: transparent;
+    border: 0;
   }
 
   .geo-on:before,
@@ -143,7 +144,7 @@ export default {
     color: white;
     font-weight: bold;
     font-size: 10px;
-    width: 90px;
+    width: 95px;
     border-radius: 5px;
     height: 20px;
     padding: 0 5px;
