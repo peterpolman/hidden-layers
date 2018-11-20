@@ -95,7 +95,7 @@ export default {
     box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px;
     overflow: hidden;
     bottom: 0px;
-    right: 0px;
+    right: 52px;
     display: flex;
     justify-content: center;
     align-items: center;

@@ -28,7 +28,7 @@ export default class MapService {
       const options = {
         center: new google.maps.LatLng(52.366, 4.844),
         zoom: 17,
-        zoomControl: false,
+        zoomControl: true,
         disableDoubleClickZoom: true,
         mapTypeControl: false,
         scrollwheel: false,

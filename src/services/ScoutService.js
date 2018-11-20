@@ -8,6 +8,7 @@ export default class ScoutService {
     this.map = null
     this.pathService = new PathService
 
+    this.usersRef = firebase.database().ref('users')
     this.scoutsRef = firebase.database().ref('scouts')
     this.scoutMarkers = []
     this.userMarkers = []
@@ -30,6 +31,20 @@ export default class ScoutService {
 
     this.scoutsRef.on('child_changed', function(snap) {
       this.onChildChanged(snap.key, snap.val());
+    }.bind(this));
+
+    this.usersRef.on('child_added', function(snap) {
+      if (this.uid == snap.key) {
+        const bounds = this.map.getBounds()
+        this.setGrid(bounds)
+      }
+    }.bind(this));
+
+    this.usersRef.on('child_changed', function(snap) {
+      if (this.uid == snap.key) {
+        const bounds = this.map.getBounds()
+        this.setGrid(bounds)
+      }
     }.bind(this));
   }
 

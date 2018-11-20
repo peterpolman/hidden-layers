@@ -18,6 +18,7 @@ export default class Scout {
         size: new google.maps.Size(size, size),
         scaledSize: new google.maps.Size(size, size),
         origin: new google.maps.Point(0,0),
+        anchor: new google.maps.Point(size / 2, size / 2)
       }
     });
   }
