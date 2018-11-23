@@ -24,14 +24,13 @@
 import firebase from 'firebase'
 
 import MapService from './services/MapService';
-import UserService from './services/UserService';
 
 export default {
   name: 'register',
   data: function () {
     return {
       mapService: new MapService,
-      userService: new UserService,
+      markerController: new MarkerController,
       email: '',
       password: '',
       gender: '',
@@ -56,7 +55,8 @@ export default {
             username: this.username,
           }
 
-          this.userService.createUser(r.user.uid, data)
+          this.markerController.createUser(r.user.uid, data)
+          
           this.$router.replace('/')
         }.bind(this))
         .then( (err) => {

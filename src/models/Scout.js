@@ -1,10 +1,9 @@
-import scoutSrc from '../assets/img/user-me.png';
+import scoutSrc from '../assets/img/wolf-1.png';
 
 export default class Scout {
   constructor(
     uid,
     position,
-    map,
     size,
     mode
   ) {
@@ -12,7 +11,6 @@ export default class Scout {
       uid: uid,
       mode: mode,
       position: new google.maps.LatLng(position.lat, position.lng),
-      map: map,
       icon: {
         url: scoutSrc,
         size: new google.maps.Size(size, size),

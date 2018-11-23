@@ -2,8 +2,8 @@
   <section class="section section-home">
     <button v-on:click="onSignalClick" :class="geoService.signal"></button>
 
-    <button v-on:click="onPanUserClick" class="btn-user" v-if="mapService.userService.userMarkers[userService.currentUser.uid]">
-      {{mapService.userService.userMarkers[userService.currentUser.uid].username}}
+    <button v-on:click="onPanUserClick" class="btn-user" v-if="mapService.markerController.myUserMarker">
+      {{mapService.markerController.myUserMarker.username}}
     </button>
     <button v-on:click="onPanScoutClick" class="btn-scout">
       Scout
@@ -13,7 +13,7 @@
     <button class="btn btn-logout" v-on:click="logout">
       Logout
     </button>
-    <button class="btn-default" v-on:click="onStopClick" v-if="this.mapService.scoutService.isWalking">
+    <button class="btn-default" v-on:click="onStopClick" v-if="this.mapService.markerController.isWalking">
     </button>
   </section>
 </template>
@@ -24,41 +24,32 @@ import config from './config.js';
 
 import GeoService from './services/GeoService';
 import MapService from './services/MapService';
-import UserService from './services/UserService';
 
 export default {
   name: 'home',
   data () {
     return {
+      uid: firebase.auth().currentUser.uid,
       geoService: new GeoService,
       mapService: new MapService,
-      userService: new UserService,
       isWalking: null
     }
   },
   mounted() {
     this.mapService.init();
-    const uid = this.mapService.userService.currentUser.uid;
   },
   methods: {
     onStopClick: function() {
-      const uid = this.mapService.userService.currentUser.uid;
-      this.mapService.scoutService.pathService.remove(uid)
+      this.mapService.markerController.pathService.remove(this.uid)
     },
     onSignalClick: function() {
       this.geoService.watchPosition()
     },
     onPanUserClick: function() {
-      const uid = this.mapService.userService.currentUser.uid;
-      if (typeof this.mapService.userService.userMarkers[uid].position != 'undefined') {
-        this.mapService.map.panTo(this.mapService.userService.userMarkers[uid].position)
-      }
+      this.mapService.map.panTo(this.mapService.markerController.myUserMarker.position)
     },
     onPanScoutClick: function() {
-      const uid = this.mapService.userService.currentUser.uid;
-      if (typeof this.mapService.scoutService.scoutMarkers[uid].position != 'undefined') {
-        this.mapService.map.panTo(this.mapService.scoutService.scoutMarkers[uid].position)
-      }
+      this.mapService.map.panTo(this.mapService.markerController.myScoutMarker.position)
     },
     logout: function() {
       firebase.auth().signOut().then(() => {

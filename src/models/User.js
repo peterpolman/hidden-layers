@@ -1,5 +1,5 @@
-import maleSrc from '../assets/img/user-male.png';
-import femaleSrc from '../assets/img/user-female.png';
+import maleSrc from '../assets/img/knight-1.png';
+import femaleSrc from '../assets/img/archer-1.png';
 
 export default class User {
   constructor(
@@ -25,7 +25,7 @@ export default class User {
         size: new google.maps.Size(size, size),
         scaledSize: new google.maps.Size(size, size),
         origin: new google.maps.Point(0,0),
-        anchor: new google.maps.Point(size / 2, size / 2)
+        anchor: new google.maps.Point(size / 2, size / 1)
       },
       animation: (me === true) ? google.maps.Animation.DROP : null
     });

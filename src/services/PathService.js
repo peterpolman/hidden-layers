@@ -1,5 +1,6 @@
 import firebase from 'firebase';
 import config from '../config.js'
+
 import Path from '../models/Path'
 
 export default class PathService {
@@ -51,6 +52,7 @@ export default class PathService {
       }
       this.paths[uid].setMap(null)
       this.paths[uid] = null
+
       // Also clear running timers of broken paths (should be no problem when timers pick up on the existing paths agains)
 
       console.log(`[UPDATE] is_standing ${uid}`);
@@ -66,10 +68,10 @@ export default class PathService {
   }
 
   move(uid, data) {
-    var offset = (((new Date).getTime() - data.timestamp) / 1000) * 1.4
+    var offset = (((new Date).getTime() - data.timestamp) / 1000) * 10 // speed
 
     this.pathTimer[uid] = window.setInterval(function() {
-      offset = offset + (1.4 / (1000 / this.config.fps)); // Walking speed should be 1.4m per second
+      offset = offset + (10 / (1000 / this.config.fps)); // Walking speed should be 1.4m per second
 
       var currentOffsetPerct = (offset / data.totalDist) * 100
       var icons = this.paths[uid].get('icons')

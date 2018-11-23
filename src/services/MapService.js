@@ -1,8 +1,8 @@
 import firebase from 'firebase'
 
 import GoogleMapsLoader from 'google-maps';
-import ScoutService from './ScoutService';
-import UserService from './UserService';
+
+import MarkerController from '../controllers/MarkerController';
 
 import config from '../config.js'
 import MapStyles from '../mapStyles.js'
@@ -11,8 +11,7 @@ export default class MapService {
   constructor() {
     this.map = null
     this.route = null
-    this.scoutService = new ScoutService
-    this.userService = new UserService
+    this.markerController = new MarkerController
     this.loader = GoogleMapsLoader
     this.mapStyles = MapStyles
   }
@@ -28,6 +27,7 @@ export default class MapService {
       const options = {
         center: new google.maps.LatLng(52.366, 4.844),
         zoom: 17,
+        minZoom: 10,
         zoomControl: true,
         disableDoubleClickZoom: true,
         mapTypeControl: false,
@@ -39,43 +39,38 @@ export default class MapService {
 
       this.map = new google.maps.Map(element, options)
 
-      if (this.userService.currentUser != null) {
-        this.attachListeners()
+      if (this.markerController.uid != null) {
+        this.markerController.listen(this.map)
+
+        this.map.addListener('click', function(e) {
+          this.onMapClick(e.latLng);
+        }.bind(this))
+
+        this.map.addListener('bounds_changed', function(e) {
+          this.onPan()
+        }.bind(this))
+
       }
 
     }.bind(this))
   }
 
-  attachListeners() {
-    this.scoutService.listen(this.map)
-    this.userService.listen(this.map)
-
-    this.scoutService.userMarkers = this.userService.userMarkers
-
-    this.map.addListener('click', function(e) {
-      this.onMapClick(e.latLng);
-    }.bind(this))
-
-    this.map.addListener('bounds_changed', function(e) {
-      const bounds = this.map.getBounds()
-      this.scoutService.setGrid(bounds)
-    }.bind(this))
-
+  onPan() {
+    const visibility = this.markerController.setGrid()
+    this.markerController.discover(visibility)
   }
 
   onMapClick(toLatlng) {
-    if (this.userService.currentUser != null) {
-      const uid = this.userService.currentUser.uid
-      const travelMode = "WALKING"
-      const fromLatlng = new google.maps.LatLng(this.userService.currentUser.position)
-      const path = this.scoutService.pathService.paths[uid]
+    const uid = this.markerController.uid
+    const travelMode = "WALKING"
+    const fromLatlng = this.markerController.myUserMarker.position
+    const path = this.markerController.pathService.paths[uid]
 
-      if (typeof path == 'undefined' || path == null) {
-        this.scoutService.send(uid, fromLatlng, toLatlng, travelMode)
-      }
-      else {
-        console.log(`Chill dude...`)
-      }
+    if (typeof path == 'undefined' || path == null) {
+      this.markerController.send(uid, fromLatlng, toLatlng, travelMode)
+    }
+    else {
+      console.log(`Chill dude...`)
     }
   }
 }

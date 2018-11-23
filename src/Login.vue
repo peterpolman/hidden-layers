@@ -15,14 +15,13 @@
 import firebase from 'firebase';
 
 import MapService from './services/MapService';
-import UserService from './services/UserService';
+import MarkerController from './controllers/MarkerController';
 
 export default {
   name: 'login',
   data: function () {
     return {
       mapService: new MapService,
-      userService: new UserService,
       email: '',
       password: ''
     }
