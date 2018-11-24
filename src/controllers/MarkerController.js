@@ -5,7 +5,9 @@ import PathService from '../services/PathService';
 import Scout from '../models/Scout';
 import User from '../models/User';
 
-export default class ScoutService {
+import Ward from '../models/Ward'
+
+export default class MarkerController {
   constructor() {
     this.uid = firebase.auth().currentUser.uid
     this.map = null
@@ -14,15 +16,15 @@ export default class ScoutService {
 
     this.connectedRef = firebase.database().ref('.info/connected')
 
-    this.myUserRef = firebase.database().ref('users').child(this.uid)
-    this.myScoutRef = firebase.database().ref('scouts').child(this.uid)
     this.usersRef = firebase.database().ref('users')
     this.scoutsRef = firebase.database().ref('scouts')
+    this.wardsRef = firebase.database().ref('wards').child(this.uid)
 
-    this.myUserMarker = []
-    this.myScoutMarker = []
+    this.myUserMarker = null
+    this.myScoutMarker = null
     this.userMarkers = []
     this.scoutMarkers = []
+    this.wardMarkers = []
 
     this.userInfoWindow = null
     this.scoutInfoWindow = null
@@ -54,8 +56,8 @@ export default class ScoutService {
     });
 
     this.usersRef.on('child_added', function(snap) {
-      console.log(`[ADD] User ${snap.key}`);
       if (snap.key != this.uid) {
+        console.log(`[ADD] User ${snap.key}`);
         this.onUserAdded(snap.key, snap.val())
       }
       else {
@@ -64,21 +66,21 @@ export default class ScoutService {
     }.bind(this));
 
     this.usersRef.on('child_changed', function(snap) {
-      console.log(`[CHANGE] User ${snap.key}`);
       if (snap.key != this.uid) {
+        console.log(`[CHANGE] User ${snap.key}`);
         this.onUserChanged(snap.key, snap.val())
       }
       else {
         this.onMyUserChanged(snap.key, snap.val())
       }
 
-      const visibility = this.setGrid()
+      var visibility = this.setGrid()
       this.discover(visibility)
     }.bind(this));
 
     this.scoutsRef.on('child_added', function(snap) {
-      console.log(`[ADD] Scout ${snap.key}`);
       if (snap.key != this.uid) {
+        console.log(`[ADD] Scout ${snap.key}`);
         this.onScoutAdded(snap.key, snap.val())
       }
       else {
@@ -87,33 +89,78 @@ export default class ScoutService {
     }.bind(this));
 
     this.scoutsRef.on('child_changed', function(snap) {
-      console.log(`[CHANGE] User ${snap.key}`);
       if (snap.key != this.uid) {
+        console.log(`[CHANGE] Scout ${snap.key}`);
         this.onScoutChanged(snap.key, snap.val());
       }
       else {
         this.onMyScoutChanged(snap.key, snap.val());
       }
 
-      const visibility = this.setGrid()
+      var visibility = this.setGrid()
+      this.discover(visibility)
+    }.bind(this));
+
+    this.wardsRef.on('child_added', function(snap) {
+      this.onWardAdded(snap.key, snap.val());
+
+      var visibility = this.setGrid()
+      this.discover(visibility)
+    }.bind(this));
+
+    this.wardsRef.on('child_removed', function(snap) {
+      this.onWardRemoved(snap.key);
+
+      var visibility = this.setGrid()
       this.discover(visibility)
     }.bind(this));
 
   }
 
+  createWard(data) {
+    if (this.wardMarkers.length < 5) {
+      const id = this.wardMarkers.length
+      this.wardsRef.child(id).set(data)
+    }
+    else {
+      alert('Remove a ward first by tapping it.');
+    }
+  }
+
+  removeWard(id) {
+    this.wardsRef.child(id).remove()
+  }
+
+  onWardRemoved(id) {
+
+  }
+
+  onWardAdded(id, data) {
+    const ward = new Ward(this.uid, data.position, 40, this.map)
+
+    ward.addListener('click', function(e) {
+      this.wardMarkers[id].setMap(null)
+      this.wardMarkers.splice(id, 1)
+
+      this.removeWard(id)
+    }.bind(this))
+
+    this.wardMarkers.push( ward )
+  }
+
   discover(visibility) {
     for (let uid in this.userMarkers) {
-      var isVisible = google.maps.geometry.poly.containsLocation(this.userMarkers[uid].position, visibility)
-      this.userMarkers[uid].setVisible(isVisible)
+      var isHidden = google.maps.geometry.poly.containsLocation(this.userMarkers[uid].position, visibility)
+      this.userMarkers[uid].setVisible(!isHidden)
     }
     for (let uid in this.scoutMarkers) {
-      var isVisible = google.maps.geometry.poly.containsLocation(this.scoutMarkers[uid].position, visibility)
-      this.scoutMarkers[uid].setVisible(isVisible)
+      var isHidden = google.maps.geometry.poly.containsLocation(this.scoutMarkers[uid].position, visibility)
+      this.scoutMarkers[uid].setVisible(!isHidden)
     }
   }
 
   onMyUserAdded(uid, data) {
-    this.myUserMarker = new User(uid, data.position, data.gender, data.username, data.email, 50, true);
+    this.myUserMarker = new User(uid, data.position, data.gender, data.username, data.email, 50, this.map, true);
     this.myUserMarker.addListener('click', function(e){
       const content = `<strong>${data.username}</strong><br><small>Last online: ${new Date(data.lastOnline).toLocaleString("nl-NL")}</small>`
 
@@ -141,6 +188,10 @@ export default class ScoutService {
       this.scoutInfoWindow.open(this.map, this.myScoutMarker);
 
       this.map.panTo(e.latLng)
+
+      var customEvent = new CustomEvent('cursor_changed', { detail: "SCOUT" })
+      window.dispatchEvent(customEvent);
+
     }.bind(this))
 
     this.myScoutMarker.setMap(this.map);
@@ -155,7 +206,7 @@ export default class ScoutService {
   }
 
   onUserAdded(uid, data) {
-    this.userMarkers[uid] = new User(uid, data.position, data.gender, data.username, data.email, 50, false);
+    this.userMarkers[uid] = new User(uid, data.position, data.gender, data.username, data.email, 50, this.map, false);
     this.userMarkers[uid].addListener('click', function(e){
       const content = `<strong>${data.username}</strong><br><small>Last online: ${new Date(data.lastOnline).toLocaleString("nl-NL")}</small>`
 
@@ -165,8 +216,7 @@ export default class ScoutService {
       this.map.panTo(e.latLng)
     }.bind(this))
 
-    this.userMarkers[uid].setMap(this.map);
-    this.userMarkers[uid].setVisible(false);
+    this.userMarkers[uid].setVisible(true);
   }
 
   onUserChanged(uid, data) {
@@ -210,21 +260,15 @@ export default class ScoutService {
   onScoutChanged(uid, data) {
     this.scoutMarkers[uid].setPosition(data.position)
     this.scoutMarkers[uid].set('mode', data.mode)
-
-    const isVisible = google.maps.geometry.poly.containsLocation(data.position, this.visibility)
-
-    if (isVisible) {
-      this.scoutMarkers[uid].setVisible(true)
-    }
   }
 
   // onScoutRemoved(uid) {
   //   console.log(`[REMOVE] SCOUT ${uid}`);
   // }
 
-  send(uid, fromLatlng, toLatlng, travelMode) {
+  send(fromLatlng, toLatlng) {
     const data = {
-      'uid': uid,
+      'uid': this.uid,
       'position': {
         'lat': fromLatlng.lat(),
         'lng': fromLatlng.lng()
@@ -239,7 +283,7 @@ export default class ScoutService {
       fromLatlng = this.myScoutMarker.position
     }
 
-    this.pathService.route(uid, fromLatlng, toLatlng, travelMode)
+    this.pathService.route(this.uid, fromLatlng, toLatlng, "WALKING")
   }
 
   createScout(uid, data) {
@@ -265,9 +309,6 @@ export default class ScoutService {
   }
 
   setGrid() {
-    const userPositionPath = this.circlePath(this.myUserMarker.position, 200, 32)
-    const scoutPositionPath = this.circlePath(this.myScoutMarker.position, 100, 32)
-
     const outerBounds = [
       new google.maps.LatLng({lng: -11.3600718975, lat: 40.4630057984}),
       new google.maps.LatLng({lng: 31.5241158009, lat: 40.4630057984}),
@@ -275,12 +316,27 @@ export default class ScoutService {
       new google.maps.LatLng({lng: -11.3600718975, lat: 57.032878786})
     ];
 
+    var visible = []
+    var myUserMarkerPath = this.circlePath(this.myUserMarker.position, 200, 256)
+    var myScoutMarkerPath = this.circlePath(this.myScoutMarker.position, 100, 256)
+
+    visible.push( outerBounds )
+    visible.push( myUserMarkerPath )
+    visible.push( myScoutMarkerPath )
+
+    if (this.wardMarkers != []) {
+      for (var wardMarker of this.wardMarkers) {
+        var path = this.circlePath(wardMarker.position, 50, 256)
+        visible.push( path )
+      }
+    }
+
     // Should not be removed once out of the bounds_changed event
     this.map.data.forEach(function(feature) {
       this.map.data.remove(feature);
     }.bind(this))
 
-    this.map.data.add({ geometry: new google.maps.Data.Polygon([outerBounds, userPositionPath, scoutPositionPath]) })
+    this.map.data.add({ geometry: new google.maps.Data.Polygon(visible) })
     this.map.data.setStyle({
       fillColor: '#000',
       fillOpacity: .75,
@@ -288,7 +344,7 @@ export default class ScoutService {
       clickable: false
     })
 
-    return new google.maps.Polygon({paths: [userPositionPath, scoutPositionPath]})
+    return new google.maps.Polygon({ paths: visible })
   }
 
 }

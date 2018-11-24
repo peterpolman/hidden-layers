@@ -2,6 +2,7 @@ import firebase from 'firebase'
 
 import GoogleMapsLoader from 'google-maps';
 
+import ItemController from '../controllers/ItemController';
 import MarkerController from '../controllers/MarkerController';
 
 import config from '../config.js'
@@ -12,6 +13,7 @@ export default class MapService {
     this.map = null
     this.route = null
     this.markerController = new MarkerController
+    this.itemController = new ItemController
     this.loader = GoogleMapsLoader
     this.mapStyles = MapStyles
   }
@@ -50,24 +52,46 @@ export default class MapService {
           this.onPan()
         }.bind(this))
 
+        window.addEventListener('cursor_changed', function(e) {
+          this.cursorMode = e.detail
+        }.bind(this))
+
       }
 
     }.bind(this))
   }
 
   onPan() {
-    const visibility = this.markerController.setGrid()
-    this.markerController.discover(visibility)
+    if (this.markerController.myUserMarker && this.markerController.myScoutMarker) {
+      const visibility = this.markerController.setGrid()
+      this.markerController.discover(visibility)
+    }
   }
 
-  onMapClick(toLatlng) {
-    const uid = this.markerController.uid
-    const travelMode = "WALKING"
-    const fromLatlng = this.markerController.myUserMarker.position
-    const path = this.markerController.pathService.paths[uid]
+  onMapClick(latlng) {
+    switch(this.cursorMode) {
+      case "WARD":
+        const data = {
+          position: {
+            lat: latlng.lat(),
+            lng: latlng.lng()
+          }
+        }
+        this.markerController.createWard(data)
+        break
+      case "SCOUT":
+        this.moveScout(latlng)
+        break
+    }
+  }
+
+  moveScout(toLatlng) {
+    const myUserMarker = this.markerController.myUserMarker
+    const fromLatlng = myUserMarker.position
+    const path = this.markerController.pathService.paths[myUserMarker.uid]
 
     if (typeof path == 'undefined' || path == null) {
-      this.markerController.send(uid, fromLatlng, toLatlng, travelMode)
+      this.markerController.send(fromLatlng, toLatlng)
     }
     else {
       console.log(`Chill dude...`)

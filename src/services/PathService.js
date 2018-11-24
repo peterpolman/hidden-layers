@@ -24,6 +24,14 @@ export default class PathService {
       this.onPathChanged(snap.key, snap.val())
     }.bind(this))
 
+    window.onfocus = function() {
+      // this.move(this.uid)
+    }.bind(this)
+
+    window.onblur = function() {
+      console.log('You are active');
+    }
+
   }
 
   onPathAdded(uid, data) {
@@ -70,6 +78,7 @@ export default class PathService {
   move(uid, data) {
     var offset = (((new Date).getTime() - data.timestamp) / 1000) * 10 // speed
 
+    // window.clearInterval(this.pathTimer[uid])
     this.pathTimer[uid] = window.setInterval(function() {
       offset = offset + (10 / (1000 / this.config.fps)); // Walking speed should be 1.4m per second
 
@@ -126,7 +135,7 @@ export default class PathService {
           console.log(`Let's walk ${totalDist}m`);
         }
         else {
-          console.log(`Don't go so far! 200m is max.`);
+          console.log(`Don't go so far! 5000 meter is max.`);
         }
 
 

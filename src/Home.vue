@@ -8,6 +8,9 @@
     <button v-on:click="onPanScoutClick" class="btn-scout">
       Scout
     </button>
+    <button v-on:click="onSpawnWardClick" class="btn-ward">
+      Ward
+    </button>
 
     <div class="google-map" id="home-map"></div>
     <button class="btn btn-logout" v-on:click="logout">
@@ -39,6 +42,10 @@ export default {
     this.mapService.init();
   },
   methods: {
+    onSpawnWardClick: function() {
+      const customEvent = new CustomEvent('cursor_changed', { detail: "WARD" })
+      window.dispatchEvent(customEvent)
+    },
     onStopClick: function() {
       this.mapService.markerController.pathService.remove(this.uid)
     },
@@ -69,6 +76,7 @@ export default {
     display: block;
   }
 
+  .btn-ward,
   .btn-user,
   .btn-scout,
   .btn-logout,
@@ -92,6 +100,7 @@ export default {
     align-items: center;
   }
 
+  .btn-ward,
   .btn-user,
   .btn-scout {
     top: 0;
@@ -102,6 +111,10 @@ export default {
     height: 30px;
     z-index: 1;
     font-weight: bold;
+  }
+
+  .btn-ward {
+    top: 70px;
   }
 
   .btn-scout  {

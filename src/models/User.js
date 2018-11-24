@@ -9,6 +9,7 @@ export default class User {
     username,
     email,
     size,
+    map,
     me
   ) {
     this.avatars = {
@@ -20,6 +21,7 @@ export default class User {
       position: new google.maps.LatLng(position.lat, position.lng),
       username: username,
       email: email,
+      map: map,
       icon: {
         url: this.avatars[gender],
         size: new google.maps.Size(size, size),
