@@ -109,7 +109,7 @@ export default class MarkerController {
     }.bind(this));
 
     this.wardsRef.on('child_removed', function(snap) {
-      this.onWardRemoved(snap.key);
+      this.onWardRemoved(snap.key, snap.val());
 
       var visibility = this.setGrid()
       this.discover(visibility)
@@ -119,7 +119,8 @@ export default class MarkerController {
 
   createWard(data) {
     if (this.wardMarkers.length < 5) {
-      const id = this.wardMarkers.length
+      const id = this.createMarkerId(data.position)
+      data['id'] = id
       this.wardsRef.child(id).set(data)
     }
     else {
@@ -131,21 +132,24 @@ export default class MarkerController {
     this.wardsRef.child(id).remove()
   }
 
-  onWardRemoved(id) {
+  createMarkerId(latLng) {
+    const id = (latLng.lat + "_" + latLng.lng)
+    return id.replace(/\./g,'')
+  }
 
+  onWardRemoved(id, val) {
+    this.wardMarkers[id].setMap(null)
+    delete this.wardMarkers[id]
   }
 
   onWardAdded(id, data) {
     const ward = new Ward(this.uid, data.position, 40, this.map)
 
     ward.addListener('click', function(e) {
-      this.wardMarkers[id].setMap(null)
-      this.wardMarkers.splice(id, 1)
-
       this.removeWard(id)
     }.bind(this))
 
-    this.wardMarkers.push( ward )
+    this.wardMarkers[id] = ward
   }
 
   discover(visibility) {
@@ -324,9 +328,12 @@ export default class MarkerController {
     visible.push( myUserMarkerPath )
     visible.push( myScoutMarkerPath )
 
+    this.wardMarkers.length = 0
+
     if (this.wardMarkers != []) {
-      for (var wardMarker of this.wardMarkers) {
-        var path = this.circlePath(wardMarker.position, 50, 256)
+      for (var id in this.wardMarkers) {
+        this.wardMarkers.length++
+        var path = this.circlePath(this.wardMarkers[id].position, 50, 256)
         visible.push( path )
       }
     }
