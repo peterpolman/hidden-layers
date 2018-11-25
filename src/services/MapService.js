@@ -2,7 +2,6 @@ import firebase from 'firebase'
 
 import GoogleMapsLoader from 'google-maps';
 
-import ItemController from '../controllers/ItemController';
 import MarkerController from '../controllers/MarkerController';
 
 import config from '../config.js'
@@ -12,8 +11,7 @@ export default class MapService {
   constructor() {
     this.map = null
     this.route = null
-    this.markerController = new MarkerController
-    this.itemController = new ItemController
+    this.markerController = new MarkerController(firebase.auth().currentUser.uid)
     this.loader = GoogleMapsLoader
     this.mapStyles = MapStyles
   }

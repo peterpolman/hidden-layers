@@ -14,20 +14,18 @@
 <script>
 import firebase from 'firebase';
 
-import MapService from './services/MapService';
-import MarkerController from './controllers/MarkerController';
+import MapBackground from './assets/img/map.png';
 
 export default {
   name: 'login',
   data: function () {
     return {
-      mapService: new MapService,
       email: '',
       password: ''
     }
   },
   mounted() {
-    this.mapService.init();
+    document.getElementById('home-map').style.backgroundImage = `url(${MapBackground})`
   },
   methods: {
     login: function () {
@@ -46,15 +44,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-  button {
-    margin: 1rem 0;
-  }
-  .google-map {
-    width: 100vw;
-    height: 30vh;
-    margin: 0 auto;
-    background: gray;
-  }
-</style>

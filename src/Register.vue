@@ -23,14 +23,14 @@
 <script>
 import firebase from 'firebase'
 
-import MapService from './services/MapService';
+import MarkerController from './controllers/MarkerController';
+import MapBackground from './assets/img/map.png';
 
 export default {
   name: 'register',
   data: function () {
     return {
-      mapService: new MapService,
-      markerController: new MarkerController,
+      markerController: new MarkerController(null),
       email: '',
       password: '',
       gender: '',
@@ -38,47 +38,40 @@ export default {
     }
   },
   mounted() {
-    this.mapService.init();
+    document.getElementById('home-map').style.backgroundImage = `url(${MapBackground})`
   },
   methods: {
     register: function () {
+      const options = {
+        enableHighAccuracy: true,
+        maximumAge: 1000,
+        timeout: 30000
+      }
+      
+      navigator.geolocation.getCurrentPosition(this.createAccount.bind(this), this.error, options);
+    },
+    error(err) {
+      if (typeof err != 'undefined') {
+        console.log(err.code + ' ' + err.message);
+        alert('Error during registration');
+      }
+    },
+    createAccount(position) {
+
       firebase.auth().createUserWithEmailAndPassword(this.email, this.password)
         .then( function(r) {
           const data = {
             uid: r.user.uid,
             email: r.user.email,
-            position: {
-              lat: 52.366,
-              lng: 4.844
-            },
+            position: { lat: position.coords.latitude, lng: position.coords.longitude },
             gender: this.gender,
             username: this.username,
           }
 
           this.markerController.createUser(r.user.uid, data)
-          
           this.$router.replace('/')
-        }.bind(this))
-        .then( (err) => {
-          if (typeof err != 'undefined') {
-            console.log(err.code + ' ' + err.message);
-            alert('Error during registration');
-          }
-        }
-      )
+        }.bind(this)).then(error)
     }
   }
 }
 </script>
-
-<style scoped>
-  button {
-    margin: 1rem 0;
-  }
-  .google-map {
-    width: 100vw;
-    height: 30vh;
-    margin: 0 auto;
-    background: gray;
-  }
-</style>

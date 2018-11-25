@@ -56,7 +56,20 @@ export default {
       this.mapService.map.panTo(this.mapService.markerController.myUserMarker.position)
     },
     onPanScoutClick: function() {
-      this.mapService.map.panTo(this.mapService.markerController.myScoutMarker.position)
+      if (this.mapService.markerController.myScoutMarker != null) {
+        this.mapService.map.panTo(this.mapService.markerController.myScoutMarker.position)
+      }
+      else {
+        const uid = this.mapService.markerController.uid
+        const data = {
+          uid: uid,
+          position: {
+            lat: this.mapService.markerController.myUserMarker.position.lat(),
+            lng: this.mapService.markerController.myUserMarker.position.lng()
+          }
+        }
+        this.mapService.markerController.createScout(uid, data)
+      }
     },
     logout: function() {
       firebase.auth().signOut().then(() => {

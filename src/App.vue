@@ -117,4 +117,12 @@ input[type="password"] {
   margin: auto;
 }
 
+.google-map {
+  width: 100vw;
+  height: 30vh;
+  margin: 0 auto;
+  background: gray;
+  background-size: cover;
+}
+
 </style>

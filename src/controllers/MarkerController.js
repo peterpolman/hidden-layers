@@ -8,17 +8,15 @@ import User from '../models/User';
 import Ward from '../models/Ward'
 
 export default class MarkerController {
-  constructor() {
-    this.uid = firebase.auth().currentUser.uid
+  constructor(uid) {
+    this.uid = uid
     this.map = null
 
     this.pathService = new PathService
-
     this.connectedRef = firebase.database().ref('.info/connected')
-
     this.usersRef = firebase.database().ref('users')
     this.scoutsRef = firebase.database().ref('scouts')
-    this.wardsRef = firebase.database().ref('wards').child(this.uid)
+    this.wardsRef = null
 
     this.myUserMarker = null
     this.myScoutMarker = null
@@ -34,6 +32,7 @@ export default class MarkerController {
 
   listen(map) {
     this.map = map
+    this.wardsRef = firebase.database().ref('wards').child(this.uid)
     this.pathService.listen(this.map)
     this.userInfoWindow = new google.maps.InfoWindow({
       isHidden: false
@@ -271,22 +270,7 @@ export default class MarkerController {
   // }
 
   send(fromLatlng, toLatlng) {
-    const data = {
-      'uid': this.uid,
-      'position': {
-        'lat': fromLatlng.lat(),
-        'lng': fromLatlng.lng()
-      }
-    }
-
-    // If the user has no scout spawn a new one
-    if (this.myScoutMarker.length > 0) {
-      this.createScout(uid, data)
-    }
-    else {
-      fromLatlng = this.myScoutMarker.position
-    }
-
+    fromLatlng = this.myScoutMarker.position
     this.pathService.route(this.uid, fromLatlng, toLatlng, "WALKING")
   }
 
