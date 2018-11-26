@@ -1,7 +1,8 @@
 <template>
   <section class="section section-home">
-    <button v-on:click="onSignalClick" :class="geoService.signal"></button>
-
+    <button v-on:click="onSignalClick" :class="geoService.signal">
+      
+    </button>
     <button v-on:click="onPanUserClick" class="btn-user" v-if="mapService.markerController.myUserMarker">
       {{mapService.markerController.myUserMarker.username}}
     </button>
