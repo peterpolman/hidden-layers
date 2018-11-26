@@ -7,6 +7,10 @@ import User from '../models/User';
 
 import Ward from '../models/Ward'
 
+const jsts = require('jsts')
+const Wkt = require('wicket')
+import wgmap from './wicket-gmap3.js'
+
 export default class MarkerController {
   constructor(uid) {
     this.uid = uid
@@ -174,6 +178,7 @@ export default class MarkerController {
     }.bind(this))
 
     this.myUserMarker.setMap(this.map);
+    this.map.panTo(this.myUserMarker.position)
   }
 
   onMyUserChanged(uid, data) {
@@ -308,7 +313,7 @@ export default class MarkerController {
     var myUserMarkerPath = this.circlePath(this.myUserMarker.position, 200, 256)
     var myScoutMarkerPath = this.circlePath(this.myScoutMarker.position, 100, 256)
 
-    visible.push( outerBounds )
+    // visible.push( outerBounds )
     visible.push( myUserMarkerPath )
     visible.push( myScoutMarkerPath )
 
@@ -335,7 +340,73 @@ export default class MarkerController {
       clickable: false
     })
 
+    var wkt = this.useWicketToGoFromGooglePolysToWKT(visible[0], visible[1]);
+    this.UseJstsToTestForIntersection(wkt[0], wkt[1]);
+    this.UseJstsToDissolveGeometries(wkt[0], wkt[1]);
+
     return new google.maps.Polygon({ paths: visible })
+  }
+
+  //https://jsfiddle.net/xzovu9x6/2/
+
+  useWicketToGoFromGooglePolysToWKT(poly1, poly2) {
+    var wicket = new Wkt.Wkt();
+
+    wicket.fromObject(poly1);
+    var wkt1 = wicket.write();
+
+    wicket.fromObject(poly2);
+    var wkt2 = wicket.write();
+
+    return [wkt1, wkt2];
+  }
+
+  UseJstsToTestForIntersection(wkt1, wkt2) {
+    // Instantiate JSTS WKTReader and get two JSTS geometry objects
+    var wktReader = new jsts.io.WKTReader();
+    var geom1 = wktReader.read(wkt1);
+    var geom2 = wktReader.read(wkt2);
+
+    if (geom2.intersects(geom1)) {
+      alert('intersection confirmed!');
+    } else {
+      alert('..no intersection.');
+    }
+  }
+
+  UseJstsToDissolveGeometries(wkt1, wkt2) {
+    // Instantiate JSTS WKTReader and get two JSTS geometry objects
+    var wktReader = new jsts.io.WKTReader();
+    var geom1 = wktReader.read(wkt1);
+    var geom2 = wktReader.read(wkt2);
+
+    // In JSTS, "union" is synonymous with "dissolve"
+    var dissolvedGeometry = geom1.union(geom2);
+
+    // Instantiate JSTS WKTWriter and get new geometry's WKT
+    var wktWriter = new jsts.io.WKTWriter();
+    var wkt = wktWriter.write(dissolvedGeometry);
+
+    // Use Wicket to ingest the new geometry's WKT
+    var wicket = new Wkt.Wkt();
+    wicket.read(wkt);
+
+    // Assemble your new polygon's options, I used object notation
+    var polyOptions = {
+      strokeColor: '#1E90FF',
+      strokeOpacity: 0.8,
+      strokeWeight: 2,
+      fillColor: '#1E90FF',
+      fillOpacity: 0.35
+    };
+
+    // Let wicket return a Google Polygon with the options you set above
+    var newPoly = wicket.toObject(polyOptions);
+
+    polygon1.setMap(null);
+    polygon2.setMap(null);
+
+    newPoly.setMap(this.map);
   }
 
 }
