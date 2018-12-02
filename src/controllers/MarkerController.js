@@ -8,8 +8,6 @@ import User from '../models/User';
 import Ward from '../models/Ward'
 
 const jsts = require('jsts')
-const Wkt = require('wicket')
-import wgmap from './wicket-gmap3.js'
 
 export default class MarkerController {
   constructor(uid) {
@@ -298,6 +296,9 @@ export default class MarkerController {
       a.push(google.maps.geometry.spherical.computeOffset(center, radius, d));
     }
 
+    // JSTS geometry needs same end as start latlng
+    a[points] = a[0]
+
     return a
   }
 
@@ -310,22 +311,57 @@ export default class MarkerController {
     ];
 
     var visible = []
-    var myUserMarkerPath = this.circlePath(this.myUserMarker.position, 200, 256)
-    var myScoutMarkerPath = this.circlePath(this.myScoutMarker.position, 100, 256)
 
-    // visible.push( outerBounds )
-    visible.push( myUserMarkerPath )
-    visible.push( myScoutMarkerPath )
+    visible.push(outerBounds)
+
+    var geometries = []
+
+    var myUserMarkerPath = this.circlePath(this.myUserMarker.position, 200, 256)
+    var myUserMarkerPoly = new google.maps.Polygon({
+      paths: [myUserMarkerPath]
+    })
+    myUserMarkerPoly.path = myUserMarkerPath
+    geometries.push(myUserMarkerPoly);
+
+    var myScoutMarkerPath = this.circlePath(this.myScoutMarker.position, 100, 256)
+    var myScoutMarkerPoly = new google.maps.Polygon({
+      paths: [myScoutMarkerPath]
+    })
+    myScoutMarkerPoly.path = myScoutMarkerPath
+    geometries.push( myScoutMarkerPoly )
+
+    var myWardMarkersPath = []
 
     this.wardMarkers.length = 0
-
     if (this.wardMarkers != []) {
       for (var id in this.wardMarkers) {
         this.wardMarkers.length++
-        var path = this.circlePath(this.wardMarkers[id].position, 50, 256)
-        visible.push( path )
+
+        var wardPath = this.circlePath(this.wardMarkers[id].position, 50, 256)
+        var wardPoly = new google.maps.Polygon({
+          paths: [wardPath]
+        })
+        wardPoly.path = wardPath
+        geometries.push( wardPoly )
       }
     }
+
+    var geometryFactory = new jsts.geom.GeometryFactory();
+
+    geometries[0] = geometryFactory.createPolygon(geometryFactory.createLinearRing(this.googleMaps2JSTS( geometries[0].getPath() )));
+
+    for (var i = 1; i < geometries.length; i++) {
+      var geometry = geometryFactory.createPolygon(geometryFactory.createLinearRing(this.googleMaps2JSTS( geometries[i].getPath() )));
+      if (geometries[0].intersects(geometry)) {
+        geometries[0] = geometries[0].union(geometry);
+      }
+      else {
+        visible.push( geometries[i].path )
+      }
+    }
+
+    var outputPath = this.jsts2googleMaps(geometries[0]);
+    visible.push(outputPath)
 
     // Should not be removed once out of the bounds_changed event
     this.map.data.forEach(function(feature) {
@@ -338,75 +374,29 @@ export default class MarkerController {
       fillOpacity: .75,
       strokeWeight: 0,
       clickable: false
-    })
-
-    var wkt = this.useWicketToGoFromGooglePolysToWKT(visible[0], visible[1]);
-    this.UseJstsToTestForIntersection(wkt[0], wkt[1]);
-    this.UseJstsToDissolveGeometries(wkt[0], wkt[1]);
+    });
 
     return new google.maps.Polygon({ paths: visible })
   }
 
-  //https://jsfiddle.net/xzovu9x6/2/
-
-  useWicketToGoFromGooglePolysToWKT(poly1, poly2) {
-    var wicket = new Wkt.Wkt();
-
-    wicket.fromObject(poly1);
-    var wkt1 = wicket.write();
-
-    wicket.fromObject(poly2);
-    var wkt2 = wicket.write();
-
-    return [wkt1, wkt2];
-  }
-
-  UseJstsToTestForIntersection(wkt1, wkt2) {
-    // Instantiate JSTS WKTReader and get two JSTS geometry objects
-    var wktReader = new jsts.io.WKTReader();
-    var geom1 = wktReader.read(wkt1);
-    var geom2 = wktReader.read(wkt2);
-
-    if (geom2.intersects(geom1)) {
-      alert('intersection confirmed!');
-    } else {
-      alert('..no intersection.');
+  googleMaps2JSTS(boundaries) {
+    var coordinates = [];
+    for (var i = 0; i < boundaries.getLength(); i++) {
+      coordinates.push(new jsts.geom.Coordinate(
+        boundaries.getAt(i).lat(), boundaries.getAt(i).lng()));
     }
-  }
 
-  UseJstsToDissolveGeometries(wkt1, wkt2) {
-    // Instantiate JSTS WKTReader and get two JSTS geometry objects
-    var wktReader = new jsts.io.WKTReader();
-    var geom1 = wktReader.read(wkt1);
-    var geom2 = wktReader.read(wkt2);
+    return coordinates;
+  };
 
-    // In JSTS, "union" is synonymous with "dissolve"
-    var dissolvedGeometry = geom1.union(geom2);
+  jsts2googleMaps(geometry) {
+    var coordArray = geometry.getCoordinates();
+    var GMcoords = [];
+    for (var i = 0; i < coordArray.length; i++) {
+      GMcoords.push(new google.maps.LatLng(coordArray[i].x, coordArray[i].y));
+    }
 
-    // Instantiate JSTS WKTWriter and get new geometry's WKT
-    var wktWriter = new jsts.io.WKTWriter();
-    var wkt = wktWriter.write(dissolvedGeometry);
-
-    // Use Wicket to ingest the new geometry's WKT
-    var wicket = new Wkt.Wkt();
-    wicket.read(wkt);
-
-    // Assemble your new polygon's options, I used object notation
-    var polyOptions = {
-      strokeColor: '#1E90FF',
-      strokeOpacity: 0.8,
-      strokeWeight: 2,
-      fillColor: '#1E90FF',
-      fillOpacity: 0.35
-    };
-
-    // Let wicket return a Google Polygon with the options you set above
-    var newPoly = wicket.toObject(polyOptions);
-
-    polygon1.setMap(null);
-    polygon2.setMap(null);
-
-    newPoly.setMap(this.map);
+    return GMcoords;
   }
 
 }
