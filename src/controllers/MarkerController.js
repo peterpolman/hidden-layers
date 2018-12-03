@@ -310,25 +310,24 @@ export default class MarkerController {
       new google.maps.LatLng({lng: -11.3600718975, lat: 57.032878786})
     ];
 
-    var visible = []
+    var visibility = []
+    visibility.push(outerBounds)
 
-    visible.push(outerBounds)
-
-    var geometries = []
+    var geoms = []
 
     var myUserMarkerPath = this.circlePath(this.myUserMarker.position, 200, 256)
     var myUserMarkerPoly = new google.maps.Polygon({
       paths: [myUserMarkerPath]
     })
     myUserMarkerPoly.path = myUserMarkerPath
-    geometries.push(myUserMarkerPoly);
+    geoms.push(this.jstsPoly(myUserMarkerPoly));
 
     var myScoutMarkerPath = this.circlePath(this.myScoutMarker.position, 100, 256)
     var myScoutMarkerPoly = new google.maps.Polygon({
       paths: [myScoutMarkerPath]
     })
     myScoutMarkerPoly.path = myScoutMarkerPath
-    geometries.push( myScoutMarkerPoly )
+    geoms.push(this.jstsPoly(myScoutMarkerPoly));
 
     var myWardMarkersPath = []
 
@@ -342,33 +341,35 @@ export default class MarkerController {
           paths: [wardPath]
         })
         wardPoly.path = wardPath
-        geometries.push( wardPoly )
+        geoms.push(this.jstsPoly(wardPoly));
       }
     }
 
-    var geometryFactory = new jsts.geom.GeometryFactory();
+    // Build a geom for every poly in the array
+    for (var i = 0; i < geoms.length; i++) {
 
-    geometries[0] = geometryFactory.createPolygon(geometryFactory.createLinearRing(this.googleMaps2JSTS( geometries[0].getPath() )));
-
-    for (var i = 1; i < geometries.length; i++) {
-      var geometry = geometryFactory.createPolygon(geometryFactory.createLinearRing(this.googleMaps2JSTS( geometries[i].getPath() )));
-      if (geometries[0].intersects(geometry)) {
-        geometries[0] = geometries[0].union(geometry);
-      }
-      else {
-        visible.push( geometries[i].path )
+      // Iterate over the geometries in the array
+      // @TODO Setup is correct currently but we need better
+      // identification since length is altered when something is spliced
+      for (var j = 0; j < geoms.length; j++) {
+        if ((i != j) && (geoms[i].intersects(geoms[j])) ) {
+          geoms[i] = geoms[i].union(geoms[j])
+          geoms.splice(j, 1)
+        }
       }
     }
 
-    var outputPath = this.jsts2googleMaps(geometries[0]);
-    visible.push(outputPath)
+    for (var j = 0; j < geoms.length; j++) {
+      var geom = this.jsts2googleMaps(geoms[j])
+      visibility.push( geom )
+    }
 
     // Should not be removed once out of the bounds_changed event
     this.map.data.forEach(function(feature) {
       this.map.data.remove(feature);
     }.bind(this))
 
-    this.map.data.add({ geometry: new google.maps.Data.Polygon(visible) })
+    this.map.data.add({ geometry: new google.maps.Data.Polygon(visibility) })
     this.map.data.setStyle({
       fillColor: '#000',
       fillOpacity: .75,
@@ -376,7 +377,19 @@ export default class MarkerController {
       clickable: false
     });
 
-    return new google.maps.Polygon({ paths: visible })
+    return new google.maps.Polygon({ paths: visibility })
+  }
+
+  jstsPoly(poly) {
+    var geometryFactory = new jsts.geom.GeometryFactory();
+
+    return geometryFactory.createPolygon(geometryFactory.createLinearRing(this.googleMaps2JSTS( poly.getPath() )));
+  }
+
+  intersectsWithAnyGeom(geoms, geom, index) {
+
+
+    return false
   }
 
   googleMaps2JSTS(boundaries) {
