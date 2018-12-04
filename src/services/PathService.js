@@ -3,13 +3,14 @@ import config from '../config.js'
 
 import Path from '../models/Path'
 
+import iconSrc from '../assets/img/wolf-1.png'
+
 export default class PathService {
   constructor() {
     this.config = config
     this.scoutsRef = firebase.database().ref('scouts')
     this.paths = []
     this.directionsService = null
-    this.pathTimer = []
   }
 
   listen(map) {
@@ -25,11 +26,11 @@ export default class PathService {
     }.bind(this))
 
     window.onfocus = function() {
-      // this.move(this.uid)
+      console.log('You are active');
     }.bind(this)
 
     window.onblur = function() {
-      console.log('You are active');
+      console.log('You are inactive');
     }
 
   }
@@ -55,13 +56,15 @@ export default class PathService {
       }
     }
     if (data.mode == "STANDING") {
-      if (typeof this.pathTimer[uid] != 'undefined') {
-        window.clearInterval(this.pathTimer[uid])
-      }
       this.paths[uid].setMap(null)
       this.paths[uid] = null
 
-      // Also clear running timers of broken paths (should be no problem when timers pick up on the existing paths agains)
+      const title = '🔔 Scout Arrived';
+      const options = {
+        body: `Your scout arrived at its destination!`,
+        icon: iconSrc
+      };
+      window.swRegistration.showNotification(title, options);
 
       console.log(`[UPDATE] is_standing ${uid}`);
     }
@@ -76,11 +79,12 @@ export default class PathService {
   }
 
   move(uid, data) {
-    var offset = (((new Date).getTime() - data.timestamp) / 1000) * 10 // speed
+    var now = (new Date).getTime()
+    var elapsed = (now - data.timestamp)
+    var offset = ((elapsed / 1000) * (1.4 / 10))
 
-    // window.clearInterval(this.pathTimer[uid])
-    this.pathTimer[uid] = window.setInterval(function() {
-      offset = offset + (10 / (1000 / this.config.fps)); // Walking speed should be 1.4m per second
+    var walk = function(timestamp) {
+      offset = offset + (1.4 / 10); // Walking speed should be 1.4m per second
 
       var currentOffsetPerct = (offset / data.totalDist) * 100
       var icons = this.paths[uid].get('icons')
@@ -90,7 +94,6 @@ export default class PathService {
       this.paths[uid].set('icons', icons)
 
       if (offset >= data.totalDist) {
-        window.clearInterval(this.pathTimer[uid])
         this.paths[uid].setMap(null)
 
         this.update(uid, {
@@ -99,8 +102,12 @@ export default class PathService {
           mode: "STANDING",
           position: data.path[data.path.length - 1]
         })
+      } else {
+        window.requestAnimationFrame(walk.bind(this))
       }
-    }.bind(this), this.config.fps)
+    }
+
+    window.requestAnimationFrame(walk.bind(this));
   }
 
   route(uid, fromLatlng, toLatlng, travelMode) {

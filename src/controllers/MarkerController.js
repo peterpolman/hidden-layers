@@ -165,7 +165,7 @@ export default class MarkerController {
   }
 
   onMyUserAdded(uid, data) {
-    this.myUserMarker = new User(uid, data.position, data.gender, data.username, data.email, 50, this.map, true);
+    this.myUserMarker = new User(uid, data.position, data.userClass, data.username, data.email, 50, this.map, true);
     this.myUserMarker.addListener('click', function(e){
       const content = `<strong>${data.username}</strong><br><small>Last online: ${new Date(data.lastOnline).toLocaleString("nl-NL")}</small>`
 
@@ -212,7 +212,7 @@ export default class MarkerController {
   }
 
   onUserAdded(uid, data) {
-    this.userMarkers[uid] = new User(uid, data.position, data.gender, data.username, data.email, 50, this.map, false);
+    this.userMarkers[uid] = new User(uid, data.position, data.userClass, data.username, data.email, 50, this.map, false);
     this.userMarkers[uid].addListener('click', function(e){
       const content = `<strong>${data.username}</strong><br><small>Last online: ${new Date(data.lastOnline).toLocaleString("nl-NL")}</small>`
 
@@ -313,21 +313,25 @@ export default class MarkerController {
     var visibility = []
     visibility.push(outerBounds)
 
-    var geoms = []
+    var geoms = {}
 
     var myUserMarkerPath = this.circlePath(this.myUserMarker.position, 200, 256)
     var myUserMarkerPoly = new google.maps.Polygon({
       paths: [myUserMarkerPath]
     })
     myUserMarkerPoly.path = myUserMarkerPath
-    geoms.push(this.jstsPoly(myUserMarkerPoly));
+    var userGeom = this.jstsPoly(myUserMarkerPoly);
+    userGeom['id'] = this.createMarkerId({lat: myUserMarkerPath[0].lat(), lng: myUserMarkerPath[0].lng()})
+    geoms[userGeom.id] = userGeom;
 
     var myScoutMarkerPath = this.circlePath(this.myScoutMarker.position, 100, 256)
     var myScoutMarkerPoly = new google.maps.Polygon({
       paths: [myScoutMarkerPath]
     })
     myScoutMarkerPoly.path = myScoutMarkerPath
-    geoms.push(this.jstsPoly(myScoutMarkerPoly));
+    var scoutGeom = this.jstsPoly(myScoutMarkerPoly);
+    scoutGeom['id'] = this.createMarkerId({lat: myScoutMarkerPath[0].lat(), lng: myScoutMarkerPath[0].lng()})
+    geoms[scoutGeom.id] = scoutGeom;
 
     var myWardMarkersPath = []
 
@@ -341,27 +345,28 @@ export default class MarkerController {
           paths: [wardPath]
         })
         wardPoly.path = wardPath
-        geoms.push(this.jstsPoly(wardPoly));
+        var wardGeom = this.jstsPoly(wardPoly);
+        wardGeom['id'] = this.createMarkerId({lat: wardPath[0].lat(), lng: wardPath[0].lng()})
+        geoms[wardGeom.id] = wardGeom;
       }
     }
 
-    // Build a geom for every poly in the array
-    for (var i = 0; i < geoms.length; i++) {
+    var allGeoms = geoms
 
-      // Iterate over the geometries in the array
-      // @TODO Setup is correct currently but we need better
-      // identification since length is altered when something is spliced
-      for (var j = 0; j < geoms.length; j++) {
-        if ((i != j) && (geoms[i].intersects(geoms[j])) ) {
+    for (var i in geoms) {
+      for (var j in geoms) {
+        if ( geoms[i].intersects(geoms[j]) && (i != j) ) {
+
           geoms[i] = geoms[i].union(geoms[j])
-          geoms.splice(j, 1)
+
+          delete geoms[j]
         }
       }
     }
 
-    for (var j = 0; j < geoms.length; j++) {
-      var geom = this.jsts2googleMaps(geoms[j])
-      visibility.push( geom )
+
+    for (var geomIndex in geoms) {
+      visibility.push( this.jsts2googleMaps(geoms[geomIndex]) )
     }
 
     // Should not be removed once out of the bounds_changed event

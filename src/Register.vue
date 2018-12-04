@@ -10,10 +10,10 @@
 
       <h2>Personal</h2>
       <input required type="text" v-model="username" placeholder="Username">
-      <input name="gender" id="gender-male" type="radio" value="male" v-model="gender">
-      <label for="gender-male">Male</label>
-      <input name="gender" id="gender-female" type="radio" value="female" v-model="gender">
-      <label for="gender-female">Female</label>
+      <input name="class" id="class-knight" type="radio" value="knight" v-model="userClass">
+      <label for="class-knight">Knight</label>
+      <input name="class" id="class-archer" type="radio" value="archer" v-model="userClass">
+      <label for="class-archer">Archer</label>
       <button  class="btn" type="submit">Register</button>
       <p>or go back to <router-link to="/login">Login</router-link></p>
     </form>
@@ -33,7 +33,7 @@ export default {
       markerController: new MarkerController(null),
       email: '',
       password: '',
-      gender: '',
+      userClass: '',
       username: '',
     }
   },
@@ -47,7 +47,7 @@ export default {
         maximumAge: 1000,
         timeout: 30000
       }
-      
+
       navigator.geolocation.getCurrentPosition(this.createAccount.bind(this), this.error, options);
     },
     error(err) {
@@ -64,7 +64,7 @@ export default {
             uid: r.user.uid,
             email: r.user.email,
             position: { lat: position.coords.latitude, lng: position.coords.longitude },
-            gender: this.gender,
+            userClass: this.userClass,
             username: this.username,
           }
 

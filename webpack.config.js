@@ -1,5 +1,6 @@
 var path = require('path')
 var webpack = require('webpack')
+var fs = require('fs');
 
 module.exports = {
   entry: './src/main.js',
@@ -90,7 +91,8 @@ module.exports = {
   devServer: {
     historyApiFallback: true,
     noInfo: false,
-    overlay: true
+    overlay: true,
+    // https: (process.enf.NODE_ENV === 'development') ? { key: fs.readFileSync('localhost.key'), cert: fs.readFileSync('localhost.crt') } : false
   },
   performance: {
     hints: false

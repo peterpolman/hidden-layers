@@ -1,22 +1,26 @@
 <template>
   <section class="section section-home">
     <button v-on:click="onSignalClick" :class="geoService.signal">
-      
+
     </button>
-    <button v-on:click="onPanUserClick" class="btn-user" v-if="mapService.markerController.myUserMarker">
+    <button  v-bind:style="{ backgroundImage: 'url(' + assets.knight + ')' }" v-on:click="onPanUserClick" class="btn-user" v-if="mapService.markerController.myUserMarker">
       {{mapService.markerController.myUserMarker.username}}
     </button>
-    <button v-on:click="onPanScoutClick" class="btn-scout">
+    <button v-bind:style="{ backgroundImage: 'url(' + assets.scout + ')' }" v-on:click="onPanScoutClick" class="btn-scout">
       Scout
     </button>
-    <button v-on:click="onSpawnWardClick" class="btn-ward">
+    <button v-bind:style="{ backgroundImage: 'url(' + assets.ward + ')' }" v-on:click="onSpawnWardClick" class="btn-ward">
       Ward
+    </button>
+    <button class="btn btn-logout" v-on:click="logout">
+      EXIT
+    </button>
+    <button v-bind:style="{ backgroundImage: 'url(' + assets.bell + ')', backgroundColor: (isSubscribed) ? '#63EE23' : '#FF6B6B' }" v-on:click="onSetBellClick" class="btn-bell">
+      PUSH
     </button>
 
     <div class="google-map" id="home-map"></div>
-    <button class="btn btn-logout" v-on:click="logout">
-      Logout
-    </button>
+
     <button class="btn-default" v-on:click="onStopClick" v-if="this.mapService.markerController.isWalking">
     </button>
   </section>
@@ -29,20 +33,152 @@ import config from './config.js';
 import GeoService from './services/GeoService';
 import MapService from './services/MapService';
 
+import KnightImg from './assets/img/knight-1.png'
+import ArcherImg from './assets/img/archer-1.png'
+import WolfImg from './assets/img/wolf-1.png'
+import WardImg from './assets/img/ward-1.png'
+import BellImg from './assets/img/badge.png'
+
 export default {
   name: 'home',
   data () {
     return {
+      isSubscribed: false,
+      assets: {
+        ward: WardImg,
+        knight: KnightImg,
+        scout: WolfImg,
+        archer: ArcherImg,
+        bell: BellImg
+      },
       uid: firebase.auth().currentUser.uid,
       geoService: new GeoService,
       mapService: new MapService,
-      isWalking: null
+      isWalking: null,
+      userClass: null
     }
   },
   mounted() {
     this.mapService.init();
+
+    window.swRegistration = null;
+
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+      console.log('Service Worker and Push is supported');
+
+      navigator.serviceWorker.register('sw.js')
+      .then(function(swReg) {
+        console.log('Service Worker is registered', swReg);
+
+        window.swRegistration = swReg;
+      })
+      .catch(function(error) {
+        console.error('Service Worker Error', error);
+      });
+    } else {
+      console.warn('Push messaging is not supported');
+    }
+
+    navigator.serviceWorker.register('sw.js')
+    .then(function(swReg) {
+      console.log('Service Worker is registered', swReg);
+
+      window.swRegistration = swReg;
+      this.initializeUI();
+    }.bind(this))
   },
   methods: {
+    initializeUI() {
+      window.swRegistration.pushManager.getSubscription()
+      .then(function(subscription) {
+        this.isSubscribed = !(subscription === null);
+
+        this.updateSubscriptionOnServer(subscription);
+
+        if (this.isSubscribed) {
+          console.log('User IS subscribed.');
+        } else {
+          console.log('User is NOT subscribed.');
+        }
+
+        this.updateBtn();
+      }.bind(this));
+    },
+    urlB64ToUint8Array(base64String) {
+      const padding = '='.repeat((4 - base64String.length % 4) % 4);
+      const base64 = (base64String + padding)
+        .replace(/\-/g, '+')
+        .replace(/_/g, '/');
+
+      const rawData = window.atob(base64);
+      const outputArray = new Uint8Array(rawData.length);
+
+      for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+      }
+      return outputArray;
+    },
+    updateBtn: function() {
+      if (Notification.permission === 'denied') {
+        this.updateSubscriptionOnServer(null);
+        return;
+      }
+    },
+    subscribeUser: function() {
+      const applicationServerKey = this.urlB64ToUint8Array(config.push.public);
+      window.swRegistration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: applicationServerKey
+      })
+      .then(function(subscription) {
+        console.log('User is subscribed.');
+
+        this.updateSubscriptionOnServer(subscription);
+
+        this.isSubscribed = true;
+
+        this.updateBtn();
+
+      }.bind(this))
+      .catch(function(err) {
+        console.log('Failed to subscribe the user: ', err);
+        this.updateBtn();
+      });
+    },
+    unsubscribeUser: function() {
+      window.swRegistration.pushManager.getSubscription()
+      .then(function(subscription) {
+        if (subscription) {
+          return subscription.unsubscribe();
+        }
+      })
+      .catch(function(error) {
+        console.log('Error unsubscribing', error);
+      })
+      .then(function() {
+        this.updateSubscriptionOnServer(null);
+
+        console.log('User is unsubscribed.');
+        this.isSubscribed = false;
+
+        this.updateBtn();
+      }.bind(this));
+    },
+    updateSubscriptionOnServer: function(subscription) {
+      if (subscription) {
+        console.log( subscription )
+        console.log( JSON.stringify(subscription) )
+      } else {
+        console.log('nothing');
+      }
+    },
+    onSetBellClick: function() {
+      if (this.isSubscribed) {
+        this.unsubscribeUser();
+      } else {
+        this.subscribeUser();
+      }
+    },
     onSpawnWardClick: function() {
       const customEvent = new CustomEvent('cursor_changed', { detail: "WARD" })
       window.dispatchEvent(customEvent)
@@ -90,6 +226,7 @@ export default {
     display: block;
   }
 
+  .btn-bell,
   .btn-ward,
   .btn-user,
   .btn-scout,
@@ -107,41 +244,57 @@ export default {
     width: 40px;
     box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px;
     overflow: hidden;
-    bottom: 0px;
-    right: 52px;
     display: flex;
     justify-content: center;
     align-items: center;
-  }
-
-  .btn-ward,
-  .btn-user,
-  .btn-scout {
-    top: 0;
-    right: 0;
-    font-size: 10px;
-    color: #666;
-    width: 60px;
-    height: 30px;
     z-index: 1;
-    font-weight: bold;
-  }
-
-  .btn-ward {
-    top: 70px;
-  }
-
-  .btn-scout  {
-    top: 35px;
+    font-size: 0;
+    color: #666;
+    width: 40px;
+    height: 40px;
+    z-index: 1;
+    background-size: 80% 80%;
+    background-repeat: no-repeat;
+    background-position: center center;
   }
 
   .btn-logout {
     top: 0;
     left: 0;
     font-size: 10px;
-    color: #666;
-    width: 60px;
-    height: 30px;
+    color: white;
+    background-color: #333;
+  }
+
+  .btn-bell {
+    top: 45px;
+    left: 0px;
+    bottom: auto;
+    right: auto;
+    z-index: 1;
+    background-size: 60% 60%;
+    background-color: #333;
+  }
+
+  .btn-user {
+    top: 0;
+    right: 0;
+  }
+
+  .btn-scout {
+    top: 45px;
+    right: 0;
+  }
+
+  .btn-ward {
+    bottom: 90px;
+    right: 0px;
+  }
+
+
+  .btn-default {
+    bottom: 0px;
+    right: 50px;
   }
 
   .btn-default:before {

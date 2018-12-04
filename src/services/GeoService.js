@@ -29,13 +29,9 @@ export default class GeoService {
     const data = {
       position: {
         lat: position.coords.latitude,
-        lng: position.coords.longitude,
-        // speed: position.coords.speed,
-        // accuracy: position.coords.accuracy
+        lng: position.coords.longitude
       }
     }
-
-    console.log(position)
 
     this.markerController.updateUser(uid, data)
   }
