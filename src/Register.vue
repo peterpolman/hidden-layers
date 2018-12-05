@@ -70,7 +70,13 @@ export default {
 
           this.markerController.createUser(r.user.uid, data)
           this.$router.replace('/')
-        }.bind(this)).then(error)
+        }.bind(this))
+        .catch( function(err) {
+          if (typeof err != 'undefined') {
+            console.log(err.code + ' ' + err.message);
+            alert('Error during registration');
+          }
+        })
     }
   }
 }

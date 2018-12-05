@@ -193,6 +193,8 @@ export default {
       this.mapService.map.panTo(this.mapService.markerController.myUserMarker.position)
     },
     onPanScoutClick: function() {
+      this.mapService.cursorMode = "SCOUT"
+      
       if (this.mapService.markerController.myScoutMarker != null) {
         this.mapService.map.panTo(this.mapService.markerController.myScoutMarker.position)
       }

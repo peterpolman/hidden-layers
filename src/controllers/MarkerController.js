@@ -232,7 +232,7 @@ export default class MarkerController {
 
   onUserRemoved(uid) {
     this.userMarkers[uid].setMap(null)
-    this.userMarkers.splice(uid, 1)
+    delete this.userMarkers[uid]
   }
 
   createUser(uid, data) {
@@ -324,14 +324,16 @@ export default class MarkerController {
     userGeom['id'] = this.createMarkerId({lat: myUserMarkerPath[0].lat(), lng: myUserMarkerPath[0].lng()})
     geoms[userGeom.id] = userGeom;
 
-    var myScoutMarkerPath = this.circlePath(this.myScoutMarker.position, 100, 256)
-    var myScoutMarkerPoly = new google.maps.Polygon({
-      paths: [myScoutMarkerPath]
-    })
-    myScoutMarkerPoly.path = myScoutMarkerPath
-    var scoutGeom = this.jstsPoly(myScoutMarkerPoly);
-    scoutGeom['id'] = this.createMarkerId({lat: myScoutMarkerPath[0].lat(), lng: myScoutMarkerPath[0].lng()})
-    geoms[scoutGeom.id] = scoutGeom;
+    if (this.myScoutMarker != null) {
+      var myScoutMarkerPath = this.circlePath(this.myScoutMarker.position, 100, 256)
+      var myScoutMarkerPoly = new google.maps.Polygon({
+        paths: [myScoutMarkerPath]
+      })
+      myScoutMarkerPoly.path = myScoutMarkerPath
+      var scoutGeom = this.jstsPoly(myScoutMarkerPoly);
+      scoutGeom['id'] = this.createMarkerId({lat: myScoutMarkerPath[0].lat(), lng: myScoutMarkerPath[0].lng()})
+      geoms[scoutGeom.id] = scoutGeom;
+    }
 
     var myWardMarkersPath = []
 
@@ -363,7 +365,6 @@ export default class MarkerController {
         }
       }
     }
-
 
     for (var geomIndex in geoms) {
       visibility.push( this.jsts2googleMaps(geoms[geomIndex]) )

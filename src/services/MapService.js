@@ -18,7 +18,7 @@ export default class MapService {
 
   init() {
     this.loader.KEY = config.maps.key;
-    this.loader.LIBRARIES = ['geometry'];
+    this.loader.LIBRARIES = ['geometry', 'places'];
     this.loader.LANGUAGE = 'nl';
     this.loader.REGION = 'NL';
     this.loader.VERSION = '3.34';
@@ -27,7 +27,7 @@ export default class MapService {
       const options = {
         center: new google.maps.LatLng(52.366, 4.844),
         zoom: 17,
-        // minZoom: 10,
+        minZoom: 10,
         zoomControl: true,
         disableDoubleClickZoom: true,
         mapTypeControl: false,
@@ -38,12 +38,13 @@ export default class MapService {
       }
 
       this.map = new google.maps.Map(element, options)
+      this.places = new google.maps.places.PlacesService(this.map);
 
       if (this.markerController.uid != null) {
         this.markerController.listen(this.map)
 
         this.map.addListener('click', function(e) {
-          this.onMapClick(e.latLng);
+          this.onMapClick(e);
         }.bind(this))
 
         this.map.addListener('bounds_changed', function(e) {
@@ -60,27 +61,66 @@ export default class MapService {
   }
 
   onPan() {
-    if (this.markerController.myUserMarker && this.markerController.myScoutMarker) {
+    if (this.markerController.myUserMarker) {
       const visibility = this.markerController.setGrid()
       this.markerController.discover(visibility)
     }
   }
 
-  onMapClick(latlng) {
+  handleCustomEvent(event) {
+    console.log(event)
+  }
+
+  onMapClick(e) {
+    if (e.placeId) {
+      // Stop the default event
+      e.stop()
+
+      this.getPlaceDetails(e)
+      this.cursorMode = null
+    }
+
     switch(this.cursorMode) {
       case "WARD":
         const data = {
           position: {
-            lat: latlng.lat(),
-            lng: latlng.lng()
+            lat: e.latLng.lat(),
+            lng: e.latLng.lng()
           }
         }
         this.markerController.createWard(data)
         break
       case "SCOUT":
-        this.moveScout(latlng)
+        this.moveScout(e.latLng)
+        this.cursorMode = null
         break
     }
+  }
+
+  getPlaceDetails(e) {
+
+    // Get details for clicked place
+    this.places.getDetails({
+      placeId: e.placeId
+    }, function(place, status) {
+      if (status === google.maps.places.PlacesServiceStatus.OK) {
+        alert(`${place.name} is a ${place.types[0]}`)
+      }
+    })
+
+
+    // Render all nearby businesses
+    // this.places.nearbySearch({
+    //   location: e.latLng,
+    //   radius: '500',
+    //   type: ['business']
+    // }, function(results, status) {
+    //   for (var i = 0; i < results.length; i++) {
+    //     var place = results[i];
+    //     console.dir(place);
+    //   }
+    // })
+
   }
 
   moveScout(toLatlng) {

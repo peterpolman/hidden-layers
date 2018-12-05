@@ -193,6 +193,15 @@ module.exports = [
     ]
   },
   {
+    "featureType": "poi.business",
+    "elementType": "labels.icon",
+    "stylers": [
+      {
+        "visibility": "on"
+      }
+    ]
+  },
+  {
     "featureType": "road",
     "elementType": "geometry",
     "stylers": [

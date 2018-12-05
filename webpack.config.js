@@ -92,7 +92,10 @@ module.exports = {
     historyApiFallback: true,
     noInfo: false,
     overlay: true,
-    // https: (process.enf.NODE_ENV === 'development') ? { key: fs.readFileSync('localhost.key'), cert: fs.readFileSync('localhost.crt') } : false
+    https: {
+      key: fs.readFileSync('certificates/localhost.key'),
+      cert: fs.readFileSync('certificates/localhost.crt')
+    }
   },
   performance: {
     hints: false
