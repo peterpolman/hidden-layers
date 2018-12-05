@@ -81,10 +81,12 @@ export default class PathService {
   move(uid, data) {
     var now = (new Date).getTime()
     var elapsed = (now - data.timestamp)
-    var offset = ((elapsed / 1000) * (1.4 / 10))
+    var offset = (elapsed * ((1.4 / 10) / (1000 / 60)))
+
+    console.log(offset)
 
     var walk = function(timestamp) {
-      offset = offset + (1.4 / 10); // Walking speed should be 1.4m per second
+      offset = offset + (1.4 / 10); // Walking speed should be 1.4m per second with a x10 speed modifier
 
       var currentOffsetPerct = (offset / data.totalDist) * 100
       var icons = this.paths[uid].get('icons')

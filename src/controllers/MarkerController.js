@@ -392,12 +392,6 @@ export default class MarkerController {
     return geometryFactory.createPolygon(geometryFactory.createLinearRing(this.googleMaps2JSTS( poly.getPath() )));
   }
 
-  intersectsWithAnyGeom(geoms, geom, index) {
-
-
-    return false
-  }
-
   googleMaps2JSTS(boundaries) {
     var coordinates = [];
     for (var i = 0; i < boundaries.getLength(); i++) {
