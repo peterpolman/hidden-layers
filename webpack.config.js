@@ -1,6 +1,6 @@
 var path = require('path')
 var webpack = require('webpack')
-var fs = require('fs');
+// var fs = require('fs');
 
 module.exports = {
   entry: './src/main.js',
@@ -91,11 +91,11 @@ module.exports = {
   devServer: {
     historyApiFallback: true,
     noInfo: false,
-    overlay: true,
-    https: {
-      key: fs.readFileSync('certificates/localhost.key'),
-      cert: fs.readFileSync('certificates/localhost.crt')
-    }
+    overlay: true
+    // https: {
+    //   key: fs.readFileSync('certificates/localhost.key'),
+    //   cert: fs.readFileSync('certificates/localhost.crt')
+    // }
   },
   performance: {
     hints: false
