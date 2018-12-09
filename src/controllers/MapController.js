@@ -17,6 +17,7 @@ export default class MapController {
     this.markerController = new MarkerController(firebase.auth().currentUser.uid)
     this.loader = GoogleMapsLoader
     this.mapStyles = MapStyles
+    this.shop = null
   }
 
   init() {
@@ -85,27 +86,23 @@ export default class MapController {
       this.pathService.init()
 
       this.places = new google.maps.places.PlacesService(this.map);
+      this.markerController.listen(this.map)
 
-      if (this.markerController.uid != null) {
-        this.markerController.listen(this.map)
+      this.map.addListener('click', function(e) {
+        this.onMapClick(e);
+      }.bind(this))
 
-        this.map.addListener('click', function(e) {
-          this.onMapClick(e);
-        }.bind(this))
+      this.map.addListener('bounds_changed', function(e) {
+        this.onPan()
+      }.bind(this))
 
-        this.map.addListener('bounds_changed', function(e) {
-          this.onPan()
-        }.bind(this))
+      window.addEventListener('cursor_changed', function(e) {
+        this.cursorMode = e.detail
+      }.bind(this))
 
-        window.addEventListener('cursor_changed', function(e) {
-          this.cursorMode = e.detail
-        }.bind(this))
-
-        window.addEventListener('map_discover', function(e) {
-          this.markerController.discover()
-        }.bind(this))
-
-      }
+      window.addEventListener('map_discover', function(e) {
+        this.markerController.discover()
+      }.bind(this))
 
     }.bind(this))
   }
@@ -118,11 +115,16 @@ export default class MapController {
 
   onMapClick(e) {
     if (e.placeId) {
-      // Stop the default event
       e.stop()
 
-      this.getPlaceDetails(e)
-      this.cursorMode = null
+      const visibility = this.markerController.gridService.setGrid(this.markerController.myUserMarker, this.markerController.myScout.marker, this.markerController.myWardMarkers)
+      const visible = new google.maps.Polygon({paths: visibility})
+      const isHidden = google.maps.geometry.poly.containsLocation(e.latLng, visible)
+
+      if (!isHidden) {
+        this.getPlaceDetails(e)
+        this.cursorMode = null
+      }
     }
 
     switch(this.cursorMode) {
@@ -145,28 +147,31 @@ export default class MapController {
   }
 
   getPlaceDetails(e) {
+    if (this.markerController.shops[e.placeId]) {
+      this.shop = this.markerController.shops[e.placeId]
+    } else {
+      this.places.getDetails({
+        placeId: e.placeId
+      }, function(place, status) {
+        if (status === google.maps.places.PlacesServiceStatus.OK) {
+          const data = {
+            id: e.placeId,
+            name: place.name,
+            category: place.types[0],
+            items: [
+              {
+                name: 'gold',
+                amount: 3,
+                image: 'gold'
+              }
+            ]
+          }
 
-    // Get details for clicked place
-    this.places.getDetails({
-      placeId: e.placeId
-    }, function(place, status) {
-      if (status === google.maps.places.PlacesServiceStatus.OK) {
-        alert(`${place.name} is a ${place.types[0]}`)
-      }
-    })
-
-    // Render all nearby businesses
-    this.places.nearbySearch({
-      location: e.latLng,
-      radius: '50',
-      type: ['business']
-    }, function(results, status) {
-      for (var i = 0; i < results.length; i++) {
-        var place = results[i];
-        console.dir(place.geometry.location);
-      }
-    })
-
+          this.shop = data
+          this.markerController.createShop(data)
+        }
+      }.bind(this))
+    }
   }
 
   moveScout(toLatlng) {

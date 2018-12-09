@@ -6,7 +6,7 @@ export default class Path {
     iconColor,
     map
   ) {
-    var lineSymbol = {
+    const lineSymbol = {
       path: google.maps.SymbolPath.CIRCLE,
       fillOpacity: 0.75,
       scale: 3,

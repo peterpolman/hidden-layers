@@ -23,6 +23,34 @@
       Stop
     </button>
 
+    <div class="dialog dialog--shop" v-if="mapController.shop">
+      <header>
+        <h2>{{ mapController.shop.name }}</h2>
+        <span>{{ mapController.shop.category }}</span>
+        <button v-on:click="mapController.shop = null">Close</button>
+      </header>
+
+      <button v-for="item in mapController.shop.items" v-bind:style="{ backgroundImage: 'url(' + assets[item.image] + ')' }" v-on:click="onGetItemClick(mapController.shop.id, item)" class="btn btn-gold">
+        {{ item.name }}
+        <small>
+          {{ item.amount }}
+        </small>
+      </button>
+      <!-- <button v-bind:style="{ backgroundImage: 'url(' + assets.gold + ')' }" v-on:click="onSpawnWardClick" class="btn btn-gold">
+        Gold
+
+      </button> -->
+      <button class="btn btn-disabled"></button>
+      <button class="btn btn-disabled"></button>
+      <button class="btn btn-disabled"></button>
+      <button class="btn btn-disabled"></button>
+      <button class="btn btn-disabled"></button>
+      <button class="btn btn-disabled"></button>
+      <button class="btn btn-disabled"></button>
+      <button class="btn btn-disabled"></button>
+      <button class="btn btn-disabled"></button>
+    </div>
+
     <div class="dialog dialog--inventory" v-if="ui.dialogs.inventory">
       <button v-bind:style="{ backgroundImage: 'url(' + assets.ward + ')' }" v-on:click="onSpawnWardClick" class="btn btn-ward">
         Ward
@@ -30,7 +58,12 @@
           {{ 5 - mapController.markerController.numOfWards }}
         </small>
       </button>
-      <button class="btn btn-disabled"></button>
+      <button v-bind:style="{ backgroundImage: 'url(' + assets.gold + ')' }" v-on:click="onSpawnWardClick" class="btn btn-gold">
+        Gold
+        <small>
+          {{ mapController.markerController.numOfGold }}
+        </small>
+      </button>
       <button class="btn btn-disabled"></button>
       <button class="btn btn-disabled"></button>
     </div>
@@ -49,6 +82,7 @@ import KnightImg from './assets/img/knight-1.png'
 import ArcherImg from './assets/img/archer-1.png'
 import WolfImg from './assets/img/wolf-1.png'
 import WardImg from './assets/img/ward-1.png'
+import GoldImg from './assets/img/coin.png'
 import BellImg from './assets/img/badge.png'
 import InventoryImg from './assets/img/backpack.png'
 import InventoryOpenImg from './assets/img/backpack_open.png'
@@ -59,7 +93,8 @@ export default {
     return {
       ui: {
         dialogs: {
-          inventory: false
+          inventory: false,
+          shop: true
         }
       },
       isSubscribed: false,
@@ -69,6 +104,7 @@ export default {
         scout: WolfImg,
         archer: ArcherImg,
         bell: BellImg,
+        gold: GoldImg,
         inventory: InventoryImg,
         inventoryOpen: InventoryOpenImg
       },
@@ -104,6 +140,15 @@ export default {
     }
   },
   methods: {
+    onGetItemClick(id, item) {
+      this.mapController.markerController.numOfGold += item.amount
+      this.mapController.markerController.updateShop({
+        id: id,
+        amount: 0
+      })
+
+      this.mapController.markerController.shop = null
+    },
     initializeUI() {
       window.swRegistration.pushManager.getSubscription()
       .then(function(subscription) {
@@ -196,8 +241,7 @@ export default {
       }
     },
     onSpawnWardClick: function() {
-      const customEvent = new CustomEvent('cursor_changed', { detail: "WARD" })
-      window.dispatchEvent(customEvent)
+      window.dispatchEvent(new CustomEvent('cursor_changed', { detail: "WARD" }))
     },
     onStopClick: function() {
       this.mapController.markerController.myScout.stop()
@@ -227,7 +271,6 @@ export default {
       }
     },
     onInventoryClick: function() {
-      // Toggle inventory state
       this.ui.dialogs.inventory = !this.ui.dialogs.inventory
     },
     logout: function() {
@@ -349,17 +392,85 @@ export default {
     display: block;
     background: rgba(0,0,0,0.4);
     box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px;
+    display: flex;
+    flex-wrap: wrap;
+    padding: 5px;
+  }
+
+  .dialog--shop {
+    top: 50%;
+    left: 50%;
+    width: 250px;
+    height: 100px;
+    margin-left: -125px;
+    margin-top: -50px;
+  }
+
+  .dialog--shop header {
+    position: absolute;
+    background: black;
+    top: -40px;
+    left: 0;
+    color: white;
+    padding: 5px 10px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    font-size: 10px;
+    width: calc(100% - 20px) ;
+    margin: 0;
+  }
+
+  .dialog--shop header button {
+    background: transparent;
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    height: 15px;
+    width: 15px;
+    font-size: 0;
+    border: 0;
+    transform: rotate(45deg)
+  }
+
+  .dialog--shop header button:before,
+  .dialog--shop header button:after {
+    content: "";
+    display: block;
+    width: 15px;
+    height: 3px;
+    background: #EFEFEF;
+    position: absolute;
+    left: 0;
+  }
+
+  .dialog--shop header button:after {
+    left: 0;
+    transform: rotate(-90deg);
+  }
+
+  .dialog--shop h2 {
+    margin: 0;
+    text-transform: uppercase;
+    font-size: 12px;
+    width: 180px;
+    display: block;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .dialog--inventory {
-    width: 60px;
+    width: 50px;
     height: 210px;
     bottom: 155px;
     right: 0;
   }
 
-  .dialog--inventory .btn {
+  .dialog .btn {
+    flex: 0 auto;
     position: relative;
+    margin: 5px;
   }
 
   .btn-disabled {

@@ -19,19 +19,22 @@ export default class MarkerController {
 
 		this.usersRef = firebase.database().ref('users')
 		this.scoutsRef = firebase.database().ref('scouts')
+		this.wardsRef = firebase.database().ref('wards').child(uid)
 
-		this.myScoutRef = firebase.database().ref('scouts').child(uid)
-
-		this.wardsRef = null
+		this.shopsRef = firebase.database().ref('shops')
+		this.itemsRef = firebase.database().ref('items')
 
 		this.myUserMarker = null
 		this.myScout = null
 		this.myWardMarkers = []
 
+		this.shops = []
+
 		this.userMarkers = []
 		this.scoutMarkers = []
 
 		this.numOfWards = 0
+		this.numOfGold = 0
 
 		this.userInfoWindow = null
 		this.scoutInfoWindow = null
@@ -41,8 +44,6 @@ export default class MarkerController {
 
 	listen(map) {
 		this.map = map
-
-		this.wardsRef = firebase.database().ref('wards').child(this.uid)
 
 		this.userInfoWindow = new google.maps.InfoWindow({isHidden: false});
 		this.scoutInfoWindow = new google.maps.InfoWindow({isHidden: false});
@@ -104,6 +105,23 @@ export default class MarkerController {
 			this.onWardRemoved(snap.key, snap.val());
 		}.bind(this));
 
+		this.shopsRef.on('child_added', function(snap) {
+			this.onShopAdded(snap.key, snap.val());
+		}.bind(this));
+
+		this.shopsRef.on('child_changed', function(snap) {
+			this.onShopChanged(snap.key, snap.val());
+		}.bind(this));
+
+	}
+
+	onShopAdded(key, data) {
+		this.shops[key] = data
+	}
+
+	onShopChanged(key, data) {
+		console.log(this.shops[key])
+		this.shops[key] = data
 	}
 
 	createMarkerId(latLng) {
@@ -172,16 +190,9 @@ export default class MarkerController {
 	onMyScoutAdded(uid, data) {
 		this.myScout = new Scout(uid, data.position, 40, data.mode);
 		this.myScout.marker.addListener('click', function(e) {
-			const username = this.myUserMarker.username
-			const content = `<strong>Scout [${username}]</strong><br><small>Last move: ${new Date(data.timestamp).toLocaleString("nl-NL")}</small>`
-
-			this.scoutInfoWindow.setContent(content);
-			this.scoutInfoWindow.open(this.map, this.myScout.marker);
-
 			this.map.panTo(e.latLng)
 
-			var customEvent = new CustomEvent('cursor_changed', {detail: "SCOUT"})
-			window.dispatchEvent(customEvent);
+			window.dispatchEvent(new CustomEvent('cursor_changed', {detail: "SCOUT"}));
 
 		}.bind(this))
 
@@ -279,6 +290,14 @@ export default class MarkerController {
 
 	removeUser(uid) {
 		this.usersRef.child(uid).remove();
+	}
+
+	createShop(data) {
+		this.shopsRef.child(data.id).set(data)
+	}
+
+	updateShop(data) {
+		this.shopsRef.child(data.id).update(data);
 	}
 
 	createScout(uid, data) {
