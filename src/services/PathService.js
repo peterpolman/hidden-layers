@@ -7,10 +7,12 @@ import iconSrc from '../assets/img/wolf-1.png'
 
 export default class PathService {
   constructor() {
+    this.uid = null
     this.config = config
     this.scoutsRef = firebase.database().ref('scouts')
     this.paths = []
     this.directionsService = null
+    this.pathTimers = []
   }
 
   listen(map) {
@@ -57,14 +59,17 @@ export default class PathService {
     }
     if (data.mode == "STANDING") {
       this.paths[uid].setMap(null)
-      this.paths[uid] = null
+      delete this.paths[uid]
 
-      const title = '🔔 Scout Arrived';
-      const options = {
-        body: `Your scout arrived at its destination!`,
-        icon: iconSrc
-      };
-      window.swRegistration.showNotification(title, options);
+      if (uid != this.uid) {
+        const title = '🔔 Scout Arrived';
+        const options = {
+          body: `Your scout arrived at its destination!`,
+          icon: iconSrc
+        };
+        window.swRegistration.showNotification(title, options);
+      }
+
 
       console.log(`[UPDATE] is_standing ${uid}`);
     }
@@ -81,9 +86,7 @@ export default class PathService {
   move(uid, data) {
     var now = (new Date).getTime()
     var elapsed = (now - data.timestamp)
-    var offset = (elapsed * ((1.4 / 10) / (1000 / 60)))
-
-    console.log(offset)
+    var offset = (elapsed * ((1.4 / 10) / (1000 / 60))) // 1 ms / fps (requestAnimationFrame updates 60 fps)
 
     var walk = function(timestamp) {
       offset = offset + (1.4 / 10); // Walking speed should be 1.4m per second with a x10 speed modifier
@@ -96,20 +99,19 @@ export default class PathService {
       this.paths[uid].set('icons', icons)
 
       if (offset >= data.totalDist) {
-        this.paths[uid].setMap(null)
-
         this.update(uid, {
           path: null,
           totalDist: 0,
           mode: "STANDING",
           position: data.path[data.path.length - 1]
         })
-      } else {
-        window.requestAnimationFrame(walk.bind(this))
+
+      } else if (this.pathTimers[data.uid] != null) {
+        this.pathTimers[uid] = window.requestAnimationFrame(walk.bind(this))
       }
     }
 
-    window.requestAnimationFrame(walk.bind(this));
+    this.pathTimers[uid] = window.requestAnimationFrame(walk.bind(this));
   }
 
   route(uid, fromLatlng, toLatlng, travelMode) {

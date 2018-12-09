@@ -15,7 +15,7 @@
     <button class="btn btn-logout" v-on:click="logout">
       EXIT
     </button>
-    <button v-bind:style="{ backgroundImage: 'url(' + assets.bell + ')', backgroundColor: (isSubscribed) ? '#63EE23' : '#FF6B6B' }" v-on:click="onSetBellClick" class="btn-bell">
+    <button v-bind:style="{ backgroundImage: 'url(' + assets.bell + ')', backgroundColor: (isSubscribed) ? '#63EE23' : '#FF6B6B' }" v-on:click="onSetBellClick" class="btn-bell" v-if="pushEnabled">
       PUSH
     </button>
 
@@ -55,7 +55,8 @@ export default {
       geoService: new GeoService,
       mapService: new MapService,
       isWalking: null,
-      userClass: null
+      userClass: null,
+      pushEnabled: false
     }
   },
   mounted() {
@@ -65,6 +66,8 @@ export default {
 
     if ('serviceWorker' in navigator && 'PushManager' in window) {
       console.log('Service Worker and Push is supported');
+
+      this.pushEnabled = true
 
       navigator.serviceWorker.register('sw.js')
       .then(function(swReg) {
@@ -78,14 +81,6 @@ export default {
     } else {
       console.warn('Push messaging is not supported');
     }
-
-    navigator.serviceWorker.register('sw.js')
-    .then(function(swReg) {
-      console.log('Service Worker is registered', swReg);
-
-      window.swRegistration = swReg;
-      this.initializeUI();
-    }.bind(this))
   },
   methods: {
     initializeUI() {
@@ -194,7 +189,7 @@ export default {
     },
     onPanScoutClick: function() {
       this.mapService.cursorMode = "SCOUT"
-      
+
       if (this.mapService.markerController.myScoutMarker != null) {
         this.mapService.map.panTo(this.mapService.markerController.myScoutMarker.position)
       }

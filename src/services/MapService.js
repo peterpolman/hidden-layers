@@ -23,6 +23,8 @@ export default class MapService {
     this.loader.REGION = 'NL';
     this.loader.VERSION = '3.34';
     this.loader.load(function(google) {
+      const hour = new Date().getHours()
+      const mapStyle = (hour >= 18 || hour <= 6) ? this.mapStyles.night : this.mapStyles.day
       const element = document.getElementById("home-map")
       const options = {
         center: new google.maps.LatLng(52.366, 4.844),
@@ -34,7 +36,7 @@ export default class MapService {
         scrollwheel: false,
         streetViewControl: false,
         fullscreenControl: false,
-        styles: this.mapStyles,
+        styles: mapStyle,
       }
 
       this.map = new google.maps.Map(element, options)

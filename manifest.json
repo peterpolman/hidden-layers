@@ -1,0 +1,15 @@
+{
+  "name": "Growth",
+  "short_name": "Growth",
+  "theme_color": "#127756",
+  "background_color": "#127756",
+  "display": "standalone",
+  "orientation": "portrait",
+  "Scope": "/",
+  "start_url": "/",
+  "splash_pages": null,
+  "icons": [{
+    "src": "/pwa_icon.png",
+    "sizes": "254x254"
+  }]
+}
