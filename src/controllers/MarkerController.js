@@ -1,30 +1,37 @@
 import firebase from 'firebase';
 
 import PathService from '../services/PathService';
+import GridService from '../services/GridService';
 
 import Scout from '../models/Scout';
 import User from '../models/User';
 
 import Ward from '../models/Ward'
 
-const jsts = require('jsts')
-
 export default class MarkerController {
   constructor(uid) {
     this.uid = uid
     this.map = null
 
-    this.pathService = new PathService
+    this.gridService = new GridService
+
     this.connectedRef = firebase.database().ref('.info/connected')
+
     this.usersRef = firebase.database().ref('users')
     this.scoutsRef = firebase.database().ref('scouts')
+
+    this.myScoutRef = firebase.database().ref('scouts').child(uid)
+
     this.wardsRef = null
 
     this.myUserMarker = null
-    this.myScoutMarker = null
+    this.myScout = null
+    this.myWardMarkers = []
+
     this.userMarkers = []
     this.scoutMarkers = []
-    this.wardMarkers = []
+
+    this.numOfWards = 0
 
     this.userInfoWindow = null
     this.scoutInfoWindow = null
@@ -34,8 +41,9 @@ export default class MarkerController {
 
   listen(map) {
     this.map = map
+
     this.wardsRef = firebase.database().ref('wards').child(this.uid)
-    this.pathService.listen(this.map)
+
     this.userInfoWindow = new google.maps.InfoWindow({
       isHidden: false
     });
@@ -57,8 +65,9 @@ export default class MarkerController {
     });
 
     this.usersRef.on('child_added', function(snap) {
+      console.log(`[ADD] User ${snap.key}`);
+
       if (snap.key != this.uid) {
-        console.log(`[ADD] User ${snap.key}`);
         this.onUserAdded(snap.key, snap.val())
       }
       else {
@@ -68,15 +77,13 @@ export default class MarkerController {
 
     this.usersRef.on('child_changed', function(snap) {
       if (snap.key != this.uid) {
-        console.log(`[CHANGE] User ${snap.key}`);
         this.onUserChanged(snap.key, snap.val())
       }
       else {
         this.onMyUserChanged(snap.key, snap.val())
       }
 
-      var visibility = this.setGrid()
-      this.discover(visibility)
+      window.dispatchEvent(new CustomEvent('map_discover'))
     }.bind(this));
 
     this.scoutsRef.on('child_added', function(snap) {
@@ -91,41 +98,28 @@ export default class MarkerController {
 
     this.scoutsRef.on('child_changed', function(snap) {
       if (snap.key != this.uid) {
-        console.log(`[CHANGE] Scout ${snap.key}`);
         this.onScoutChanged(snap.key, snap.val());
       }
       else {
         this.onMyScoutChanged(snap.key, snap.val());
       }
 
-      var visibility = this.setGrid()
-      this.discover(visibility)
+      window.dispatchEvent(new CustomEvent('map_discover'))
     }.bind(this));
 
     this.wardsRef.on('child_added', function(snap) {
       this.onWardAdded(snap.key, snap.val());
-
-      var visibility = this.setGrid()
-      this.discover(visibility)
     }.bind(this));
 
     this.wardsRef.on('child_removed', function(snap) {
       this.onWardRemoved(snap.key, snap.val());
-
-      var visibility = this.setGrid()
-      this.discover(visibility)
     }.bind(this));
 
   }
 
   createWard(data) {
-    if (this.wardMarkers.length < 5) {
-      const id = this.createMarkerId(data.position)
-      data['id'] = id
-      this.wardsRef.child(id).set(data)
-    }
-    else {
-      alert('Remove a ward first by tapping it.');
+    if (this.myWardMarkers.length < 5) {
+      this.wardsRef.child(data.id).set(data)
     }
   }
 
@@ -139,8 +133,36 @@ export default class MarkerController {
   }
 
   onWardRemoved(id, val) {
-    this.wardMarkers[id].setMap(null)
-    delete this.wardMarkers[id]
+    this.myWardMarkers[id].setMap(null)
+    delete this.myWardMarkers[id]
+    window.dispatchEvent(new CustomEvent('map_discover'))
+    this.numOfWards = this.myWardMarkers.length
+  }
+
+  discover() {
+    const visibility = this.gridService.setGrid(
+      this.myUserMarker,
+      this.myScout.marker,
+      this.myWardMarkers
+    )
+
+    // Should not be removed once out of the bounds_changed event
+    this.map.data.forEach(function(feature) {
+      this.map.data.remove(feature);
+    }.bind(this))
+
+    this.map.data.add({ geometry: new google.maps.Data.Polygon(visibility) })
+    this.map.data.setStyle({
+      fillColor: '#000',
+      fillOpacity: .75,
+      strokeWeight: 0,
+      clickable: false
+    });
+
+    const visible = new google.maps.Polygon({ paths: visibility })
+
+    this.userMarkers = this.gridService.discover(this.userMarkers, visible)
+    this.scoutMarkers = this.gridService.discover(this.scoutMarkers, visible)
   }
 
   onWardAdded(id, data) {
@@ -150,18 +172,11 @@ export default class MarkerController {
       this.removeWard(id)
     }.bind(this))
 
-    this.wardMarkers[id] = ward
-  }
+    this.myWardMarkers[id] = ward
 
-  discover(visibility) {
-    for (let uid in this.userMarkers) {
-      var isHidden = google.maps.geometry.poly.containsLocation(this.userMarkers[uid].position, visibility)
-      this.userMarkers[uid].setVisible(!isHidden)
-    }
-    for (let uid in this.scoutMarkers) {
-      var isHidden = google.maps.geometry.poly.containsLocation(this.scoutMarkers[uid].position, visibility)
-      this.scoutMarkers[uid].setVisible(!isHidden)
-    }
+    window.dispatchEvent(new CustomEvent('map_discover'))
+
+    this.numOfWards = this.myWardMarkers.length
   }
 
   onMyUserAdded(uid, data) {
@@ -185,13 +200,13 @@ export default class MarkerController {
   }
 
   onMyScoutAdded(uid, data) {
-    this.myScoutMarker = new Scout(uid, data.position, 40, data.mode);
-    this.myScoutMarker.addListener('click', function(e) {
+    this.myScout = new Scout(uid, data.position, 40, data.mode);
+    this.myScout.marker.addListener('click', function(e) {
       const username = this.myUserMarker.username
       const content = `<strong>Scout [${username}]</strong><br><small>Last move: ${new Date(data.timestamp).toLocaleString("nl-NL")}</small>`
 
       this.scoutInfoWindow.setContent(content);
-      this.scoutInfoWindow.open(this.map, this.myScoutMarker);
+      this.scoutInfoWindow.open(this.map, this.myScout.marker);
 
       this.map.panTo(e.latLng)
 
@@ -200,15 +215,43 @@ export default class MarkerController {
 
     }.bind(this))
 
-    this.myScoutMarker.setMap(this.map);
+    this.myScout.marker.setMap(this.map);
 
-    this.isWalking = (this.myScoutMarker.mode == "WALKING")
+    this.isWalking = (data.mode == "WALKING")
+
+    if (data.mode == "WALKING") {
+      if (this.myScout.path == null) {
+        this.myScout.walk(data, this.map)
+      }
+    }
   }
 
   onMyScoutChanged(uid, data) {
-    this.myScoutMarker.setPosition(data.position)
-    this.myScoutMarker.set('mode', data.mode)
-    this.isWalking = (this.myScoutMarker.mode == "WALKING")
+    this.myScout.setPosition(data.position)
+    this.myScout.set('mode', data.mode)
+
+    this.isWalking = (data.mode == "WALKING")
+
+    if (data.mode == "WALKING") {
+      if (this.myScout.path == null) {
+        this.myScout.walk(data, this.map)
+      }
+    }
+
+    if (data.mode == "STANDING") {
+      this.myScout.path.setMap(null)
+      this.myScout.set('path', null)
+
+      if (uid != this.uid) {
+        const title = '🔔 Scout Arrived';
+        const options = {
+          body: `Your scout arrived at its destination!`,
+          icon: scoutSrc
+        };
+        window.swRegistration.showNotification(title, options);
+      }
+
+    }
   }
 
   onUserAdded(uid, data) {
@@ -248,7 +291,7 @@ export default class MarkerController {
   }
 
   onScoutAdded(uid, data) {
-    this.scoutMarkers[uid] = new Scout(uid, data.position, 40, data.mode);
+    this.scoutMarkers[uid] = new Scout(uid, data.position, 40, data.mode).marker;
     this.scoutMarkers[uid].addListener('click', function(e) {
       const username = this.userMarkers[uid].username
       const content = `<strong>Scout [${username}]</strong><br><small>Last move: ${new Date(data.timestamp).toLocaleString("nl-NL")}</small>`
@@ -268,148 +311,8 @@ export default class MarkerController {
     this.scoutMarkers[uid].set('mode', data.mode)
   }
 
-  // onScoutRemoved(uid) {
-  //   console.log(`[REMOVE] SCOUT ${uid}`);
-  // }
-
-  send(fromLatlng, toLatlng) {
-    fromLatlng = this.myScoutMarker.position
-    this.pathService.route(this.uid, fromLatlng, toLatlng, "WALKING")
-  }
-
   createScout(uid, data) {
     this.scoutsRef.child(uid).set(data)
-  }
-
-  // updateScout(uid, data) {
-  //   this.scoutsRef.child(uid).update(data)
-  // }
-
-  // removeScout(uid, data) {
-  //   this.scoutsRef.child(uid).remove()
-  // }
-
-  circlePath(center, radius, points) {
-    var a = [], p = 360 / points, d = 0;
-
-    for (var i = 0; i < points; ++i, d+= p) {
-      a.push(google.maps.geometry.spherical.computeOffset(center, radius, d));
-    }
-
-    // JSTS geometry needs same end as start latlng
-    a[points] = a[0]
-
-    return a
-  }
-
-  setGrid() {
-    const outerBounds = [
-      new google.maps.LatLng({lng: -11.3600718975, lat: 40.4630057984}),
-      new google.maps.LatLng({lng: 31.5241158009, lat: 40.4630057984}),
-      new google.maps.LatLng({lng: 31.5241158009, lat: 57.032878786}),
-      new google.maps.LatLng({lng: -11.3600718975, lat: 57.032878786})
-    ];
-
-    var visibility = []
-    visibility.push(outerBounds)
-
-    var geoms = {}
-
-    var myUserMarkerPath = this.circlePath(this.myUserMarker.position, 200, 256)
-    var myUserMarkerPoly = new google.maps.Polygon({
-      paths: [myUserMarkerPath]
-    })
-    myUserMarkerPoly.path = myUserMarkerPath
-    var userGeom = this.jstsPoly(myUserMarkerPoly);
-    userGeom['id'] = this.createMarkerId({lat: myUserMarkerPath[0].lat(), lng: myUserMarkerPath[0].lng()})
-    geoms[userGeom.id] = userGeom;
-
-    if (this.myScoutMarker != null) {
-      var myScoutMarkerPath = this.circlePath(this.myScoutMarker.position, 100, 256)
-      var myScoutMarkerPoly = new google.maps.Polygon({
-        paths: [myScoutMarkerPath]
-      })
-      myScoutMarkerPoly.path = myScoutMarkerPath
-      var scoutGeom = this.jstsPoly(myScoutMarkerPoly);
-      scoutGeom['id'] = this.createMarkerId({lat: myScoutMarkerPath[0].lat(), lng: myScoutMarkerPath[0].lng()})
-      geoms[scoutGeom.id] = scoutGeom;
-    }
-
-    var myWardMarkersPath = []
-
-    this.wardMarkers.length = 0
-    if (this.wardMarkers != []) {
-      for (var id in this.wardMarkers) {
-        this.wardMarkers.length++
-
-        var wardPath = this.circlePath(this.wardMarkers[id].position, 50, 256)
-        var wardPoly = new google.maps.Polygon({
-          paths: [wardPath]
-        })
-        wardPoly.path = wardPath
-        var wardGeom = this.jstsPoly(wardPoly);
-        wardGeom['id'] = this.createMarkerId({lat: wardPath[0].lat(), lng: wardPath[0].lng()})
-        geoms[wardGeom.id] = wardGeom;
-      }
-    }
-
-    var allGeoms = geoms
-
-    for (var i in geoms) {
-      for (var j in geoms) {
-        if ( geoms[i].intersects(geoms[j]) && (i != j) ) {
-
-          geoms[i] = geoms[i].union(geoms[j])
-
-          delete geoms[j]
-        }
-      }
-    }
-
-    for (var geomIndex in geoms) {
-      visibility.push( this.jsts2googleMaps(geoms[geomIndex]) )
-    }
-
-    // Should not be removed once out of the bounds_changed event
-    this.map.data.forEach(function(feature) {
-      this.map.data.remove(feature);
-    }.bind(this))
-
-    this.map.data.add({ geometry: new google.maps.Data.Polygon(visibility) })
-    this.map.data.setStyle({
-      fillColor: '#000',
-      fillOpacity: .75,
-      strokeWeight: 0,
-      clickable: false
-    });
-
-    return new google.maps.Polygon({ paths: visibility })
-  }
-
-  jstsPoly(poly) {
-    var geometryFactory = new jsts.geom.GeometryFactory();
-
-    return geometryFactory.createPolygon(geometryFactory.createLinearRing(this.googleMaps2JSTS( poly.getPath() )));
-  }
-
-  googleMaps2JSTS(boundaries) {
-    var coordinates = [];
-    for (var i = 0; i < boundaries.getLength(); i++) {
-      coordinates.push(new jsts.geom.Coordinate(
-        boundaries.getAt(i).lat(), boundaries.getAt(i).lng()));
-    }
-
-    return coordinates;
-  };
-
-  jsts2googleMaps(geometry) {
-    var coordArray = geometry.getCoordinates();
-    var GMcoords = [];
-    for (var i = 0; i < coordArray.length; i++) {
-      GMcoords.push(new google.maps.LatLng(coordArray[i].x, coordArray[i].y));
-    }
-
-    return GMcoords;
   }
 
 }

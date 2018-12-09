@@ -3,14 +3,17 @@ import firebase from 'firebase'
 import GoogleMapsLoader from 'google-maps';
 
 import MarkerController from '../controllers/MarkerController';
+import PathService from '../services/PathService'
 
 import config from '../config.js'
 import MapStyles from '../mapStyles.js'
 
-export default class MapService {
+export default class MapController {
   constructor() {
+    this.uid = firebase.auth().currentUser.uid
     this.map = null
     this.route = null
+    this.pathService = new PathService
     this.markerController = new MarkerController(firebase.auth().currentUser.uid)
     this.loader = GoogleMapsLoader
     this.mapStyles = MapStyles
@@ -40,6 +43,9 @@ export default class MapService {
       }
 
       this.map = new google.maps.Map(element, options)
+
+      this.pathService.init()
+
       this.places = new google.maps.places.PlacesService(this.map);
 
       if (this.markerController.uid != null) {
@@ -57,6 +63,10 @@ export default class MapService {
           this.cursorMode = e.detail
         }.bind(this))
 
+        window.addEventListener('map_discover', function(e) {
+          this.markerController.discover()
+        }.bind(this))
+
       }
 
     }.bind(this))
@@ -64,13 +74,8 @@ export default class MapService {
 
   onPan() {
     if (this.markerController.myUserMarker) {
-      const visibility = this.markerController.setGrid()
-      this.markerController.discover(visibility)
+      this.markerController.discover()
     }
-  }
-
-  handleCustomEvent(event) {
-    console.log(event)
   }
 
   onMapClick(e) {
@@ -84,11 +89,13 @@ export default class MapService {
 
     switch(this.cursorMode) {
       case "WARD":
+        const position = {
+          lat: e.latLng.lat(),
+          lng: e.latLng.lng()
+        }
         const data = {
-          position: {
-            lat: e.latLng.lat(),
-            lng: e.latLng.lng()
-          }
+          position: position,
+          id: this.markerController.createMarkerId(position)
         }
         this.markerController.createWard(data)
         break
@@ -110,31 +117,32 @@ export default class MapService {
       }
     })
 
-
     // Render all nearby businesses
-    // this.places.nearbySearch({
-    //   location: e.latLng,
-    //   radius: '500',
-    //   type: ['business']
-    // }, function(results, status) {
-    //   for (var i = 0; i < results.length; i++) {
-    //     var place = results[i];
-    //     console.dir(place);
-    //   }
-    // })
+    this.places.nearbySearch({
+      location: e.latLng,
+      radius: '50',
+      type: ['business']
+    }, function(results, status) {
+      for (var i = 0; i < results.length; i++) {
+        var place = results[i];
+        console.dir(place.geometry.location);
+      }
+    })
 
   }
 
   moveScout(toLatlng) {
-    const myUserMarker = this.markerController.myUserMarker
-    const fromLatlng = myUserMarker.position
-    const path = this.markerController.pathService.paths[myUserMarker.uid]
+    if (this.markerController.myScout.path == null) {
+      this.pathService.route(this.uid, this.markerController.myScout.marker.position, toLatlng, "WALKING").then(function(data){
 
-    if (typeof path == 'undefined' || path == null) {
-      this.markerController.send(fromLatlng, toLatlng)
-    }
-    else {
-      console.log(`Chill dude...`)
+        this.markerController.myScout.update(data)
+
+        console.log(`Let's walk ${data.totalDist}m`);
+      }.bind(this)).catch(function(err) {
+        console.log(err)
+      })
+
+
     }
   }
 }

@@ -1,28 +1,40 @@
 <template>
   <section class="section section-home">
-    <button v-on:click="onSignalClick" :class="geoService.signal">
+    <div class="google-map" id="home-map"></div>
 
+    <button v-on:click="onSignalClick" :class="geoService.signal">
     </button>
-    <button  v-bind:style="{ backgroundImage: 'url(' + assets.knight + ')' }" v-on:click="onPanUserClick" class="btn-user" v-if="mapService.markerController.myUserMarker">
-      {{mapService.markerController.myUserMarker.username}}
+    <button  v-bind:style="{ backgroundImage: 'url(' + assets.knight + ')' }" v-on:click="onPanUserClick" class="btn btn-user" v-if="mapController.markerController.myUserMarker">
+      {{mapController.markerController.myUserMarker.username}}
     </button>
-    <button v-bind:style="{ backgroundImage: 'url(' + assets.scout + ')' }" v-on:click="onPanScoutClick" class="btn-scout">
+    <button v-bind:style="{ backgroundImage: 'url(' + assets.scout + ')' }" v-on:click="onPanScoutClick" class="btn btn-scout">
       Scout
     </button>
-    <button v-bind:style="{ backgroundImage: 'url(' + assets.ward + ')' }" v-on:click="onSpawnWardClick" class="btn-ward">
-      Ward
+    <button v-bind:style="{ backgroundImage: 'url(' + ( (ui.dialogs.inventory) ? assets.inventoryOpen : assets.inventory )+ ')' }" v-on:click="onInventoryClick" class="btn btn-inventory">
+      Inventory
     </button>
     <button class="btn btn-logout" v-on:click="logout">
       EXIT
     </button>
-    <button v-bind:style="{ backgroundImage: 'url(' + assets.bell + ')', backgroundColor: (isSubscribed) ? '#63EE23' : '#FF6B6B' }" v-on:click="onSetBellClick" class="btn-bell" v-if="pushEnabled">
+    <button v-bind:style="{ backgroundImage: 'url(' + assets.bell + ')', backgroundColor: (isSubscribed) ? '#63EE23' : '#FF6B6B' }" v-on:click="onSetBellClick" class="btn btn-bell" v-if="pushEnabled">
       PUSH
     </button>
-
-    <div class="google-map" id="home-map"></div>
-
-    <button class="btn-default" v-on:click="onStopClick" v-if="this.mapService.markerController.isWalking">
+    <button class="btn btn-stop" v-on:click="onStopClick" v-if="this.mapController.markerController.isWalking">
+      Stop
     </button>
+
+    <div class="dialog dialog--inventory" v-if="ui.dialogs.inventory">
+      <button v-bind:style="{ backgroundImage: 'url(' + assets.ward + ')' }" v-on:click="onSpawnWardClick" class="btn btn-ward">
+        Ward
+        <small>
+          {{ 5 - mapController.markerController.numOfWards }}
+        </small>
+      </button>
+      <button class="btn btn-disabled"></button>
+      <button class="btn btn-disabled"></button>
+      <button class="btn btn-disabled"></button>
+    </div>
+
   </section>
 </template>
 
@@ -31,36 +43,45 @@ import firebase from 'firebase';
 import config from './config.js';
 
 import GeoService from './services/GeoService';
-import MapService from './services/MapService';
+import MapController from './controllers/MapController';
 
 import KnightImg from './assets/img/knight-1.png'
 import ArcherImg from './assets/img/archer-1.png'
 import WolfImg from './assets/img/wolf-1.png'
 import WardImg from './assets/img/ward-1.png'
 import BellImg from './assets/img/badge.png'
+import InventoryImg from './assets/img/backpack.png'
+import InventoryOpenImg from './assets/img/backpack_open.png'
 
 export default {
   name: 'home',
   data () {
     return {
+      ui: {
+        dialogs: {
+          inventory: false
+        }
+      },
       isSubscribed: false,
       assets: {
         ward: WardImg,
         knight: KnightImg,
         scout: WolfImg,
         archer: ArcherImg,
-        bell: BellImg
+        bell: BellImg,
+        inventory: InventoryImg,
+        inventoryOpen: InventoryOpenImg
       },
       uid: firebase.auth().currentUser.uid,
       geoService: new GeoService,
-      mapService: new MapService,
+      mapController: new MapController,
       isWalking: null,
       userClass: null,
       pushEnabled: false
     }
   },
   mounted() {
-    this.mapService.init();
+    this.mapController.init();
 
     window.swRegistration = null;
 
@@ -179,31 +200,35 @@ export default {
       window.dispatchEvent(customEvent)
     },
     onStopClick: function() {
-      this.mapService.markerController.pathService.remove(this.uid)
+      this.mapController.markerController.myScout.stop()
     },
     onSignalClick: function() {
       this.geoService.watchPosition()
     },
     onPanUserClick: function() {
-      this.mapService.map.panTo(this.mapService.markerController.myUserMarker.position)
+      this.mapController.map.panTo(this.mapController.markerController.myUserMarker.position)
     },
     onPanScoutClick: function() {
-      this.mapService.cursorMode = "SCOUT"
+      this.mapController.cursorMode = "SCOUT"
 
-      if (this.mapService.markerController.myScoutMarker != null) {
-        this.mapService.map.panTo(this.mapService.markerController.myScoutMarker.position)
+      if (this.mapController.markerController.myScout != null) {
+        this.mapController.map.panTo(this.mapController.markerController.myScout.marker.position)
       }
       else {
-        const uid = this.mapService.markerController.uid
+        const uid = this.mapController.markerController.uid
         const data = {
           uid: uid,
           position: {
-            lat: this.mapService.markerController.myUserMarker.position.lat(),
-            lng: this.mapService.markerController.myUserMarker.position.lng()
+            lat: this.mapController.markerController.myUserMarker.position.lat(),
+            lng: this.mapController.markerController.myUserMarker.position.lng()
           }
         }
-        this.mapService.markerController.createScout(uid, data)
+        this.mapController.markerController.createScout(uid, data)
       }
+    },
+    onInventoryClick: function() {
+      // Toggle inventory state
+      this.ui.dialogs.inventory = !this.ui.dialogs.inventory
     },
     logout: function() {
       firebase.auth().signOut().then(() => {
@@ -223,12 +248,7 @@ export default {
     display: block;
   }
 
-  .btn-bell,
-  .btn-ward,
-  .btn-user,
-  .btn-scout,
-  .btn-logout,
-  .btn-default {
+  .btn {
     background: white;
     border: 0px;
     margin: 10px;
@@ -253,6 +273,25 @@ export default {
     background-size: 80% 80%;
     background-repeat: no-repeat;
     background-position: center center;
+  }
+
+  .btn:focus {
+    outline: none;
+  }
+
+  .btn:active {
+    opacity: 0.8
+  }
+
+  .btn small {
+    position: absolute;
+    z-index: 1;
+    right: 0;
+    bottom: 0;
+    background: #333;
+    color: white;
+    font-size: 7px;
+    padding: 2px;
   }
 
   .btn-logout {
@@ -283,24 +322,48 @@ export default {
     right: 0;
   }
 
-  .btn-ward {
-    bottom: 90px;
+  .btn-inventory {
+    bottom: 95px;
     right: 0px;
+    background-size: 90% 90%;
   }
 
-
-  .btn-default {
+  .btn-stop {
     bottom: 0px;
     right: 50px;
   }
 
-  .btn-default:before {
+  .btn-stop:before {
     content: "";
     display: inline-block;
     background: #666;
     width: 14px;
     height: 14px;
     position: relative;
+  }
+
+  .dialog {
+    border-radius: 2px;
+    position: fixed;
+    margin: auto;
+    display: block;
+    background: rgba(0,0,0,0.4);
+    box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px;
+  }
+
+  .dialog--inventory {
+    width: 60px;
+    height: 210px;
+    bottom: 155px;
+    right: 0;
+  }
+
+  .dialog--inventory .btn {
+    position: relative;
+  }
+
+  .btn-disabled {
+    background-color: rgba(0,0,0,0.5);
   }
 
   .geo-on,

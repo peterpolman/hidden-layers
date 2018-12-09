@@ -20,8 +20,6 @@ export default class GeoService {
     this.watcher = navigator.geolocation.watchPosition(this.onWatchPosition.bind(this), this.onError.bind(this), options);
   }
 
-  // ICONS: https://ravenmore.itch.io/fantasy-icon-pack
-
   onWatchPosition(position) {
     this.signal = 'geo-on'
 

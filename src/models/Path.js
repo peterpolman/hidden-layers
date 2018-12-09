@@ -6,29 +6,29 @@ export default class Path {
     iconColor,
     map
   ) {
+    var lineSymbol = {
+      path: google.maps.SymbolPath.CIRCLE,
+      fillOpacity: 1,
+      scale: 3,
+      fillColor: strokeColor
+    };
+
     return new google.maps.Polyline({
         uid: uid,
         path: path,
         strokeColor: strokeColor,
-        strokeOpacity: 0.5,
-        strokeWeight: 3,
+        strokeOpacity: 0,
+        strokeWeight: 0,
         icons: [{
-          icon: {
-            path: "M-20,0a20,20 0 1,0 40,0a20,20 0 1,0 -40,0",
-            fillColor: iconColor,
-            fillOpacity: .75,
-            anchor: new google.maps.Point(0,0),
-            strokeWeight: 0,
-            scale: .3
-          },
-          offset: "0%"
+            icon: lineSymbol,
+            offset: '0',
+            repeat: '10px'
         }],
         map: map
     });
   }
 
   set(key, value) {
-    debugger
     this[key] = value
   }
 
