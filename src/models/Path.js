@@ -8,7 +8,7 @@ export default class Path {
   ) {
     var lineSymbol = {
       path: google.maps.SymbolPath.CIRCLE,
-      fillOpacity: 1,
+      fillOpacity: 0.75,
       scale: 3,
       fillColor: strokeColor
     };
