@@ -70,7 +70,7 @@ export default class MapController {
       const element = document.getElementById("home-map")
       const options = {
         center: new google.maps.LatLng(52.366, 4.844),
-        zoom: 17,
+        zoom: 18,
         minZoom: 10,
         zoomControl: true,
         disableDoubleClickZoom: true,
@@ -147,8 +147,9 @@ export default class MapController {
   }
 
   getPlaceDetails(e) {
+    console.log(e.placeId)
     if (this.markerController.shops[e.placeId]) {
-      this.shop = this.markerController.shops[e.placeId]
+      this.shop = e.placeId
     } else {
       this.places.getDetails({
         placeId: e.placeId
@@ -161,14 +162,21 @@ export default class MapController {
             category: place.types[0],
             items: [
               {
+                name: 'ward',
+                amount: 5,
+                image: 'ward',
+                class: 'btn-ward'
+              },
+              {
                 name: 'gold',
-                amount: 3,
-                image: 'gold'
+                amount: 1,
+                image: 'gold',
+                class: 'btn-gold'
               }
             ]
           }
 
-          this.shop = data
+          this.shop = e.placeId
           this.markerController.createShop(data)
         }
       }.bind(this))

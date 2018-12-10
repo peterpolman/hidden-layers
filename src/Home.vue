@@ -25,43 +25,45 @@
 
     <div class="dialog dialog--shop" v-if="mapController.shop">
       <header>
-        <h2>{{ mapController.shop.name }}</h2>
-        <span>{{ mapController.shop.category }} [Owner: {{ (typeof mapController.markerController.userMarkers[mapController.shop.owner] != 'undefined') ? mapController.markerController.userMarkers[mapController.shop.owner]['username'] : 'you'  }}]</span>
-        <button v-on:click="mapController.shop = null">Close</button>
+        <h2>{{ mapController.markerController.shops[mapController.shop].name }}</h2>
+        <span>{{ mapController.markerController.shops[mapController.shop].category }} [Owner: {{ (typeof mapController.markerController.userMarkers[mapController.markerController.shops[mapController.shop].owner] != 'undefined') ? mapController.markerController.userMarkers[mapController.markerController.shops[mapController.shop].owner]['username'] : 'you'  }}]</span>
+        <button v-on:click="onCloseStore">Close</button>
       </header>
+      <draggable class="dialog__content" v-model="mapController.markerController.shops[mapController.shop].items" :options="{group: 'items'}" @start="drag=true" @end="drag=false">
+        <button
+          v-if="item"
+          v-for="(item, key) in mapController.markerController.shops[mapController.shop].items"
+          :key="key"
+          v-bind:style="{ backgroundImage: (item.amount) ? 'url(' + assets[item.image] + ')' : 'none' }"
+          v-on:click="onGetItemFromStore(mapController.shop, key, item)"
+          v-bind:class="`btn ${item.class}`"
+        >
 
-      <button v-bind:id="`item-${key}`" ondragstart="drag(event)" draggable="true" v-for="(item, key) in mapController.shop.items" v-bind:style="{ backgroundImage: 'url(' + assets[item.image] + ')' }" v-on:click="onGetItemClick(mapController.shop.id, item)" class="btn btn-gold">
-        {{ item.name }}
-        <small>
-          {{ item.amount }}
-        </small>
-      </button>
-      <button class="btn btn-disabled"></button>
-      <button class="btn btn-disabled"></button>
-      <button class="btn btn-disabled"></button>
-      <button class="btn btn-disabled"></button>
-      <button class="btn btn-disabled"></button>
-      <button class="btn btn-disabled"></button>
-      <button class="btn btn-disabled"></button>
-      <button class="btn btn-disabled"></button>
-      <button class="btn btn-disabled"></button>
+           {{ item.name }}
+           <small v-if="item.amount">
+             {{ item.amount }}
+           </small>
+         </button>
+      </draggable>
     </div>
 
     <div class="dialog dialog--inventory" v-if="ui.dialogs.inventory">
-      <button v-bind:style="{ backgroundImage: 'url(' + assets.ward + ')' }" v-on:click="onSpawnWardClick" class="btn btn-ward">
-        Ward
-        <small>
-          {{ 5 - mapController.markerController.numOfWards }}
-        </small>
-      </button>
-      <button v-bind:style="{ backgroundImage: 'url(' + assets.gold + ')' }" v-on:click="onSpawnWardClick" class="btn btn-gold">
-        Gold
-        <small>
-          {{ mapController.markerController.numOfGold }}
-        </small>
-      </button>
-      <button class="btn btn-disabled"></button>
-      <button class="btn btn-disabled"></button>
+
+      <draggable class="dialog__content" v-model="itemController.inventory" :options="{group: 'inventory'}" @start="drag=true" @end="drag=false">
+        <button
+          v-if="item"
+          v-bind:style="{ backgroundImage: (item.amount) ? 'url(' + assets[item.image] + ')' : 'none' }"
+          v-bind:class="`btn ${item.class}`"
+          v-for="(item, key) in itemController.inventory"
+          v-on:click="onSpawnWardClick"
+          :key="key"
+        >
+           {{ item.name }}
+           <small v-if="item.amount">
+             {{ item.amount }}
+           </small>
+         </button>
+      </draggable>
     </div>
 
   </section>
@@ -71,8 +73,11 @@
 import firebase from 'firebase';
 import config from './config.js';
 
+import draggable from 'vuedraggable'
+
 import GeoService from './services/GeoService';
 import MapController from './controllers/MapController';
+import ItemController from './controllers/ItemController';
 
 import KnightImg from './assets/img/knight-1.png'
 import ArcherImg from './assets/img/archer-1.png'
@@ -84,6 +89,9 @@ import InventoryImg from './assets/img/backpack.png'
 import InventoryOpenImg from './assets/img/backpack_open.png'
 
 export default {
+  components: {
+      draggable,
+  },
   name: 'home',
   data () {
     return {
@@ -107,6 +115,7 @@ export default {
       uid: firebase.auth().currentUser.uid,
       geoService: new GeoService,
       mapController: new MapController,
+      itemController: new ItemController(firebase.auth().currentUser.uid),
       isWalking: null,
       userClass: null,
       pushEnabled: false
@@ -125,6 +134,7 @@ export default {
       navigator.serviceWorker.register('sw.js')
       .then(function(swReg) {
         console.log('Service Worker is registered', swReg);
+
         window.swRegistration = swReg;
       })
       .catch(function(error) {
@@ -135,32 +145,25 @@ export default {
     }
   },
   methods: {
-    allowDrop(ev) {
-      ev.preventDefault();
-    },
-    drag(ev) {
-      console.log(ev);
-      ev.dataTransfer.setData("text", ev.target.id);
-    },
-    drop(ev) {
-      ev.preventDefault();
-      var data = ev.dataTransfer.getData("text");
-      ev.target.appendChild(document.getElementById(data));
-    },
-    onGetItemClick(id, item) {
-      this.mapController.markerController.numOfGold += item.amount
-      this.mapController.markerController.updateShop({
-        id: id,
-        items: [
-          {
-            name: 'gold',
-            amount: 0,
-            image: 'gold'
-          }
-        ]
-      })
+    onGetItemFromStore(id, key, item) {
+      this.mapController.markerController.removeShopItem(id, key)
 
-      this.mapController.markerController.shop = null
+      var items = this.itemController.inventory
+      items.push(item)
+
+      this.itemController.add(items)
+    },
+    onCloseStore() {
+      // debugger
+      const id = this.mapController.shop
+      const items = this.mapController.markerController.shops[id].items
+
+      if (items != null) {
+        this.mapController.markerController.updateShopItems(id, items)
+      }
+
+      this.mapController.shop = null
+
     },
     initializeUI() {
       window.swRegistration.pushManager.getSubscription()
@@ -338,6 +341,7 @@ export default {
 
   .btn:focus {
     outline: none;
+    box-shadow: 0 0 5px 2px #3D91CB;
   }
 
   .btn:active {
@@ -349,10 +353,18 @@ export default {
     z-index: 1;
     right: 0;
     bottom: 0;
-    background: #333;
+    background: black;
     color: white;
     font-size: 7px;
     padding: 2px;
+  }
+
+  .btn-gold {
+    background-size: 50% 50%;
+  }
+
+  .btn-ward {
+
   }
 
   .btn-logout {
@@ -413,6 +425,15 @@ export default {
     display: flex;
     flex-wrap: wrap;
     padding: 5px;
+  }
+
+  .dialog__content {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    flex: 0 auto;
   }
 
   .dialog--shop {
@@ -483,6 +504,10 @@ export default {
     height: 210px;
     bottom: 155px;
     right: 0;
+  }
+
+  .dialog--inventory .dialog__content {
+    flex-direction: column;
   }
 
   .dialog .btn {

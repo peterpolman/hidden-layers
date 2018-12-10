@@ -8,7 +8,6 @@ import User from '../models/User';
 
 import ScoutSrc from '../assets/img/wolf-1.png';
 
-
 import Ward from '../models/Ward'
 
 export default class MarkerController {
@@ -25,7 +24,6 @@ export default class MarkerController {
 		this.wardsRef = firebase.database().ref('wards').child(uid)
 
 		this.shopsRef = firebase.database().ref('shops')
-		this.itemsRef = firebase.database().ref('items')
 
 		this.myUserMarker = null
 		this.myScout = null
@@ -113,6 +111,7 @@ export default class MarkerController {
 		}.bind(this));
 
 		this.shopsRef.on('child_changed', function(snap) {
+			console.log(snap.val())
 			this.onShopChanged(snap.key, snap.val());
 		}.bind(this));
 
@@ -122,9 +121,9 @@ export default class MarkerController {
 		this.shops[key] = data
 	}
 
-	onShopChanged(key, data) {
-		console.log(this.shops[key])
-		this.shops[key] = data
+	onShopChanged(id, data) {
+		console.log(id, data.items);
+		this.shops[id] = data
 	}
 
 	createMarkerId(latLng) {
@@ -296,8 +295,13 @@ export default class MarkerController {
 		this.shopsRef.child(data.id).set(data)
 	}
 
-	updateShop(data) {
-		this.shopsRef.child(data.id).update(data);
+	removeShopItem(id, key) {
+		console.log(id, key);
+		this.shopsRef.child(id).child('items').child(key).remove()
+	}
+
+	updateShopItems(id, items) {
+		this.shopsRef.child(id).child('items').set(items);
 	}
 
 	createScout(uid, data) {
