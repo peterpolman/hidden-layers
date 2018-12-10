@@ -30,7 +30,7 @@
         <button v-on:click="mapController.shop = null">Close</button>
       </header>
 
-      <button v-for="item in mapController.shop.items" v-bind:style="{ backgroundImage: 'url(' + assets[item.image] + ')' }" v-on:click="onGetItemClick(mapController.shop.id, item)" class="btn btn-gold">
+      <button v-bind:id="`item-${key}`" ondragstart="drag(event)" draggable="true" v-for="(item, key) in mapController.shop.items" v-bind:style="{ backgroundImage: 'url(' + assets[item.image] + ')' }" v-on:click="onGetItemClick(mapController.shop.id, item)" class="btn btn-gold">
         {{ item.name }}
         <small>
           {{ item.amount }}
@@ -125,7 +125,6 @@ export default {
       navigator.serviceWorker.register('sw.js')
       .then(function(swReg) {
         console.log('Service Worker is registered', swReg);
-
         window.swRegistration = swReg;
       })
       .catch(function(error) {
@@ -136,6 +135,18 @@ export default {
     }
   },
   methods: {
+    allowDrop(ev) {
+      ev.preventDefault();
+    },
+    drag(ev) {
+      console.log(ev);
+      ev.dataTransfer.setData("text", ev.target.id);
+    },
+    drop(ev) {
+      ev.preventDefault();
+      var data = ev.dataTransfer.getData("text");
+      ev.target.appendChild(document.getElementById(data));
+    },
     onGetItemClick(id, item) {
       this.mapController.markerController.numOfGold += item.amount
       this.mapController.markerController.updateShop({
@@ -249,7 +260,12 @@ export default {
       this.mapController.markerController.myScout.stop()
     },
     onSignalClick: function() {
-      this.geoService.watchPosition()
+      this.geoService.getPosition().then(function(r) {
+        this.mapController.map.panTo(r)
+        this.geoService.watchPosition()
+      }.bind(this)).catch(function(err) {
+        console.log(err)
+      })
     },
     onPanUserClick: function() {
       this.mapController.map.panTo(this.mapController.markerController.myUserMarker.position)

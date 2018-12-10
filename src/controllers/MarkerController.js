@@ -141,7 +141,7 @@ export default class MarkerController {
 		}.bind(this))
 
 		this.map.data.add({geometry: new google.maps.Data.Polygon(visibility)})
-		this.map.data.setStyle({fillColor: '#000', fillOpacity: .75, strokeWeight: 0, clickable: false});
+		this.map.data.setStyle({fillColor: '#000', fillOpacity: .5, strokeWeight: 0, clickable: false});
 
 		const visible = new google.maps.Polygon({paths: visibility})
 

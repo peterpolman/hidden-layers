@@ -6,18 +6,30 @@ export default class GeoService {
     this.signal = 'geo-off'
     this.watcher = null
     this.markerController = new MarkerController(firebase.auth().currentUser.uid)
-  }
-
-  watchPosition() {
-    const options = {
+    this.options = {
       enableHighAccuracy: true,
       maximumAge: 1000,
       timeout: 30000
     }
+  }
 
+  getPosition() {
+    return new Promise(function (resolve, reject) {
+      navigator.geolocation.getCurrentPosition(function(r) {
+        const position = {
+          lat: r.coords.latitude,
+          lng: r.coords.longitude
+        }
+        resolve(position);
+      }.bind(this), function(err) {
+        reject(err);
+      }, this.options);
+    }.bind(this))
+  }
+
+  watchPosition() {
     navigator.geolocation.clearWatch(this.watcher);
-
-    this.watcher = navigator.geolocation.watchPosition(this.onWatchPosition.bind(this), this.onError.bind(this), options);
+    this.watcher = navigator.geolocation.watchPosition(this.onWatchPosition.bind(this), this.onError.bind(this), this.options);
   }
 
   onWatchPosition(position) {
