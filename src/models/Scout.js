@@ -10,7 +10,7 @@ export default class Scout {
 		this.scoutRef = firebase.database().ref('scouts').child(uid)
 
 		this.path = null
-		this.pathTimer = []
+		this.pathTimer = null
 
 		this.mode = 'STANDING'
 
@@ -39,16 +39,15 @@ export default class Scout {
 		this.marker.setPosition(new google.maps.LatLng(position))
 	}
 
-	walk(data, map) {
+	walk(data) {
+		var interval = 100;
 		var now = (new Date).getTime()
-		var elapsed = (now - data.timestamp)
-		var offset = (elapsed / 200) * 1.4 // 1 ms / fps (requestAnimationFrame updates 60 fps)
+		var elapsed = ((now - data.timestamp) < 0) ? (interval * 2) : (now - data.timestamp)
+		var offset = (elapsed / interval) * 1.4
 
-		this.path = new Path(data.uid, data.path, '#3D91CB', '#3D91CB', map);
+		this.path = new Path(data.uid, data.path, '#3D91CB', '#3D91CB');
 
-		var walk = function(e) {
-      const position = this.path.GetPointAtDistance(offset);
-
+		var walk = function() {
 			if (offset >= data.totalDist) {
         clearInterval(this.pathTimer)
 
@@ -57,25 +56,29 @@ export default class Scout {
 					mode: "STANDING"
 				})
 			}
-      else {
-        this.marker.setPosition(position)
+			else {
+				offset = ((offset + 1.4) >= data.totalDist) ? data.totalDist : offset + 1.4;
 
-        this.update({
-          position: {
-            lat: position.lat(),
-            lng: position.lng()
-          }
-        })
+				var position = this.path.GetPointAtDistance(offset);
 
-        offset = offset + 1.4; // Walking speed should be 1.4m per second with a x10 speed modifier
-      }
+				if (position != null) {
+					this.update({
+						position: {
+							lat: position.lat(),
+							lng: position.lng()
+						}
+					})
+				}
+			}
 		}
 
-		this.pathTimer = setInterval(walk.bind(this), 200)
+		this.pathTimer = setInterval(walk.bind(this), interval)
+
+		return this.path
 	}
 
 	stop() {
-    clearInterval(this.pathTimer)
+		clearInterval(this.pathTimer)
 
 		return this.update({
       totalDist: 0,

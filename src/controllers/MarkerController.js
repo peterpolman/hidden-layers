@@ -6,6 +6,9 @@ import GridService from '../services/GridService';
 import Scout from '../models/Scout';
 import User from '../models/User';
 
+import ScoutSrc from '../assets/img/wolf-1.png';
+
+
 import Ward from '../models/Ward'
 
 export default class MarkerController {
@@ -191,9 +194,7 @@ export default class MarkerController {
 		this.myScout = new Scout(uid, data.position, 40, data.mode);
 		this.myScout.marker.addListener('click', function(e) {
 			this.map.panTo(e.latLng)
-
 			window.dispatchEvent(new CustomEvent('cursor_changed', {detail: "SCOUT"}));
-
 		}.bind(this))
 
 		this.myScout.marker.setMap(this.map);
@@ -201,36 +202,35 @@ export default class MarkerController {
 		this.isWalking = (data.mode == "WALKING")
 
 		if (data.mode == "WALKING") {
-			if (this.myScout.path == null) {
-				this.myScout.walk(data, this.map)
-			}
+ 			this.myScout.walk(data, this.map)
 		}
 	}
 
 	onMyScoutChanged(uid, data) {
-		this.myScout.setPosition(data.position)
 		this.myScout.set('mode', data.mode)
 
 		this.isWalking = (data.mode == "WALKING")
 
 		if (data.mode == "WALKING") {
+			this.myScout.setPosition(data.position)
+
 			if (this.myScout.path == null) {
-				this.myScout.walk(data, this.map)
+				var path = this.myScout.walk(data)
+				path.setMap(this.map)
 			}
+
 		}
 
 		if (data.mode == "STANDING") {
 			this.myScout.path.setMap(null)
 			this.myScout.set('path', null)
 
-			if (uid != this.uid) {
-				const title = '🔔 Scout Arrived';
-				const options = {
-					body: `Your scout arrived at its destination!`,
-					icon: scoutSrc
-				};
-				window.swRegistration.showNotification(title, options);
-			}
+			const title = '🔔 Scout Arrived';
+			const options = {
+				body: `Your scout arrived at its destination!`,
+				icon: ScoutSrc
+			};
+			window.swRegistration.showNotification(title, options);
 
 		}
 	}

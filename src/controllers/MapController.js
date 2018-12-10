@@ -156,6 +156,7 @@ export default class MapController {
         if (status === google.maps.places.PlacesServiceStatus.OK) {
           const data = {
             id: e.placeId,
+            owner: this.uid,
             name: place.name,
             category: place.types[0],
             items: [

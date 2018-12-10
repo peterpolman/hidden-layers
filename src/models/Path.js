@@ -3,8 +3,7 @@ export default class Path {
     uid,
     path,
     strokeColor,
-    iconColor,
-    map
+    iconColor
   ) {
     const lineSymbol = {
       path: google.maps.SymbolPath.CIRCLE,
@@ -23,8 +22,7 @@ export default class Path {
             icon: lineSymbol,
             offset: '0',
             repeat: '10px'
-        }],
-        map: map
+        }]
     });
   }
 

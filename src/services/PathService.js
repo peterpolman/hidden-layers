@@ -11,11 +11,7 @@ export default class PathService {
 
   route(uid, fromLatlng, toLatlng, travelMode) {
     return new Promise(function (resolve, reject) {
-      this.directionsService.route({
-        origin: fromLatlng,
-        destination: toLatlng,
-        travelMode: travelMode
-      }, function(response, status) {
+      this.directionsService.route({ origin: fromLatlng, destination: toLatlng, travelMode: travelMode }, function(response, status) {
         if (status === google.maps.DirectionsStatus.OK) {
           const sphericalLib = google.maps.geometry.spherical
           const route = response.routes[0].overview_path

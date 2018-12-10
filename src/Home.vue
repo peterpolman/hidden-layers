@@ -26,7 +26,7 @@
     <div class="dialog dialog--shop" v-if="mapController.shop">
       <header>
         <h2>{{ mapController.shop.name }}</h2>
-        <span>{{ mapController.shop.category }}</span>
+        <span>{{ mapController.shop.category }} [Owner: {{ (typeof mapController.markerController.userMarkers[mapController.shop.owner] != 'undefined') ? mapController.markerController.userMarkers[mapController.shop.owner]['username'] : 'you'  }}]</span>
         <button v-on:click="mapController.shop = null">Close</button>
       </header>
 
@@ -36,10 +36,6 @@
           {{ item.amount }}
         </small>
       </button>
-      <!-- <button v-bind:style="{ backgroundImage: 'url(' + assets.gold + ')' }" v-on:click="onSpawnWardClick" class="btn btn-gold">
-        Gold
-
-      </button> -->
       <button class="btn btn-disabled"></button>
       <button class="btn btn-disabled"></button>
       <button class="btn btn-disabled"></button>
@@ -144,7 +140,13 @@ export default {
       this.mapController.markerController.numOfGold += item.amount
       this.mapController.markerController.updateShop({
         id: id,
-        amount: 0
+        items: [
+          {
+            name: 'gold',
+            amount: 0,
+            image: 'gold'
+          }
+        ]
       })
 
       this.mapController.markerController.shop = null
