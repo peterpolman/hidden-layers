@@ -16,7 +16,7 @@
     <button class="btn btn-logout" v-on:click="logout">
       EXIT
     </button>
-    <button v-bind:style="{ backgroundImage: 'url(' + assets.bell + ')', backgroundColor: (isSubscribed) ? '#63EE23' : '#FF6B6B' }" v-on:click="onSetBellClick" class="btn btn-bell" v-if="pushEnabled">
+    <button v-bind:style="{ backgroundImage: 'url(' + assets.bell + ')', backgroundColor: (notificationController.isSubscribed) ? '#63EE23' : '#FF6B6B' }" v-on:click="onSetBellClick" class="btn btn-bell" v-if="notificationController.pushEnabled">
       PUSH
     </button>
     <button class="btn btn-stop" v-on:click="onStopClick" v-if="this.mapController.markerController.isWalking">
@@ -46,7 +46,7 @@
        </button>
     </div>
 
-    <div class="dialog dialog--inventory" v-if="ui.dialogs.inventory">
+    <div class="dialog dialog--inventory" v-if="this.itemController.inventoryOpen">
       <button
         :key="item.id"
         v-if="item"
@@ -73,6 +73,7 @@ import draggable from 'vuedraggable'
 import GeoService from './services/GeoService';
 import MapController from './controllers/MapController';
 import ItemController from './controllers/ItemController';
+import NotificationController from './controllers/NotificationController';
 
 import KnightImg from './assets/img/knight-1.png'
 import ArcherImg from './assets/img/archer-1.png'
@@ -96,7 +97,6 @@ export default {
           store: true
         }
       },
-      isSubscribed: false,
       assets: {
         ward: WardImg,
         knight: KnightImg,
@@ -111,37 +111,32 @@ export default {
       geoService: new GeoService,
       mapController: new MapController,
       itemController: new ItemController(firebase.auth().currentUser.uid),
+      notificationController: new NotificationController,
       isWalking: null,
-      userClass: null,
-      pushEnabled: false
+      userClass: null
     }
   },
   mounted() {
     this.mapController.init();
 
-    window.swRegistration = null;
-
     if ('serviceWorker' in navigator && 'PushManager' in window) {
-      console.log('Service Worker and Push is supported');
-
-      this.pushEnabled = true
+      this.notificationController.pushEnabled = true
 
       navigator.serviceWorker.register('sw.js')
       .then(function(swReg) {
-        console.log('Service Worker is registered', swReg);
-
         window.swRegistration = swReg;
-      })
+      }.bind(this))
       .catch(function(error) {
         console.error('Service Worker Error', error);
       });
     } else {
       console.warn('Push messaging is not supported');
     }
+
   },
   methods: {
     onInventoryClick() {
-      this.ui.dialogs.inventory = !this.ui.dialogs.inventory
+      this.itemController.inventoryOpen = !this.itemController.inventoryOpen
     },
     onGetItemFromStore(id, key, item) {
       if (item.amount > 0) {
@@ -167,95 +162,11 @@ export default {
         alert('Count them moneyzz!');
       }
     },
-    initializeUI() {
-      window.swRegistration.pushManager.getSubscription()
-      .then(function(subscription) {
-        this.isSubscribed = !(subscription === null);
-
-        this.updateSubscriptionOnServer(subscription);
-
-        if (this.isSubscribed) {
-          console.log('User IS subscribed.');
-        } else {
-          console.log('User is NOT subscribed.');
-        }
-
-        this.updateBtn();
-      }.bind(this));
-    },
-    urlB64ToUint8Array(base64String) {
-      const padding = '='.repeat((4 - base64String.length % 4) % 4);
-      const base64 = (base64String + padding)
-        .replace(/\-/g, '+')
-        .replace(/_/g, '/');
-
-      const rawData = window.atob(base64);
-      const outputArray = new Uint8Array(rawData.length);
-
-      for (let i = 0; i < rawData.length; ++i) {
-        outputArray[i] = rawData.charCodeAt(i);
-      }
-      return outputArray;
-    },
-    updateBtn: function() {
-      if (Notification.permission === 'denied') {
-        this.updateSubscriptionOnServer(null);
-        return;
-      }
-    },
-    subscribeUser: function() {
-      const applicationServerKey = this.urlB64ToUint8Array(config.push.public);
-      window.swRegistration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: applicationServerKey
-      })
-      .then(function(subscription) {
-        console.log('User is subscribed.');
-
-        this.updateSubscriptionOnServer(subscription);
-
-        this.isSubscribed = true;
-
-        this.updateBtn();
-
-      }.bind(this))
-      .catch(function(err) {
-        console.log('Failed to subscribe the user: ', err);
-        this.updateBtn();
-      });
-    },
-    unsubscribeUser: function() {
-      window.swRegistration.pushManager.getSubscription()
-      .then(function(subscription) {
-        if (subscription) {
-          return subscription.unsubscribe();
-        }
-      })
-      .catch(function(error) {
-        console.log('Error unsubscribing', error);
-      })
-      .then(function() {
-        this.updateSubscriptionOnServer(null);
-
-        console.log('User is unsubscribed.');
-        this.isSubscribed = false;
-
-        this.updateBtn();
-      }.bind(this));
-    },
-    updateSubscriptionOnServer: function(subscription) {
-      if (subscription) {
-        console.log( subscription )
-        console.log( JSON.stringify(subscription) )
-      } else {
-        console.log('nothing');
-      }
-    },
     onSetBellClick: function() {
-      if (this.isSubscribed) {
-        this.unsubscribeUser();
+      if (this.notificationController.isSubscribed) {
+        this.notificationController.unsubscribeUser();
       } else {
-        this.subscribeUser();
+        this.notificationController.subscribeUser();
       }
     },
     onSpawnWardClick: function() {

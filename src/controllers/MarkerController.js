@@ -228,6 +228,7 @@ export default class MarkerController {
 				body: `Your scout arrived at its destination!`,
 				icon: ScoutSrc
 			};
+			
 			window.swRegistration.showNotification(title, options);
 
 		}
