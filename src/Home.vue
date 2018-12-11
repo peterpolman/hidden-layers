@@ -296,20 +296,17 @@ export default {
       this.map.panTo(this.markerController.myUserMarker.position)
     },
     onPanScoutClick() {
-      if (this.markerController.myScout != null) {
-        this.map.panTo(this.markerController.myScout.marker.position)
-      }
-      // Deploy a new scout if there is none
+  		if (this.markerController.myScout == null) {
+  			this.markerController.createScout(this.uid, {
+  				uid: this.uid,
+  				position: {
+  					lat: this.markerController.myUserMarker.position.lat(),
+  					lng: this.markerController.myUserMarker.position.lng()
+  				}
+  			})
+  		}
       else {
-        const uid = this.markerController.uid
-        const data = {
-          uid: uid,
-          position: {
-            lat: this.markerController.myUserMarker.position.lat(),
-            lng: this.markerController.myUserMarker.position.lng()
-          }
-        }
-        this.markerController.createScout(uid, data)
+        this.map.panTo(this.markerController.myScout.marker.position)
       }
     },
     logout() {

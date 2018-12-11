@@ -24,7 +24,7 @@ export default class MarkerController {
 
 		this.usersRef = firebase.database().ref('users')
 		this.scoutsRef = firebase.database().ref('scouts')
-		this.wardsRef = firebase.database().ref('wards').child(uid)
+		this.wardsRef = null
 
 		this.myUserMarker = null
 		this.myScout = null
@@ -44,7 +44,11 @@ export default class MarkerController {
 	}
 
 	init(map) {
+		const userConnectionsRef = this.usersRef.child(this.uid).child('connections');
+		const lastOnlineRef = this.usersRef.child(this.uid).child('lastOnline');
+
 		this.map = map
+		this.wardsRef = firebase.database().ref('wards').child(this.uid)
 
 		this.pathService.init()
 
@@ -52,9 +56,6 @@ export default class MarkerController {
 
 		this.userInfoWindow = new google.maps.InfoWindow({isHidden: false});
 		this.scoutInfoWindow = new google.maps.InfoWindow({isHidden: false});
-
-		const userConnectionsRef = this.usersRef.child(this.uid).child('connections');
-		const lastOnlineRef = this.usersRef.child(this.uid).child('lastOnline');
 
 		this.connectedRef.on('value', function(snap) {
 			if (snap.val() === true) {
@@ -183,6 +184,8 @@ export default class MarkerController {
 
 		this.myUserMarker.setMap(this.map);
 		this.map.panTo(this.myUserMarker.position)
+
+		this.discover()
 	}
 
 	onMyUserChanged(uid, data) {
