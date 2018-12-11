@@ -1,7 +1,7 @@
 import firebase from 'firebase';
 
-import PathService from '../services/PathService';
 import GridService from '../services/GridService';
+import PathService from '../services/PathService'
 
 import Scout from '../models/Scout';
 import User from '../models/User';
@@ -16,6 +16,9 @@ export default class MarkerController {
 		this.map = null
 
 		this.gridService = new GridService
+		this.pathService = new PathService
+
+		this.places = null
 
 		this.connectedRef = firebase.database().ref('.info/connected')
 
@@ -29,6 +32,7 @@ export default class MarkerController {
 
 		this.storesRef = firebase.database().ref('stores')
 		this.stores = []
+		this.store = null
 
 		this.userMarkers = []
 		this.scoutMarkers = []
@@ -39,8 +43,12 @@ export default class MarkerController {
 		this.isWalking = false
 	}
 
-	listen(map) {
+	init(map) {
 		this.map = map
+
+		this.pathService.init()
+
+		this.places = new google.maps.places.PlacesService(this.map);
 
 		this.userInfoWindow = new google.maps.InfoWindow({isHidden: false});
 		this.scoutInfoWindow = new google.maps.InfoWindow({isHidden: false});
@@ -198,6 +206,8 @@ export default class MarkerController {
 		if (data.mode == "WALKING") {
  			this.myScout.marker.setPosition(data.position)
 		}
+
+		this.discover()
 	}
 
 	onMyScoutChanged(uid, data) {
@@ -328,6 +338,59 @@ export default class MarkerController {
 
 	createGold() {
 
+	}
+
+	getPlaceDetails(e) {
+		if (this.stores[e.placeId]) {
+			this.store = e.placeId
+		} else {
+			this.places.getDetails({
+				placeId: e.placeId
+			}, function(place, status) {
+				if (status === google.maps.places.PlacesServiceStatus.OK) {
+					const dbRef = this.storesRef
+
+					dbRef.child(e.placeId).set({
+						id: e.placeId,
+						owner: this.uid,
+						name: place.name,
+						category: place.types[0],
+						items: [
+							{
+								id: 'ward',
+								name: 'Ward',
+								amount: Math.floor(Math.random() * 3),
+								class: 'btn-ward',
+								callback: 'onDropItem'
+							},
+							{
+								id: 'gold',
+								name: 'Gold',
+								amount: Math.floor(Math.random() * 20),
+								class: 'btn-gold',
+								callback: 'onDropItem'
+							}
+						]
+					})
+
+					this.store = e.placeId
+
+				}
+			}.bind(this))
+		}
+	}
+
+	moveScout(toLatlng) {
+		if (this.myScout.path == null) {
+			this.pathService.route(this.uid, this.myScout.marker.position, toLatlng, "WALKING").then(function(data){
+
+				this.myScout.update(data)
+
+				console.log(`Let's walk ${data.totalDist}m`);
+			}.bind(this)).catch(function(err) {
+				console.log(err)
+			})
+		}
 	}
 
 }

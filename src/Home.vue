@@ -13,13 +13,13 @@
     </button>
 
     <div class="section-pan">
-      <button  v-bind:style="{ backgroundImage: 'url(' + assets.knight + ')' }" v-on:click="onPanUserClick" class="btn btn-user" v-if="mapController.markerController.myUserMarker">
+      <button  v-bind:style="{ backgroundImage: 'url(' + assets.knight + ')' }" v-on:click="onPanUserClick" class="btn btn-user" v-if="markerController.myUserMarker">
         User
       </button>
       <button v-bind:style="{ backgroundImage: 'url(' + assets.scout + ')' }" v-on:click="onPanScoutClick" class="btn btn-scout">
         Scout
       </button>
-      <button v-bind:style="{ backgroundImage: 'url(' + assets.ward + ')' }" v-on:click="onPanWardClick" class="btn btn-ward" v-if="mapController.markerController.myWardMarkers">
+      <button v-bind:style="{ backgroundImage: 'url(' + assets.ward + ')' }" v-on:click="onPanWardClick" class="btn btn-ward">
         Ward
       </button>
     </div>
@@ -27,30 +27,30 @@
     <button v-bind:style="{ backgroundImage: 'url(' + ( (ui.dialogs.inventory) ? assets.inventoryOpen : assets.inventory )+ ')' }" v-on:click="onInventoryClick" class="btn btn-inventory">
       Inventory
     </button>
-    <button class="btn btn-stop" v-on:click="onStopClick" v-if="this.mapController.markerController.isWalking">
+    <button class="btn btn-stop" v-on:click="onStopClick" v-if="markerController.isWalking">
       Stop
     </button>
 
-    <div class="dialog dialog--store" v-if="mapController.store">
+    <div class="dialog dialog--store" v-if="markerController.store">
       <header>
-        <h2>{{ mapController.markerController.stores[mapController.store].name }}</h2>
+        <h2>{{ markerController.stores[markerController.store].name }}</h2>
         <div>
-          Category: {{ mapController.markerController.stores[mapController.store].category }}
+          Category: {{ markerController.stores[markerController.store].category }}
         </div>
         <div>
-          Owner: {{ (typeof mapController.markerController.userMarkers[mapController.markerController.stores[mapController.store].owner] != 'undefined') ? mapController.markerController.userMarkers[mapController.markerController.stores[mapController.store].owner]['username'] : 'you'  }}
+          Owner: {{ (typeof markerController.userMarkers[markerController.stores[markerController.store].owner] != 'undefined') ? markerController.userMarkers[markerController.stores[markerController.store].owner]['username'] : 'you'  }}
         </div>
         <button v-on:click="onCloseStore">Close</button>
       </header>
 
       <ul>
-        <li v-for="(item, key) in mapController.markerController.stores[mapController.store].items">
+        <li v-for="(item, key) in markerController.stores[markerController.store].items">
           <button
             :key="key"
             v-if="item"
             v-bind:style="{ backgroundImage: 'url(' + assets[item.id] + ')' }"
             v-bind:class="`btn ${item.class}`"
-            v-on:click="onGetItemFromStore(mapController.store, key, item)">
+            v-on:click="onGetItemFromStore(markerController.store, key, item)">
             {{ item.name }}
             <small>
               {{ item.amount }}
@@ -70,7 +70,7 @@
       </ul>
     </div>
 
-    <div class="dialog dialog--inventory" v-if="this.itemController.inventoryOpen">
+    <div class="dialog dialog--inventory" v-if="itemController.inventoryOpen">
       <ul>
         <li v-for="item in itemController.inventory">
           <button
@@ -91,16 +91,19 @@
 </template>
 
 <script>
-import firebase from 'firebase';
-import config from './config.js';
+import firebase from 'firebase'
+import config from './config.js'
 
-import draggable from 'vuedraggable'
+// Import controllers
+import MapController from './controllers/MapController'
+import ItemController from './controllers/ItemController'
+import NotificationController from './controllers/NotificationController'
+import MarkerController from './controllers/MarkerController'
 
-import GeoService from './services/GeoService';
-import MapController from './controllers/MapController';
-import ItemController from './controllers/ItemController';
-import NotificationController from './controllers/NotificationController';
+// Import services
+import GeoService from './services/GeoService'
 
+// Import assets
 import KnightImg from './assets/img/knight-1.png'
 import ArcherImg from './assets/img/archer-1.png'
 import WolfImg from './assets/img/wolf-1.png'
@@ -111,9 +114,6 @@ import InventoryImg from './assets/img/backpack.png'
 import InventoryOpenImg from './assets/img/backpack_open.png'
 
 export default {
-  components: {
-      draggable,
-  },
   name: 'home',
   data () {
     return {
@@ -138,14 +138,41 @@ export default {
       mapController: new MapController,
       itemController: new ItemController(firebase.auth().currentUser.uid),
       notificationController: new NotificationController,
+      markerController: new MarkerController(firebase.auth().currentUser.uid),
       isWalking: null,
       userClass: null,
       wardId: 0
     }
   },
   mounted() {
-    this.mapController.init();
+    // Initialize the map
+    this.mapController.init().then(function(map) {
+      this.map = map
 
+      this.markerController.init(this.map)
+
+      this.map.addListener('click', function(e) {
+        this.onMapClick(e);
+      }.bind(this))
+
+      // this.map.addListener('bounds_changed', function(e) {
+      //   this.onPan()
+      // }.bind(this))
+
+    }.bind(this)).catch(function(err) {
+      console.log(err)
+    });
+
+    // Add custom event listeners
+    window.addEventListener('cursor_changed', function(e) {
+      this.cursorMode = e.detail.type
+    }.bind(this))
+
+    window.addEventListener('map_discover', function(e) {
+      this.markerController.discover()
+    }.bind(this))
+
+    // Start the service worker if available
     if ('serviceWorker' in navigator && 'PushManager' in window) {
       this.notificationController.pushEnabled = true
 
@@ -159,9 +186,48 @@ export default {
     } else {
       console.warn('Push messaging is not supported');
     }
-
   },
   methods: {
+    onPan() {
+      if (this.markerController.myUserMarker && this.markerController.myScout) {
+        this.markerController.discover()
+      }
+    },
+    onMapClick(e) {
+      this.markerController.myScout.marker.setAnimation(null)
+
+      if (e.placeId) {
+        e.stop()
+
+        const visibility = this.markerController.gridService.setGrid(this.markerController.myUserMarker, this.markerController.myScout.marker, this.markerController.myWardMarkers)
+        const visible = new google.maps.Polygon({paths: visibility})
+        const isHidden = google.maps.geometry.poly.containsLocation(e.latLng, visible)
+
+        if (!isHidden) {
+          this.markerController.getPlaceDetails(e)
+          this.cursorMode = null
+        }
+      }
+
+      switch(this.cursorMode) {
+        case "WARD":
+          const position = {
+            lat: e.latLng.lat(),
+            lng: e.latLng.lng()
+          }
+          this.markerController.createWard({
+            position: position,
+            id: this.markerController.createMarkerId(position)
+          })
+
+          break
+        case "SCOUT":
+          this.markerController.moveScout(e.latLng)
+          this.cursorMode = null
+
+          break
+      }
+    },
     onInventoryClick() {
       this.itemController.inventoryOpen = !this.itemController.inventoryOpen
 
@@ -170,7 +236,7 @@ export default {
       }
     },
     onGetItemFromStore(id, key, item) {
-      const storesRef = this.mapController.markerController.storesRef
+      const storesRef = this.markerController.storesRef
 
       this.itemController.inventoryOpen = true
 
@@ -182,17 +248,19 @@ export default {
       storesRef.child(id).child('items').child(key).update({ amount: 0 })
     },
     onCloseStore() {
-      this.mapController.store = null
+      this.markerController.store = null
     },
     onItemClick(item) {
       return this[item.callback](item);
     },
     onDropItem(item) {
       if (item.id === 'ward') {
-        this.mapController.cursorMode = "WARD"
+        this.cursorMode = "WARD"
       }
 
       if (item.id === 'gold') {
+        this.cursorMode = "GOLD"
+
         alert('Count them moneyzz!');
       }
     },
@@ -207,38 +275,41 @@ export default {
       window.dispatchEvent(new CustomEvent('cursor_changed', { detail: { type: "WARD" } }))
     },
     onStopClick() {
-      this.mapController.markerController.myScout.stop()
+      this.markerController.myScout.stop()
     },
     onSignalClick() {
       this.geoService.getPosition().then(function(r) {
-        this.mapController.map.panTo(r)
+        this.map.panTo(r)
         this.geoService.watchPosition()
       }.bind(this)).catch(function(err) {
         console.log(err)
       })
     },
     onPanWardClick() {
-      const wardMarkers = this.mapController.markerController.myWardMarkers
-      this.mapController.map.panTo(wardMarkers[Object.keys(wardMarkers)[0]].position);
+      const wardMarkers = this.markerController.myWardMarkers
+
+      if (wardMarkers.length > 0) {
+        this.map.panTo(wardMarkers[Object.keys(wardMarkers)[0]].position);
+      }
     },
     onPanUserClick() {
-      this.mapController.map.panTo(this.mapController.markerController.myUserMarker.position)
+      this.map.panTo(this.markerController.myUserMarker.position)
     },
     onPanScoutClick() {
-      if (this.mapController.markerController.myScout != null) {
-        this.mapController.map.panTo(this.mapController.markerController.myScout.marker.position)
+      if (this.markerController.myScout != null) {
+        this.map.panTo(this.markerController.myScout.marker.position)
       }
       // Deploy a new scout if there is none
       else {
-        const uid = this.mapController.markerController.uid
+        const uid = this.markerController.uid
         const data = {
           uid: uid,
           position: {
-            lat: this.mapController.markerController.myUserMarker.position.lat(),
-            lng: this.mapController.markerController.myUserMarker.position.lng()
+            lat: this.markerController.myUserMarker.position.lat(),
+            lng: this.markerController.myUserMarker.position.lng()
           }
         }
-        this.mapController.markerController.createScout(uid, data)
+        this.markerController.createScout(uid, data)
       }
     },
     logout() {
