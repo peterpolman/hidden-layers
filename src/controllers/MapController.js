@@ -17,7 +17,7 @@ export default class MapController {
     this.markerController = new MarkerController(firebase.auth().currentUser.uid)
     this.loader = GoogleMapsLoader
     this.mapStyles = MapStyles
-    this.shop = null
+    this.store = null
   }
 
   init() {
@@ -97,7 +97,7 @@ export default class MapController {
       }.bind(this))
 
       window.addEventListener('cursor_changed', function(e) {
-        this.cursorMode = e.detail
+        this.cursorMode = e.detail.type
       }.bind(this))
 
       window.addEventListener('map_discover', function(e) {
@@ -147,37 +147,40 @@ export default class MapController {
   }
 
   getPlaceDetails(e) {
-    console.log(e.placeId)
-    if (this.markerController.shops[e.placeId]) {
-      this.shop = e.placeId
+    if (this.markerController.stores[e.placeId]) {
+      this.store = e.placeId
     } else {
       this.places.getDetails({
         placeId: e.placeId
       }, function(place, status) {
         if (status === google.maps.places.PlacesServiceStatus.OK) {
-          const data = {
+          const dbRef = this.markerController.storesRef
+
+          dbRef.child(e.placeId).set({
             id: e.placeId,
             owner: this.uid,
             name: place.name,
             category: place.types[0],
             items: [
               {
-                name: 'ward',
-                amount: 5,
-                image: 'ward',
-                class: 'btn-ward'
+                id: 'ward',
+                name: 'Ward',
+                amount: Math.floor(Math.random() * 3),
+                class: 'btn-ward',
+                callback: 'onDropItem'
               },
               {
-                name: 'gold',
-                amount: 1,
-                image: 'gold',
-                class: 'btn-gold'
+                id: 'gold',
+                name: 'Gold',
+                amount: Math.floor(Math.random() * 20),
+                class: 'btn-gold',
+                callback: 'onDropItem'
               }
             ]
-          }
+          })
 
-          this.shop = e.placeId
-          this.markerController.createShop(data)
+          this.store = e.placeId
+
         }
       }.bind(this))
     }
@@ -193,8 +196,6 @@ export default class MapController {
       }.bind(this)).catch(function(err) {
         console.log(err)
       })
-
-
     }
   }
 }

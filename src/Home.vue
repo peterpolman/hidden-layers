@@ -23,47 +23,42 @@
       Stop
     </button>
 
-    <div class="dialog dialog--shop" v-if="mapController.shop">
+    <div class="dialog dialog--store" v-if="mapController.store">
       <header>
-        <h2>{{ mapController.markerController.shops[mapController.shop].name }}</h2>
-        <span>{{ mapController.markerController.shops[mapController.shop].category }} [Owner: {{ (typeof mapController.markerController.userMarkers[mapController.markerController.shops[mapController.shop].owner] != 'undefined') ? mapController.markerController.userMarkers[mapController.markerController.shops[mapController.shop].owner]['username'] : 'you'  }}]</span>
+        <h2>{{ mapController.markerController.stores[mapController.store].name }}</h2>
+        <span>
+          {{ mapController.markerController.stores[mapController.store].category }}
+          [Owner: {{ (typeof mapController.markerController.userMarkers[mapController.markerController.stores[mapController.store].owner] != 'undefined') ? mapController.markerController.userMarkers[mapController.markerController.stores[mapController.store].owner]['username'] : 'you'  }}]
+        </span>
         <button v-on:click="onCloseStore">Close</button>
       </header>
-      <draggable class="dialog__content" v-model="mapController.markerController.shops[mapController.shop].items" :options="{group: 'items'}" @start="drag=true" @end="drag=false">
-        <button
-          v-if="item"
-          v-for="(item, key) in mapController.markerController.shops[mapController.shop].items"
-          :key="key"
-          v-bind:style="{ backgroundImage: (item.amount) ? 'url(' + assets[item.image] + ')' : 'none' }"
-          v-on:click="onGetItemFromStore(mapController.shop, key, item)"
-          v-bind:class="`btn ${item.class}`"
-        >
-
-           {{ item.name }}
-           <small v-if="item.amount">
-             {{ item.amount }}
-           </small>
-         </button>
-      </draggable>
+      <button
+        :key="key"
+        v-if="item"
+        v-for="(item, key) in mapController.markerController.stores[mapController.store].items"
+        v-bind:style="{ backgroundImage: 'url(' + assets[item.id] + ')' }"
+        v-bind:class="`btn ${item.class}`"
+        v-on:click="onGetItemFromStore(mapController.store, key, item)">
+        {{ item.name }}
+        <small>
+          {{ item.amount }}
+        </small>
+       </button>
     </div>
 
     <div class="dialog dialog--inventory" v-if="ui.dialogs.inventory">
-
-      <draggable class="dialog__content" v-model="itemController.inventory" :options="{group: 'inventory'}" @start="drag=true" @end="drag=false">
-        <button
-          v-if="item"
-          v-bind:style="{ backgroundImage: (item.amount) ? 'url(' + assets[item.image] + ')' : 'none' }"
-          v-bind:class="`btn ${item.class}`"
-          v-for="(item, key) in itemController.inventory"
-          v-on:click="onSpawnWardClick"
-          :key="key"
-        >
-           {{ item.name }}
-           <small v-if="item.amount">
-             {{ item.amount }}
-           </small>
-         </button>
-      </draggable>
+      <button
+        :key="item.id"
+        v-if="item"
+        v-for="item in itemController.inventory"
+        v-bind:style="{ backgroundImage: 'url(' + assets[item.id] + ')' }"
+        v-bind:class="`btn ${item.class}`"
+        v-on:click="onItemClick(item)">
+        {{ item.name }}
+        <small v-if="item.amount">
+          {{ item.amount }}
+        </small>
+       </button>
     </div>
 
   </section>
@@ -98,7 +93,7 @@ export default {
       ui: {
         dialogs: {
           inventory: false,
-          shop: true
+          store: true
         }
       },
       isSubscribed: false,
@@ -145,25 +140,32 @@ export default {
     }
   },
   methods: {
-    onGetItemFromStore(id, key, item) {
-      this.mapController.markerController.removeShopItem(id, key)
-
-      var items = this.itemController.inventory
-      items.push(item)
-
-      this.itemController.add(items)
+    onInventoryClick() {
+      this.ui.dialogs.inventory = !this.ui.dialogs.inventory
     },
-    onCloseStore() {
-      // debugger
-      const id = this.mapController.shop
-      const items = this.mapController.markerController.shops[id].items
-
-      if (items != null) {
-        this.mapController.markerController.updateShopItems(id, items)
+    onGetItemFromStore(id, key, item) {
+      if (item.amount > 0) {
+        var inventory = this.itemController.add(item)
+        this.itemController.update(inventory)
       }
 
-      this.mapController.shop = null
+      const storesRef = this.mapController.markerController.storesRef
+      storesRef.child(id).child('items').child(key).update({ amount: 0 })
+    },
+    onCloseStore() {
+      this.mapController.store = null
+    },
+    onItemClick(item) {
+      return this[item.callback](item);
+    },
+    onDropItem(item) {
+      if (item.id === 'ward') {
+        this.mapController.cursorMode = "WARD"
+      }
 
+      if (item.id === 'gold') {
+        alert('Count them moneyzz!');
+      }
     },
     initializeUI() {
       window.swRegistration.pushManager.getSubscription()
@@ -257,7 +259,7 @@ export default {
       }
     },
     onSpawnWardClick: function() {
-      window.dispatchEvent(new CustomEvent('cursor_changed', { detail: "WARD" }))
+      window.dispatchEvent(new CustomEvent('cursor_changed', { detail: { type: "WARD" } }))
     },
     onStopClick: function() {
       this.mapController.markerController.myScout.stop()
@@ -290,9 +292,6 @@ export default {
         }
         this.mapController.markerController.createScout(uid, data)
       }
-    },
-    onInventoryClick: function() {
-      this.ui.dialogs.inventory = !this.ui.dialogs.inventory
     },
     logout: function() {
       firebase.auth().signOut().then(() => {
@@ -353,10 +352,11 @@ export default {
     z-index: 1;
     right: 0;
     bottom: 0;
-    background: black;
+    background: rgba(0,0,0,0.75);
     color: white;
     font-size: 7px;
-    padding: 2px;
+    padding: 2px 3px;
+    border-top-left-radius: 2px;
   }
 
   .btn-gold {
@@ -427,16 +427,11 @@ export default {
     padding: 5px;
   }
 
-  .dialog__content {
-    display: flex;
-    flex-wrap: wrap;
-  }
-
   .btn {
     flex: 0 auto;
   }
 
-  .dialog--shop {
+  .dialog--store {
     top: 50%;
     left: 50%;
     width: 250px;
@@ -445,7 +440,7 @@ export default {
     margin-top: -50px;
   }
 
-  .dialog--shop header {
+  .dialog--store header {
     position: absolute;
     background: black;
     top: -40px;
@@ -459,7 +454,7 @@ export default {
     margin: 0;
   }
 
-  .dialog--shop header button {
+  .dialog--store header button {
     background: transparent;
     position: absolute;
     right: 10px;
@@ -471,8 +466,8 @@ export default {
     transform: rotate(45deg)
   }
 
-  .dialog--shop header button:before,
-  .dialog--shop header button:after {
+  .dialog--store header button:before,
+  .dialog--store header button:after {
     content: "";
     display: block;
     width: 15px;
@@ -482,12 +477,12 @@ export default {
     left: 0;
   }
 
-  .dialog--shop header button:after {
+  .dialog--store header button:after {
     left: 0;
     transform: rotate(-90deg);
   }
 
-  .dialog--shop h2 {
+  .dialog--store h2 {
     margin: 0;
     text-transform: uppercase;
     font-size: 12px;
@@ -504,10 +499,9 @@ export default {
     height: 210px;
     bottom: 155px;
     right: 0;
-  }
-
-  .dialog--inventory .dialog__content {
     flex-direction: column;
+    display: flex;
+    flex-wrap: wrap;
   }
 
   .dialog .btn {

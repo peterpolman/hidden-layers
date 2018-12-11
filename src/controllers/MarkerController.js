@@ -23,13 +23,12 @@ export default class MarkerController {
 		this.scoutsRef = firebase.database().ref('scouts')
 		this.wardsRef = firebase.database().ref('wards').child(uid)
 
-		this.shopsRef = firebase.database().ref('shops')
-
 		this.myUserMarker = null
 		this.myScout = null
 		this.myWardMarkers = []
 
-		this.shops = []
+		this.storesRef = firebase.database().ref('stores')
+		this.stores = []
 
 		this.userMarkers = []
 		this.scoutMarkers = []
@@ -106,24 +105,24 @@ export default class MarkerController {
 			this.onWardRemoved(snap.key, snap.val());
 		}.bind(this));
 
-		this.shopsRef.on('child_added', function(snap) {
-			this.onShopAdded(snap.key, snap.val());
+		this.storesRef.on('child_added', function(snap) {
+			this.onStoreAdded(snap.key, snap.val());
 		}.bind(this));
 
-		this.shopsRef.on('child_changed', function(snap) {
-			console.log(snap.val())
-			this.onShopChanged(snap.key, snap.val());
+		this.storesRef.on('child_changed', function(snap) {
+			this.onStoreChanged(snap.key, snap.val());
 		}.bind(this));
 
 	}
 
-	onShopAdded(key, data) {
-		this.shops[key] = data
+	onStoreAdded(id, data) {
+		this.stores[id] = data
+		this.stores[id].items.sort()
 	}
 
-	onShopChanged(id, data) {
-		console.log(id, data.items);
-		this.shops[id] = data
+	onStoreChanged(id, data) {
+		this.stores[id] = data
+		this.stores[id].items.sort()
 	}
 
 	createMarkerId(latLng) {
@@ -193,7 +192,7 @@ export default class MarkerController {
 		this.myScout = new Scout(uid, data.position, 40, data.mode);
 		this.myScout.marker.addListener('click', function(e) {
 			this.map.panTo(e.latLng)
-			window.dispatchEvent(new CustomEvent('cursor_changed', {detail: "SCOUT"}));
+			window.dispatchEvent(new CustomEvent('cursor_changed', { detail: { type: "SCOUT" } }));
 		}.bind(this))
 
 		this.myScout.marker.setMap(this.map);
@@ -291,31 +290,36 @@ export default class MarkerController {
 		this.usersRef.child(uid).remove();
 	}
 
-	createShop(data) {
-		this.shopsRef.child(data.id).set(data)
-	}
-
-	removeShopItem(id, key) {
-		console.log(id, key);
-		this.shopsRef.child(id).child('items').child(key).remove()
-	}
-
-	updateShopItems(id, items) {
-		this.shopsRef.child(id).child('items').set(items);
-	}
-
 	createScout(uid, data) {
 		this.scoutsRef.child(uid).set(data)
 	}
 
 	createWard(data) {
-		if (this.myWardMarkers.length < 5) {
-			this.wardsRef.child(data.id).set(data)
-		}
+		this.wardsRef.child(data.id).set(data)
+
+		window.dispatchEvent(new CustomEvent('item_substract', {
+			detail: {
+				id: 'ward',
+				name: 'Ward',
+				amount: 1,
+				class: 'btn-ward',
+				callback: 'onDropItem'
+			}
+		}));
 	}
 
 	removeWard(id) {
 		this.wardsRef.child(id).remove()
+
+		window.dispatchEvent(new CustomEvent('item_add', {
+			detail: {
+				id: 'ward',
+				name: 'Ward',
+				amount: 1,
+				class: 'btn-ward',
+				callback: 'onDropItem'
+			}
+		}));
 	}
 
 }
