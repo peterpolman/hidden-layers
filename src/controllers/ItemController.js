@@ -2,7 +2,7 @@ import firebase from 'firebase'
 
 export default class ItemController {
   constructor(uid) {
-    this.inventory = []
+    this.inventory = [null,null,null,null,]
     this.inventoryOpen = false
 
     this.itemsRef = firebase.database().ref('items').child(uid)
@@ -53,7 +53,7 @@ export default class ItemController {
     var key
 
     for (key = 0; key < this.inventory.length; ++key) {
-      if (this.inventory[key].id === item.id) {
+      if (this.inventory[key] && this.inventory[key].id === item.id) {
         isInInventory = true
         break
       }
@@ -71,7 +71,7 @@ export default class ItemController {
 
   substract(item) {
     for (var key = 0; key < this.inventory.length; ++key) {
-      if (item.id === this.inventory[key].id) {
+      if (this.inventory[key] && item.id === this.inventory[key].id) {
         this.inventory[key].amount -= item.amount
 
         if (this.inventory[key].amount <= 0) {

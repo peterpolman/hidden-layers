@@ -33,9 +33,6 @@ export default class MarkerController {
 		this.userMarkers = []
 		this.scoutMarkers = []
 
-		this.numOfWards = 0
-		this.numOfGold = 0
-
 		this.userInfoWindow = null
 		this.scoutInfoWindow = null
 
@@ -151,7 +148,6 @@ export default class MarkerController {
 		this.myWardMarkers[id].setMap(null)
 		delete this.myWardMarkers[id]
 		window.dispatchEvent(new CustomEvent('map_discover'))
-		this.numOfWards = this.myWardMarkers.length
 	}
 
 	onWardAdded(id, data) {
@@ -164,8 +160,6 @@ export default class MarkerController {
 		this.myWardMarkers[id] = ward
 
 		window.dispatchEvent(new CustomEvent('map_discover'))
-
-		this.numOfWards = this.myWardMarkers.length
 	}
 
 	onMyUserAdded(uid, data) {
@@ -192,6 +186,8 @@ export default class MarkerController {
 		this.myScout = new Scout(uid, data.position, 40, data.mode);
 		this.myScout.marker.addListener('click', function(e) {
 			this.map.panTo(e.latLng)
+			this.myScout.marker.setAnimation(google.maps.Animation.BOUNCE)
+
 			window.dispatchEvent(new CustomEvent('cursor_changed', { detail: { type: "SCOUT" } }));
 		}.bind(this))
 
@@ -200,7 +196,7 @@ export default class MarkerController {
 		this.isWalking = (data.mode == "WALKING")
 
 		if (data.mode == "WALKING") {
- 			this.myScout.walk(data, this.map)
+ 			this.myScout.marker.setPosition(data.position)
 		}
 	}
 
@@ -328,6 +324,10 @@ export default class MarkerController {
 				callback: 'onDropItem'
 			}
 		}));
+	}
+
+	createGold() {
+
 	}
 
 }

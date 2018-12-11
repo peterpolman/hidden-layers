@@ -39,10 +39,14 @@ export default class Scout {
 		this.marker.setPosition(new google.maps.LatLng(position))
 	}
 
+	setAnimation(animaton) {
+		this.marker.setAnimation(animation)
+	}
+
 	walk(data) {
 		var interval = 100;
 		var now = (new Date).getTime()
-		var elapsed = ((now - data.timestamp) < 0) ? (interval * 2) : (now - data.timestamp)
+		var elapsed = ((now - data.timestamp) < 0) ? (interval * 2) : (now - data.timestamp) // @TODO unsure about this part...
 		var offset = (elapsed / interval) * 1.4
 
 		this.path = new Path(data.uid, data.path, '#3D91CB', '#3D91CB');

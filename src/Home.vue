@@ -2,22 +2,30 @@
   <section class="section section-home">
     <div class="google-map" id="home-map"></div>
 
-    <button v-on:click="onSignalClick" :class="geoService.signal">
-    </button>
-    <button  v-bind:style="{ backgroundImage: 'url(' + assets.knight + ')' }" v-on:click="onPanUserClick" class="btn btn-user" v-if="mapController.markerController.myUserMarker">
-      {{mapController.markerController.myUserMarker.username}}
-    </button>
-    <button v-bind:style="{ backgroundImage: 'url(' + assets.scout + ')' }" v-on:click="onPanScoutClick" class="btn btn-scout">
-      Scout
-    </button>
-    <button v-bind:style="{ backgroundImage: 'url(' + ( (ui.dialogs.inventory) ? assets.inventoryOpen : assets.inventory )+ ')' }" v-on:click="onInventoryClick" class="btn btn-inventory">
-      Inventory
-    </button>
     <button class="btn btn-logout" v-on:click="logout">
       EXIT
     </button>
     <button v-bind:style="{ backgroundImage: 'url(' + assets.bell + ')', backgroundColor: (notificationController.isSubscribed) ? '#63EE23' : '#FF6B6B' }" v-on:click="onSetBellClick" class="btn btn-bell" v-if="notificationController.pushEnabled">
       PUSH
+    </button>
+    <button v-on:click="onSignalClick" :class="geoService.signal">
+
+    </button>
+
+    <div class="section-pan">
+      <button  v-bind:style="{ backgroundImage: 'url(' + assets.knight + ')' }" v-on:click="onPanUserClick" class="btn btn-user" v-if="mapController.markerController.myUserMarker">
+        User
+      </button>
+      <button v-bind:style="{ backgroundImage: 'url(' + assets.scout + ')' }" v-on:click="onPanScoutClick" class="btn btn-scout">
+        Scout
+      </button>
+      <button v-bind:style="{ backgroundImage: 'url(' + assets.ward + ')' }" v-on:click="onPanWardClick" class="btn btn-ward" v-if="mapController.markerController.myWardMarkers">
+        Ward
+      </button>
+    </div>
+
+    <button v-bind:style="{ backgroundImage: 'url(' + ( (ui.dialogs.inventory) ? assets.inventoryOpen : assets.inventory )+ ')' }" v-on:click="onInventoryClick" class="btn btn-inventory">
+      Inventory
     </button>
     <button class="btn btn-stop" v-on:click="onStopClick" v-if="this.mapController.markerController.isWalking">
       Stop
@@ -26,41 +34,59 @@
     <div class="dialog dialog--store" v-if="mapController.store">
       <header>
         <h2>{{ mapController.markerController.stores[mapController.store].name }}</h2>
-        <span>
-          {{ mapController.markerController.stores[mapController.store].category }}
-          [Owner: {{ (typeof mapController.markerController.userMarkers[mapController.markerController.stores[mapController.store].owner] != 'undefined') ? mapController.markerController.userMarkers[mapController.markerController.stores[mapController.store].owner]['username'] : 'you'  }}]
-        </span>
+        <div>
+          Category: {{ mapController.markerController.stores[mapController.store].category }}
+        </div>
+        <div>
+          Owner: {{ (typeof mapController.markerController.userMarkers[mapController.markerController.stores[mapController.store].owner] != 'undefined') ? mapController.markerController.userMarkers[mapController.markerController.stores[mapController.store].owner]['username'] : 'you'  }}
+        </div>
         <button v-on:click="onCloseStore">Close</button>
       </header>
-      <button
-        :key="key"
-        v-if="item"
-        v-for="(item, key) in mapController.markerController.stores[mapController.store].items"
-        v-bind:style="{ backgroundImage: 'url(' + assets[item.id] + ')' }"
-        v-bind:class="`btn ${item.class}`"
-        v-on:click="onGetItemFromStore(mapController.store, key, item)">
-        {{ item.name }}
-        <small>
-          {{ item.amount }}
-        </small>
-       </button>
+
+      <ul>
+        <li v-for="(item, key) in mapController.markerController.stores[mapController.store].items">
+          <button
+            :key="key"
+            v-if="item"
+            v-bind:style="{ backgroundImage: 'url(' + assets[item.id] + ')' }"
+            v-bind:class="`btn ${item.class}`"
+            v-on:click="onGetItemFromStore(mapController.store, key, item)">
+            {{ item.name }}
+            <small>
+              {{ item.amount }}
+            </small>
+           </button>
+         </li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+      </ul>
     </div>
 
     <div class="dialog dialog--inventory" v-if="this.itemController.inventoryOpen">
-      <button
-        :key="item.id"
-        v-if="item"
-        v-for="item in itemController.inventory"
-        v-bind:style="{ backgroundImage: 'url(' + assets[item.id] + ')' }"
-        v-bind:class="`btn ${item.class}`"
-        v-on:click="onItemClick(item)">
-        {{ item.name }}
-        <small v-if="item.amount">
-          {{ item.amount }}
-        </small>
-       </button>
+      <ul>
+        <li v-for="item in itemController.inventory">
+          <button
+            :key="item.id"
+            v-if="item"
+            v-bind:style="{ backgroundImage: 'url(' + assets[item.id] + ')' }"
+            v-bind:class="`btn ${item.class}`"
+            v-on:click="onItemClick(item)">
+            {{ item.name }}
+            <small v-if="item.amount">
+              {{ item.amount }}
+            </small>
+           </button>
+         </li>
+       </ul>
     </div>
-
   </section>
 </template>
 
@@ -113,7 +139,8 @@ export default {
       itemController: new ItemController(firebase.auth().currentUser.uid),
       notificationController: new NotificationController,
       isWalking: null,
-      userClass: null
+      userClass: null,
+      wardId: 0
     }
   },
   mounted() {
@@ -137,16 +164,21 @@ export default {
   methods: {
     onInventoryClick() {
       this.itemController.inventoryOpen = !this.itemController.inventoryOpen
+
+      if (!this.itemController.inventoryOpen) {
+        this.mapController.cursorMode = null
+      }
     },
     onGetItemFromStore(id, key, item) {
+      const storesRef = this.mapController.markerController.storesRef
+
       this.itemController.inventoryOpen = true
-      
+
       if (item.amount > 0) {
         var inventory = this.itemController.add(item)
         this.itemController.update(inventory)
       }
 
-      const storesRef = this.mapController.markerController.storesRef
       storesRef.child(id).child('items').child(key).update({ amount: 0 })
     },
     onCloseStore() {
@@ -164,20 +196,20 @@ export default {
         alert('Count them moneyzz!');
       }
     },
-    onSetBellClick: function() {
+    onSetBellClick() {
       if (this.notificationController.isSubscribed) {
         this.notificationController.unsubscribeUser();
       } else {
         this.notificationController.subscribeUser();
       }
     },
-    onSpawnWardClick: function() {
+    onSpawnWardClick() {
       window.dispatchEvent(new CustomEvent('cursor_changed', { detail: { type: "WARD" } }))
     },
-    onStopClick: function() {
+    onStopClick() {
       this.mapController.markerController.myScout.stop()
     },
-    onSignalClick: function() {
+    onSignalClick() {
       this.geoService.getPosition().then(function(r) {
         this.mapController.map.panTo(r)
         this.geoService.watchPosition()
@@ -185,15 +217,18 @@ export default {
         console.log(err)
       })
     },
-    onPanUserClick: function() {
+    onPanWardClick() {
+      const wardMarkers = this.mapController.markerController.myWardMarkers
+      this.mapController.map.panTo(wardMarkers[Object.keys(wardMarkers)[0]].position);
+    },
+    onPanUserClick() {
       this.mapController.map.panTo(this.mapController.markerController.myUserMarker.position)
     },
-    onPanScoutClick: function() {
-      this.mapController.cursorMode = "SCOUT"
-
+    onPanScoutClick() {
       if (this.mapController.markerController.myScout != null) {
         this.mapController.map.panTo(this.mapController.markerController.myScout.marker.position)
       }
+      // Deploy a new scout if there is none
       else {
         const uid = this.mapController.markerController.uid
         const data = {
@@ -206,7 +241,7 @@ export default {
         this.mapController.markerController.createScout(uid, data)
       }
     },
-    logout: function() {
+    logout() {
       firebase.auth().signOut().then(() => {
         this.$router.replace('login')
       })
@@ -276,8 +311,9 @@ export default {
     background-size: 50% 50%;
   }
 
-  .btn-ward {
-
+  .section-pan .btn-ward {
+    top: 90px;
+    right: 0;
   }
 
   .btn-logout {
@@ -335,43 +371,58 @@ export default {
     display: block;
     background: rgba(0,0,0,0.4);
     box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px;
-    display: flex;
-    flex-wrap: wrap;
     padding: 5px;
   }
 
-  .btn {
-    flex: 0 auto;
+  .dialog ul {
+    margin: 0;
+    list-style: none;
+    padding: 0;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    flex-wrap: wrap;
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .dialog li {
+    margin: 5px;
+    border-radius: 2px;
+    width: 40px;
+    height: 40px;
+    background-color: rgba(0,0,0,0.5);
+    display: block;
   }
 
   .dialog--store {
-    top: 50%;
-    left: 50%;
-    width: 250px;
-    height: 100px;
-    margin-left: -125px;
-    margin-top: -50px;
+    bottom: 155px;
+    right: 70px;
+    width: 150px;
+    height: 210px;
   }
 
   .dialog--store header {
     position: absolute;
     background: black;
-    top: -40px;
+    top: -52px;
+    max-height: 52px;
+    box-sizing: border-box;
     left: 0;
     color: white;
     padding: 5px 10px;
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
     font-size: 10px;
-    width: calc(100% - 20px) ;
+    width: 100%;
     margin: 0;
   }
 
   .dialog--store header button {
     background: transparent;
     position: absolute;
-    right: 10px;
-    top: 10px;
+    right: 5px;
+    top: 5px;
     height: 15px;
     width: 15px;
     font-size: 0;
@@ -399,7 +450,7 @@ export default {
     margin: 0;
     text-transform: uppercase;
     font-size: 12px;
-    width: 180px;
+    width: 125px;
     display: block;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -412,19 +463,16 @@ export default {
     height: 210px;
     bottom: 155px;
     right: 0;
+  }
+
+  .dialog--inventory ul {
     flex-direction: column;
-    display: flex;
-    flex-wrap: wrap;
   }
 
   .dialog .btn {
     flex: 0 auto;
     position: relative;
-    margin: 5px;
-  }
-
-  .btn-disabled {
-    background-color: rgba(0,0,0,0.5);
+    margin: 0px;
   }
 
   .geo-on,

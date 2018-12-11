@@ -114,6 +114,8 @@ export default class MapController {
   }
 
   onMapClick(e) {
+    this.markerController.myScout.marker.setAnimation(null)
+
     if (e.placeId) {
       e.stop()
 
