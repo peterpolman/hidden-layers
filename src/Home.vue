@@ -139,6 +139,8 @@ export default {
       this.itemController.inventoryOpen = !this.itemController.inventoryOpen
     },
     onGetItemFromStore(id, key, item) {
+      this.itemController.inventoryOpen = true
+      
       if (item.amount > 0) {
         var inventory = this.itemController.add(item)
         this.itemController.update(inventory)

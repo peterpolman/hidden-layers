@@ -228,7 +228,7 @@ export default class MarkerController {
 				body: `Your scout arrived at its destination!`,
 				icon: ScoutSrc
 			};
-			
+
 			window.swRegistration.showNotification(title, options);
 
 		}
@@ -296,17 +296,24 @@ export default class MarkerController {
 	}
 
 	createWard(data) {
-		this.wardsRef.child(data.id).set(data)
 
-		window.dispatchEvent(new CustomEvent('item_substract', {
-			detail: {
-				id: 'ward',
-				name: 'Ward',
-				amount: 1,
-				class: 'btn-ward',
-				callback: 'onDropItem'
-			}
-		}));
+		if (this.myWardMarkers.length < 3) {
+			this.wardsRef.child(data.id).set(data)
+
+			window.dispatchEvent(new CustomEvent('item_substract', {
+				detail: {
+					id: 'ward',
+					name: 'Ward',
+					amount: 1,
+					class: 'btn-ward',
+					callback: 'onDropItem'
+				}
+			}));
+		}
+		else {
+			alert('You can deploy up to 3 wards.')
+		}
+
 	}
 
 	removeWard(id) {

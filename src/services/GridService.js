@@ -44,7 +44,7 @@ export default class GridService {
 
     var geoms = {}
 
-    var myUserMarkerPath = this.circlePath(myUserMarker.position, 100, 256)
+    var myUserMarkerPath = this.circlePath(myUserMarker.position, 100, 128)
     var myUserMarkerPoly = new google.maps.Polygon({
       paths: [myUserMarkerPath]
     })
@@ -54,7 +54,7 @@ export default class GridService {
     geoms[userGeom.id] = userGeom;
 
     if (myScoutMarker != null) {
-      var myScoutMarkerPath = this.circlePath(myScoutMarker.position, 50, 256)
+      var myScoutMarkerPath = this.circlePath(myScoutMarker.position, 50, 128)
       var myScoutMarkerPoly = new google.maps.Polygon({
         paths: [myScoutMarkerPath]
       })
@@ -72,7 +72,7 @@ export default class GridService {
       for (var id in myWardMarkers) {
         myWardMarkers.length++
 
-        var wardPath = this.circlePath(myWardMarkers[id].position, 50, 256)
+        var wardPath = this.circlePath(myWardMarkers[id].position, 50, 128)
         var wardPoly = new google.maps.Polygon({
           paths: [wardPath]
         })
