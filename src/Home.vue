@@ -168,10 +168,6 @@ export default {
       this.cursorMode = e.detail.type
     }.bind(this))
 
-    window.addEventListener('map_discover', function(e) {
-      this.markerController.discover()
-    }.bind(this))
-
     // Start the service worker if available
     if ('serviceWorker' in navigator && 'PushManager' in window) {
       this.notificationController.pushEnabled = true
@@ -194,6 +190,11 @@ export default {
       }
     },
     onMapClick(e) {
+      const position = {
+        lat: e.latLng.lat(),
+        lng: e.latLng.lng()
+      }
+
       this.markerController.myScout.marker.setAnimation(null)
 
       if (e.placeId) {
@@ -211,15 +212,16 @@ export default {
 
       switch(this.cursorMode) {
         case "WARD":
-          const position = {
-            lat: e.latLng.lat(),
-            lng: e.latLng.lng()
-          }
           this.markerController.createWard({
             position: position,
             id: this.markerController.createMarkerId(position)
           })
-
+          break
+        case "GOLD":
+          this.markerController.createGold({
+            position: position,
+            id: this.markerController.createMarkerId(position)
+          })
           break
         case "SCOUT":
           this.markerController.moveScout(e.latLng)
@@ -260,8 +262,6 @@ export default {
 
       if (item.id === 'gold') {
         this.cursorMode = "GOLD"
-
-        alert('Count them moneyzz!');
       }
     },
     onSetBellClick() {

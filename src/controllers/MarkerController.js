@@ -5,10 +5,10 @@ import PathService from '../services/PathService'
 
 import Scout from '../models/Scout';
 import User from '../models/User';
+import Ward from '../models/Ward'
+import Gold from '../models/Gold'
 
 import ScoutSrc from '../assets/img/wolf-1.png';
-
-import Ward from '../models/Ward'
 
 export default class MarkerController {
 	constructor(uid) {
@@ -24,11 +24,15 @@ export default class MarkerController {
 
 		this.usersRef = firebase.database().ref('users')
 		this.scoutsRef = firebase.database().ref('scouts')
+		this.lootRef = firebase.database().ref('loot')
+
 		this.wardsRef = null
 
 		this.myUserMarker = null
 		this.myScout = null
 		this.myWardMarkers = []
+
+		this.lootMarkers = []
 
 		this.storesRef = firebase.database().ref('stores')
 		this.stores = []
@@ -82,7 +86,7 @@ export default class MarkerController {
 				this.onMyUserChanged(snap.key, snap.val())
 			}
 
-			window.dispatchEvent(new CustomEvent('map_discover'))
+			this.discover()
 		}.bind(this));
 
 		this.scoutsRef.on('child_added', function(snap) {
@@ -100,7 +104,7 @@ export default class MarkerController {
 				this.onMyScoutChanged(snap.key, snap.val());
 			}
 
-			window.dispatchEvent(new CustomEvent('map_discover'))
+			this.discover()
 		}.bind(this));
 
 		this.wardsRef.on('child_added', function(snap) {
@@ -109,6 +113,14 @@ export default class MarkerController {
 
 		this.wardsRef.on('child_removed', function(snap) {
 			this.onWardRemoved(snap.key, snap.val());
+		}.bind(this));
+
+		this.lootRef.on('child_added', function(snap) {
+			this.onLootAdded(snap.key, snap.val());
+		}.bind(this));
+
+		this.lootRef.on('child_removed', function(snap) {
+			this.onLootRemoved(snap.key, snap.val());
 		}.bind(this));
 
 		this.storesRef.on('child_added', function(snap) {
@@ -153,12 +165,6 @@ export default class MarkerController {
 		this.scoutMarkers = this.gridService.discover(this.scoutMarkers, visible)
 	}
 
-	onWardRemoved(id, val) {
-		this.myWardMarkers[id].setMap(null)
-		delete this.myWardMarkers[id]
-		window.dispatchEvent(new CustomEvent('map_discover'))
-	}
-
 	onWardAdded(id, data) {
 		const ward = new Ward(this.uid, data.position, 40, this.map)
 
@@ -168,7 +174,30 @@ export default class MarkerController {
 
 		this.myWardMarkers[id] = ward
 
-		window.dispatchEvent(new CustomEvent('map_discover'))
+		this.discover()
+	}
+
+	onWardRemoved(id, val) {
+		this.myWardMarkers[id].setMap(null)
+		delete this.myWardMarkers[id]
+		this.discover()
+	}
+
+	onLootAdded(id, data) {
+		const gold = new Gold(this.uid, data.position, 15, this.map)
+
+		gold.addListener('click', function(e) {
+			this.removeGold(id)
+		}.bind(this))
+
+		this.lootMarkers[id] = gold
+		this.discover()
+	}
+
+	onLootRemoved(id, val) {
+		this.lootMarkers[id].setMap(null)
+		delete this.lootMarkers[id]
+		this.discover()
 	}
 
 	onMyUserAdded(uid, data) {
@@ -339,8 +368,32 @@ export default class MarkerController {
 		}));
 	}
 
-	createGold() {
+	createGold(data) {
+		this.lootRef.child(data.id).set(data)
 
+		window.dispatchEvent(new CustomEvent('item_substract', {
+			detail: {
+				id: 'gold',
+				name: 'Gold',
+				amount: 1,
+				class: 'btn-gold',
+				callback: 'onDropItem'
+			}
+		}));
+	}
+
+	removeGold(id) {
+		this.lootRef.child(id).remove()
+
+		window.dispatchEvent(new CustomEvent('item_add', {
+			detail: {
+				id: 'gold',
+				name: 'Gold',
+				amount: 1,
+				class: 'btn-gold',
+				callback: 'onDropItem'
+			}
+		}));
 	}
 
 	getPlaceDetails(e) {

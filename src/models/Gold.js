@@ -1,6 +1,6 @@
-import wardSrc from '../assets/img/coin.png';
+import goldSrc from '../assets/img/coin.png';
 
-export default class Ward {
+export default class Gold {
   constructor(
     uid,
     position,
@@ -12,7 +12,7 @@ export default class Ward {
       position: new google.maps.LatLng(position.lat, position.lng),
       map: map,
       icon: {
-        url: wardSrc,
+        url: goldSrc,
         size: new google.maps.Size(size, size),
         scaledSize: new google.maps.Size(size, size),
         origin: new google.maps.Point(0,0),
