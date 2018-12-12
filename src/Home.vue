@@ -13,7 +13,7 @@
     </button>
 
     <div class="section-pan">
-      <button  v-bind:style="{ backgroundImage: 'url(' + assets.knight + ')' }" v-on:click="onPanUserClick" class="btn btn-user" v-if="markerController.myUserMarker">
+      <button  v-bind:style="{ backgroundImage: 'url(' + assets.knight + ')' }" v-on:click="onPanUserClick" class="btn btn-user" v-if="markerController.myUser">
         User
       </button>
       <button v-bind:style="{ backgroundImage: 'url(' + assets.scout + ')' }" v-on:click="onPanScoutClick" class="btn btn-scout">
@@ -109,6 +109,7 @@ import ArcherImg from './assets/img/archer-1.png'
 import WolfImg from './assets/img/wolf-1.png'
 import WardImg from './assets/img/ward-1.png'
 import GoldImg from './assets/img/coin.png'
+import WoodSwordImg from './assets/img/woodSword.png'
 import BellImg from './assets/img/badge.png'
 import InventoryImg from './assets/img/backpack.png'
 import InventoryOpenImg from './assets/img/backpack_open.png'
@@ -130,6 +131,7 @@ export default {
         archer: ArcherImg,
         bell: BellImg,
         gold: GoldImg,
+        sword: WoodSwordImg,
         inventory: InventoryImg,
         inventoryOpen: InventoryOpenImg
       },
@@ -184,8 +186,11 @@ export default {
     }
   },
   methods: {
+    onFight() {
+      alert(`Wooden Sword: "We'll be fightin those goblins very soon..."`);
+    },
     onPan() {
-      if (this.markerController.myUserMarker && this.markerController.myScout) {
+      if (this.markerController.myUser && this.markerController.myScout) {
         this.markerController.discover()
       }
     },
@@ -200,7 +205,7 @@ export default {
       if (e.placeId) {
         e.stop()
 
-        const visibility = this.markerController.gridService.setGrid(this.markerController.myUserMarker, this.markerController.myScout.marker, this.markerController.myWardMarkers)
+        const visibility = this.markerController.gridService.setGrid(this.markerController.myUser.marker, this.markerController.myScout.marker, this.markerController.myWardMarkers)
         const visible = new google.maps.Polygon({paths: visibility})
         const isHidden = google.maps.geometry.poly.containsLocation(e.latLng, visible)
 
@@ -219,8 +224,10 @@ export default {
           break
         case "GOLD":
           this.markerController.createGold({
+            uid: this.uid,
             position: position,
-            id: this.markerController.createMarkerId(position)
+            id: this.markerController.createMarkerId(position),
+            amount: this.amountToDrop
           })
           break
         case "SCOUT":
@@ -258,10 +265,12 @@ export default {
     onDropItem(item) {
       if (item.id === 'ward') {
         this.cursorMode = "WARD"
+        this.amountToDrop = 1
       }
 
       if (item.id === 'gold') {
         this.cursorMode = "GOLD"
+        this.amountToDrop = item.amount
       }
     },
     onSetBellClick() {
@@ -293,15 +302,15 @@ export default {
       }
     },
     onPanUserClick() {
-      this.map.panTo(this.markerController.myUserMarker.position)
+      this.map.panTo(this.markerController.myUser.marker.position)
     },
     onPanScoutClick() {
   		if (this.markerController.myScout == null) {
   			this.markerController.createScout(this.uid, {
   				uid: this.uid,
   				position: {
-  					lat: this.markerController.myUserMarker.position.lat(),
-  					lng: this.markerController.myUserMarker.position.lng()
+  					lat: this.markerController.myUser.marker.position.lat(),
+  					lng: this.markerController.myUser.marker.position.lng()
   				}
   			})
   		}
@@ -318,277 +327,6 @@ export default {
 }
 </script>
 
-<style scoped>
-  .google-map {
-    width: 100%;
-    height: 100%;
-    margin: 0 auto;
-    background: gray;
-    display: block;
-  }
-
-  .btn {
-    background: white;
-    border: 0px;
-    margin: 10px;
-    padding: 0px;
-    position: absolute;
-    cursor: pointer;
-    user-select: none;
-    border-radius: 2px;
-    height: 40px;
-    width: 40px;
-    box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1;
-    font-size: 0;
-    color: #666;
-    width: 40px;
-    height: 40px;
-    z-index: 1;
-    background-size: 80% 80%;
-    background-repeat: no-repeat;
-    background-position: center center;
-  }
-
-  .btn:focus {
-    outline: none;
-    box-shadow: 0 0 5px 2px #3D91CB;
-  }
-
-  .btn:active {
-    opacity: 0.8
-  }
-
-  .btn small {
-    position: absolute;
-    z-index: 1;
-    right: 0;
-    bottom: 0;
-    background: rgba(0,0,0,0.75);
-    color: white;
-    font-size: 7px;
-    padding: 2px 3px;
-    border-top-left-radius: 2px;
-  }
-
-  .btn-gold {
-    background-size: 50% 50%;
-  }
-
-  .section-pan .btn-ward {
-    top: 90px;
-    right: 0;
-  }
-
-  .btn-logout {
-    top: 0;
-    left: 0;
-    font-size: 10px;
-    color: white;
-    background-color: #333;
-  }
-
-  .btn-bell {
-    top: 45px;
-    left: 0px;
-    bottom: auto;
-    right: auto;
-    z-index: 1;
-    background-size: 60% 60%;
-    background-color: #333;
-  }
-
-  .btn-user {
-    top: 0;
-    right: 0;
-  }
-
-  .btn-scout {
-    top: 45px;
-    right: 0;
-  }
-
-  .btn-inventory {
-    bottom: 95px;
-    right: 0px;
-    background-size: 90% 90%;
-  }
-
-  .btn-stop {
-    bottom: 0px;
-    right: 50px;
-  }
-
-  .btn-stop:before {
-    content: "";
-    display: inline-block;
-    background: #666;
-    width: 14px;
-    height: 14px;
-    position: relative;
-  }
-
-  .dialog {
-    border-radius: 2px;
-    position: fixed;
-    margin: auto;
-    display: block;
-    background: rgba(0,0,0,0.4);
-    box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px;
-    padding: 5px;
-  }
-
-  .dialog ul {
-    margin: 0;
-    list-style: none;
-    padding: 0;
-    display: flex;
-    width: 100%;
-    height: 100%;
-    flex-wrap: wrap;
-    display: flex;
-    flex-wrap: wrap;
-  }
-
-  .dialog li {
-    margin: 5px;
-    border-radius: 2px;
-    width: 40px;
-    height: 40px;
-    background-color: rgba(0,0,0,0.5);
-    display: block;
-  }
-
-  .dialog--store {
-    bottom: 155px;
-    right: 70px;
-    width: 150px;
-    height: 210px;
-  }
-
-  .dialog--store header {
-    position: absolute;
-    background: black;
-    top: -52px;
-    max-height: 52px;
-    box-sizing: border-box;
-    left: 0;
-    color: white;
-    padding: 5px 10px;
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
-    font-size: 10px;
-    width: 100%;
-    margin: 0;
-  }
-
-  .dialog--store header button {
-    background: transparent;
-    position: absolute;
-    right: 5px;
-    top: 5px;
-    height: 15px;
-    width: 15px;
-    font-size: 0;
-    border: 0;
-    transform: rotate(45deg)
-  }
-
-  .dialog--store header button:before,
-  .dialog--store header button:after {
-    content: "";
-    display: block;
-    width: 15px;
-    height: 3px;
-    background: #EFEFEF;
-    position: absolute;
-    left: 0;
-  }
-
-  .dialog--store header button:after {
-    left: 0;
-    transform: rotate(-90deg);
-  }
-
-  .dialog--store h2 {
-    margin: 0;
-    text-transform: uppercase;
-    font-size: 12px;
-    width: 125px;
-    display: block;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .dialog--inventory {
-    width: 50px;
-    height: 210px;
-    bottom: 155px;
-    right: 0;
-  }
-
-  .dialog--inventory ul {
-    flex-direction: column;
-  }
-
-  .dialog .btn {
-    flex: 0 auto;
-    position: relative;
-    margin: 0px;
-  }
-
-  .geo-on,
-  .geo-off {
-    position: absolute;
-    display: flex;
-    margin: 10px;
-    padding: 0;
-    left: 0;
-    bottom: 0;
-    z-index: 1;
-    -webkit-appearance: none;
-    background: transparent;
-    border: 0;
-  }
-
-  .geo-on:before,
-  .geo-off:before {
-    content: "";
-    display: inline-flex;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: #f65858;
-    position: relative;
-  }
-
-  .geo-on:before {
-    background: #4df04d;
-  }
-
-  .geo-off:after {
-    content: "Tap to enable GPS";
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    position: relative;
-    margin-left: .5rem;
-
-    background-color: rgba(0,0,0,0.5);
-    color: white;
-    font-weight: bold;
-    font-size: 10px;
-    width: 95px;
-    border-radius: 5px;
-    height: 20px;
-    padding: 0 5px;
-  }
-
+<style scoped lang="scss">
+  @import './app.scss'
 </style>

@@ -2,16 +2,13 @@ import firebase from 'firebase';
 
 export default class PathService {
   constructor() {
-    this.directionsService = null
-  }
-
-  init() {
-    this.directionsService = new google.maps.DirectionsService()
   }
 
   route(uid, fromLatlng, toLatlng, travelMode) {
+    const directionsService = new google.maps.DirectionsService()
+
     return new Promise(function (resolve, reject) {
-      this.directionsService.route({ origin: fromLatlng, destination: toLatlng, travelMode: travelMode }, function(response, status) {
+      directionsService.route({ origin: fromLatlng, destination: toLatlng, travelMode: travelMode }, function(response, status) {
         if (status === google.maps.DirectionsStatus.OK) {
           const sphericalLib = google.maps.geometry.spherical
           const route = response.routes[0].overview_path

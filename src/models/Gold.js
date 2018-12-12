@@ -1,26 +1,28 @@
-import goldSrc from '../assets/img/coin.png';
+import goldSrc from '../assets/img/coinstack.png';
 
 export default class Gold {
   constructor(
     uid,
+    id,
     position,
     size,
-    map
+    amount
   ) {
-    var marker = new google.maps.Marker({
+    this.amount = amount
+
+    return new google.maps.Marker({
       uid: uid,
+      id: id,
       position: new google.maps.LatLng(position.lat, position.lng),
-      map: map,
+      amount: amount,
       icon: {
         url: goldSrc,
         size: new google.maps.Size(size, size),
         scaledSize: new google.maps.Size(size, size),
         origin: new google.maps.Point(0,0),
-        anchor: new google.maps.Point(size / 2, size)
+        anchor: new google.maps.Point(size / 1, size)
       }
     })
-
-    return marker;
   }
 
   set(key, value) {

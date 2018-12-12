@@ -7,6 +7,7 @@ import Scout from '../models/Scout';
 import User from '../models/User';
 import Ward from '../models/Ward'
 import Gold from '../models/Gold'
+import Goblin from '../models/Goblin'
 
 import ScoutSrc from '../assets/img/wolf-1.png';
 
@@ -25,18 +26,18 @@ export default class MarkerController {
 		this.usersRef = firebase.database().ref('users')
 		this.scoutsRef = firebase.database().ref('scouts')
 		this.lootRef = firebase.database().ref('loot')
-
+		this.storesRef = firebase.database().ref('stores')
 		this.wardsRef = null
 
-		this.myUserMarker = null
+		this.myUser = null
 		this.myScout = null
 		this.myWardMarkers = []
 
-		this.lootMarkers = []
-
-		this.storesRef = firebase.database().ref('stores')
-		this.stores = []
 		this.store = null
+		this.stores = []
+
+		this.goblinMarkers = []
+		this.lootMarkers = []
 
 		this.userMarkers = []
 		this.scoutMarkers = []
@@ -53,8 +54,6 @@ export default class MarkerController {
 
 		this.map = map
 		this.wardsRef = firebase.database().ref('wards').child(this.uid)
-
-		this.pathService.init()
 
 		this.places = new google.maps.places.PlacesService(this.map);
 
@@ -87,6 +86,14 @@ export default class MarkerController {
 			}
 
 			this.discover()
+		}.bind(this));
+
+		this.storesRef.on('child_added', function(snap) {
+			this.onStoreAdded(snap.key, snap.val());
+		}.bind(this));
+
+		this.storesRef.on('child_changed', function(snap) {
+			this.onStoreChanged(snap.key, snap.val());
 		}.bind(this));
 
 		this.scoutsRef.on('child_added', function(snap) {
@@ -123,19 +130,25 @@ export default class MarkerController {
 			this.onLootRemoved(snap.key, snap.val());
 		}.bind(this));
 
-		this.storesRef.on('child_added', function(snap) {
-			this.onStoreAdded(snap.key, snap.val());
-		}.bind(this));
-
-		this.storesRef.on('child_changed', function(snap) {
-			this.onStoreChanged(snap.key, snap.val());
-		}.bind(this));
-
 	}
 
 	onStoreAdded(id, data) {
+		const randInt = Math.floor(Math.random() * 100)
+
 		this.stores[id] = data
 		this.stores[id].items.sort()
+
+		if ( randInt > 85 ) {
+			const goblin = new Goblin(this.uid, data.position, 40)
+			this.goblinMarkers[id] = goblin.marker
+
+			this.goblinMarkers[id].addListener('click', function(e) {
+				alert('Goblin: "' + goblin.greeting + '"');
+			})
+
+			this.goblinMarkers[id].setMap(this.map)
+			this.goblinMarkers[id].setVisible(false)
+		}
 	}
 
 	onStoreChanged(id, data) {
@@ -149,7 +162,14 @@ export default class MarkerController {
 	}
 
 	discover() {
-		const visibility = this.gridService.setGrid(this.myUserMarker, this.myScout.marker, this.myWardMarkers)
+		let visible, visibility
+
+		if (this.myScout != null) {
+			visibility = this.gridService.setGrid(this.myUser.marker, this.myScout.marker, this.myWardMarkers)
+		}
+		else {
+			visibility = this.gridService.setGrid(this.myUser.marker, null, this.myWardMarkers)
+		}
 
 		// Should not be removed once out of the bounds_changed event
 		this.map.data.forEach(function(feature) {
@@ -159,11 +179,12 @@ export default class MarkerController {
 		this.map.data.add({geometry: new google.maps.Data.Polygon(visibility)})
 		this.map.data.setStyle({fillColor: '#000', fillOpacity: .5, strokeWeight: 0, clickable: false});
 
-		const visible = new google.maps.Polygon({paths: visibility})
+		visible = new google.maps.Polygon({paths: visibility})
 
 		this.userMarkers = this.gridService.discover(this.userMarkers, visible)
 		this.scoutMarkers = this.gridService.discover(this.scoutMarkers, visible)
 		this.lootMarkers = this.gridService.discover(this.lootMarkers, visible)
+		this.goblinMarkers = this.gridService.discover(this.goblinMarkers, visible)
 	}
 
 	onWardAdded(id, data) {
@@ -185,42 +206,47 @@ export default class MarkerController {
 	}
 
 	onLootAdded(id, data) {
-		const gold = new Gold(this.uid, data.position, 15, this.map)
+		const gold = new Gold(this.uid, this.id, data.position, 25, data.amount)
 
 		gold.addListener('click', function(e) {
-			this.removeGold(id)
+			alert(`You picked up ${data.amount} Gold`)
+			this.removeGold(data)
 		}.bind(this))
 
 		this.lootMarkers[id] = gold
+		this.lootMarkers[id].setMap(this.map)
+		this.lootMarkers[id].setVisible(false)
+
 		this.discover()
 	}
 
 	onLootRemoved(id, val) {
 		this.lootMarkers[id].setMap(null)
 		delete this.lootMarkers[id]
+
 		this.discover()
 	}
 
 	onMyUserAdded(uid, data) {
-		this.myUserMarker = new User(uid, data.position, data.userClass, data.username, data.email, 50, this.map, true);
-		this.myUserMarker.addListener('click', function(e) {
+		this.myUser = new User(uid, data.position, data.userClass, data.username, data.email, 50);
+		this.myUser.marker.addListener('click', function(e) {
 			const content = `<strong>${data.username}</strong><br><small>Last online: ${new Date(data.lastOnline).toLocaleString("nl-NL")}</small>`
 
 			this.userInfoWindow.setContent(content);
-			this.userInfoWindow.open(this.map, this.myUserMarker);
+			this.userInfoWindow.open(this.map, this.myUser.marker);
 
 			this.map.panTo(e.latLng)
 		}.bind(this))
 
-		this.myUserMarker.setMap(this.map);
-		this.map.panTo(this.myUserMarker.position)
+		this.myUser.marker.setMap(this.map);
+		this.map.panTo(this.myUser.marker.position)
 
 		this.discover()
 	}
 
 	onMyUserChanged(uid, data) {
 		const latlng = new google.maps.LatLng(data.position.lat, data.position.lng)
-		this.myUserMarker.setPosition(latlng)
+		this.myUser.marker.setPosition(latlng)
 	}
 
 	onMyScoutAdded(uid, data) {
@@ -264,7 +290,7 @@ export default class MarkerController {
 
 			const title = '🔔 Scout Arrived';
 			const options = {
-				body: `Your scout arrived at its destination!`,
+				body: `Scout has stopped walking.`,
 				icon: ScoutSrc
 			};
 
@@ -274,7 +300,7 @@ export default class MarkerController {
 	}
 
 	onUserAdded(uid, data) {
-		this.userMarkers[uid] = new User(uid, data.position, data.userClass, data.username, data.email, 50, this.map, false);
+		this.userMarkers[uid] = new User(uid, data.position, data.userClass, data.username, data.email, 50).marker;
 		this.userMarkers[uid].addListener('click', function(e) {
 			const content = `<strong>${data.username}</strong><br><small>Last online: ${new Date(data.lastOnline).toLocaleString("nl-NL")}</small>`
 
@@ -284,6 +310,7 @@ export default class MarkerController {
 			this.map.panTo(e.latLng)
 		}.bind(this))
 
+		this.userMarkers[uid].setMap(this.map);
 		this.userMarkers[uid].setVisible(true);
 	}
 
@@ -370,7 +397,7 @@ export default class MarkerController {
 	}
 
 	createGold(data) {
-		const visibility = this.gridService.setGrid(this.myUserMarker, this.myScout.marker, this.myWardMarkers)
+		const visibility = this.gridService.setGrid(this.myUser.marker, this.myScout.marker, this.myWardMarkers)
 		const visible = new google.maps.Polygon({paths: visibility})
 		const latLng = new google.maps.LatLng(data.position)
 		const isHidden = google.maps.geometry.poly.containsLocation(latLng, visible)
@@ -383,7 +410,7 @@ export default class MarkerController {
 				detail: {
 					id: 'gold',
 					name: 'Gold',
-					amount: 1,
+					amount: data.amount,
 					class: 'btn-gold',
 					callback: 'onDropItem'
 				}
@@ -391,14 +418,14 @@ export default class MarkerController {
 		}
 	}
 
-	removeGold(id) {
-		this.lootRef.child(id).remove()
+	removeGold(item) {
+		this.lootRef.child(item.id).remove()
 
 		window.dispatchEvent(new CustomEvent('item_add', {
 			detail: {
 				id: 'gold',
 				name: 'Gold',
-				amount: 1,
+				amount: item.amount,
 				class: 'btn-gold',
 				callback: 'onDropItem'
 			}
@@ -414,28 +441,40 @@ export default class MarkerController {
 			}, function(place, status) {
 				if (status === google.maps.places.PlacesServiceStatus.OK) {
 					const dbRef = this.storesRef
+					const availableItems = [
+						{
+							id: 'ward',
+							name: 'Ward',
+							amount: Math.floor(Math.random() * 3),
+							class: 'btn-ward',
+							callback: 'onDropItem'
+						},
+						{
+							id: 'gold',
+							name: 'Gold',
+							amount: Math.floor(Math.random() * 20),
+							class: 'btn-gold',
+							callback: 'onDropItem'
+						},
+						{
+							id: 'sword',
+							name: 'Wooden Sword',
+							amount: 1,
+							class: 'btn-sword',
+							callback: 'onFight'
+						}
+					]
 
 					dbRef.child(e.placeId).set({
 						id: e.placeId,
 						owner: this.uid,
 						name: place.name,
 						category: place.types[0],
-						items: [
-							{
-								id: 'ward',
-								name: 'Ward',
-								amount: Math.floor(Math.random() * 3),
-								class: 'btn-ward',
-								callback: 'onDropItem'
-							},
-							{
-								id: 'gold',
-								name: 'Gold',
-								amount: Math.floor(Math.random() * 20),
-								class: 'btn-gold',
-								callback: 'onDropItem'
-							}
-						]
+						position: {
+							lat: place.geometry.location.lat(),
+							lng: place.geometry.location.lng()
+						},
+						items: availableItems
 					})
 
 					this.store = e.placeId

@@ -2,7 +2,7 @@ import firebase from 'firebase'
 
 export default class ItemController {
   constructor(uid) {
-    this.inventory = [null,null,null,null,]
+    this.inventory = [null, null, null, null]
     this.inventoryOpen = false
 
     this.itemsRef = firebase.database().ref('items').child(uid)

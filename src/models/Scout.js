@@ -44,7 +44,7 @@ export default class Scout {
 	}
 
 	walk(data) {
-		var interval = 100;
+		var interval = 200;
 		var now = (new Date).getTime()
 		var elapsed = ((now - data.timestamp) < 0) ? (interval * 2) : (now - data.timestamp) // @TODO unsure about this part...
 		var offset = (elapsed / interval) * 1.4

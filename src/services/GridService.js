@@ -5,9 +5,9 @@ export default class GridService {
   }
 
   discover(markers, visibility) {
-    for (let uid in markers) {
-      var isHidden = google.maps.geometry.poly.containsLocation(markers[uid].position, visibility)
-      markers[uid].setVisible(!isHidden)
+    for (let id in markers) {
+      var isHidden = google.maps.geometry.poly.containsLocation(markers[id].position, visibility)
+      markers[id].setVisible(!isHidden)
     }
 
     return markers
@@ -31,7 +31,7 @@ export default class GridService {
     return id.replace(/\./g,'')
   }
 
-  setGrid(myUserMarker, myScoutMarker = null, myWardMarkers = []) {
+  setGrid(myUserMarker, myScoutMarker, myWardMarkers = []) {
     const outerBounds = [
       new google.maps.LatLng({lng: -11.3600718975, lat: 40.4630057984}),
       new google.maps.LatLng({lng: 31.5241158009, lat: 40.4630057984}),

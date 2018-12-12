@@ -8,28 +8,25 @@ export default class User {
     userClass,
     username,
     email,
-    size,
-    map,
-    me
+    size
   ) {
-    this.avatars = {
+    const avatars = {
       knight: knightSrc,
       archer: archerSrc,
     }
-    return new google.maps.Marker({
+
+    this.marker = new google.maps.Marker({
       uid: uid,
       position: new google.maps.LatLng(position.lat, position.lng),
       username: username,
       email: email,
-      map: map,
       icon: {
-        url: this.avatars[userClass],
+        url: avatars[userClass],
         size: new google.maps.Size(size, size),
         scaledSize: new google.maps.Size(size, size),
         origin: new google.maps.Point(0,0),
         anchor: new google.maps.Point(size / 2, size / 1)
-      },
-      animation: (me === true) ? google.maps.Animation.DROP : null
+      }
     });
   }
 }
