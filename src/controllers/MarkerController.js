@@ -163,6 +163,7 @@ export default class MarkerController {
 
 		this.userMarkers = this.gridService.discover(this.userMarkers, visible)
 		this.scoutMarkers = this.gridService.discover(this.scoutMarkers, visible)
+		this.lootMarkers = this.gridService.discover(this.lootMarkers, visible)
 	}
 
 	onWardAdded(id, data) {
@@ -369,17 +370,25 @@ export default class MarkerController {
 	}
 
 	createGold(data) {
-		this.lootRef.child(data.id).set(data)
+		const visibility = this.gridService.setGrid(this.myUserMarker, this.myScout.marker, this.myWardMarkers)
+		const visible = new google.maps.Polygon({paths: visibility})
+		const latLng = new google.maps.LatLng(data.position)
+		const isHidden = google.maps.geometry.poly.containsLocation(latLng, visible)
 
-		window.dispatchEvent(new CustomEvent('item_substract', {
-			detail: {
-				id: 'gold',
-				name: 'Gold',
-				amount: 1,
-				class: 'btn-gold',
-				callback: 'onDropItem'
-			}
-		}));
+		if (!isHidden) {
+
+			this.lootRef.child(data.id).set(data)
+
+			window.dispatchEvent(new CustomEvent('item_substract', {
+				detail: {
+					id: 'gold',
+					name: 'Gold',
+					amount: 1,
+					class: 'btn-gold',
+					callback: 'onDropItem'
+				}
+			}));
+		}
 	}
 
 	removeGold(id) {
