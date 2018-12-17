@@ -12,7 +12,6 @@ import Goblin from '../models/Goblin'
 import Path from '../models/Path';
 
 import ScoutSrc from '../assets/img/wolf-0.png';
-import ScoutSelectedSrc from '../assets/img/wolf-1.png';
 
 export default class MarkerController {
 	constructor(uid) {
@@ -49,6 +48,8 @@ export default class MarkerController {
 
 		this.userInfoWindow = null
 		this.scoutInfoWindow = null
+
+		this.isWalking = false
 	}
 
 	init(map) {
@@ -180,7 +181,7 @@ export default class MarkerController {
 		}.bind(this))
 
 		this.map.data.add({geometry: new google.maps.Data.Polygon(visibility)})
-		this.map.data.setStyle({fillColor: '#000', fillOpacity: .5, strokeWeight: 0, clickable: false});
+		this.map.data.setStyle({fillColor: '#000', fillOpacity: .75, strokeWeight: 0, clickable: false});
 
 		visible = new google.maps.Polygon({paths: visibility})
 
@@ -256,7 +257,8 @@ export default class MarkerController {
 		this.myScout = new Scout(uid, data.position, 40, data.mode);
 		this.myScout.marker.addListener('click', function(e) {
 			this.map.panTo(e.latLng)
-			this.myScout.setIcon(ScoutSelectedSrc)
+			this.myScout.indicator.setPosition(e.latLng)
+			this.myScout.indicator.setMap(this.map)
 
 			window.dispatchEvent(new CustomEvent('cursor_changed', { detail: { type: "SCOUT" } }));
 		}.bind(this))
@@ -264,6 +266,7 @@ export default class MarkerController {
 		this.myScout.marker.setMap(this.map);
 
 		if (data.mode == "WALKING") {
+			this.isWalking = true
 
 			if (this.myScout.path == null) {
 				this.myScout.path = new Path(data.uid, data.path, '#3D91CB', '#3D91CB');
@@ -278,11 +281,11 @@ export default class MarkerController {
 
 	onMyScoutChanged(uid, data) {
 		this.myScout.set('mode', data.mode)
-		this.isWalking = this.myScout.isWalking
 
 		clearTimeout(this.myScout.pathTimer)
 
 		if (data.mode == "WALKING") {
+			this.isWalking = true
 			this.myScout.setPosition(data.position)
 
 			if (this.myScout.path == null) {
@@ -294,6 +297,7 @@ export default class MarkerController {
 		}
 
 		if (data.mode == "STANDING") {
+			this.isWalking = false
 			if (this.myScout.path != null) {
 				this.myScout.path.setMap(null)
 				this.myScout.path = null

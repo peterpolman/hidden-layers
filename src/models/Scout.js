@@ -24,6 +24,19 @@ export default class Scout {
 				anchor: new google.maps.Point(size / 2, size / 2)
 			}
 		});
+
+		this.indicator = new google.maps.Marker({
+			position: new google.maps.LatLng(position.lat, position.lng),
+			zIndex: -1,
+			icon: {
+	      path: 'M126,11c0,6.1-28.2,11-63,11S0,17.1,0,11S28.2,0,63,0S126,4.9,126,11z',
+	      fillColor: '#3D91CB',
+	      fillOpacity: 1,
+	      scale: .4,
+				strokeWeight: 0,
+				anchor: new google.maps.Point(67,-28)
+	    }
+		});
 	}
 
 	set(key, value) {
@@ -53,8 +66,8 @@ export default class Scout {
 	}
 
 	nextStep(data) {
-		var interval = 100;
-		var meterPerSecond = 1
+		var interval = 60;
+		var meterPerSecond = .25
 		var offset = ((data.timestamp - data.startTimestamp) / interval) * meterPerSecond
 
 		var walk = function() {

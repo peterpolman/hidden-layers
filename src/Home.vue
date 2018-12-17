@@ -201,8 +201,6 @@ export default {
         lng: e.latLng.lng()
       }
 
-      this.markerController.myScout.setIcon(this.assets.scout)
-
       if (e.placeId) {
         e.stop()
 
@@ -232,6 +230,7 @@ export default {
           })
           break
         case "SCOUT":
+          this.markerController.myScout.indicator.setMap(null)
           this.markerController.moveScout(e.latLng)
           this.cursorMode = null
 
