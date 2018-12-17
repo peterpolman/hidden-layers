@@ -59,6 +59,7 @@ export default class Scout {
 
 	setPosition(position) {
 		this.marker.setPosition(new google.maps.LatLng(position))
+		this.indicator.setPosition(new google.maps.LatLng(position))
 	}
 
 	setAnimation(animaton) {

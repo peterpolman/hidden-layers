@@ -232,8 +232,6 @@ export default {
         case "SCOUT":
           this.markerController.myScout.indicator.setMap(null)
           this.markerController.moveScout(e.latLng)
-          this.cursorMode = null
-
           break
       }
     },
