@@ -76,19 +76,19 @@ module.exports = {
     },
     extensions: ['*', '.js', '.vue', '.json']
   },
-  // devServer: {
-  //   historyApiFallback: true,
-  //   noInfo: false,
-  //   overlay: true,
-  //   https: {
-  //     key: fs.readFileSync('certificates/localhost.key'),
-  //     cert: fs.readFileSync('certificates/localhost.crt')
-  //   }
-  // },
+  devServer: {
+    historyApiFallback: true,
+    noInfo: false,
+    overlay: true,
+    https: {
+      key: fs.readFileSync('certificates/localhost.key'),
+      cert: fs.readFileSync('certificates/localhost.crt')
+    }
+  },
   performance: {
     hints: false
-  }
-  // devtool: '#eval-source-map'
+  },
+  devtool: '#eval-source-map'
 }
 
 if (process.env.NODE_ENV === 'production') {

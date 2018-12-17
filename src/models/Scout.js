@@ -1,24 +1,23 @@
 import firebase from 'firebase/app';
 import 'firebase/database';
 
-import scoutSrc from '../assets/img/wolf-1.png';
+import ScoutSrc from '../assets/img/wolf-0.png';
+
 import config from '../config.js'
-import Path from './Path';
 
 export default class Scout {
 	constructor(uid, position, size, mode) {
 		this.scoutRef = firebase.database().ref('scouts').child(uid)
-
+		this.size = size
 		this.path = null
 		this.pathTimer = null
-
 		this.mode = 'STANDING'
-
+		this.isWalking = (mode == "WALKING")
 		this.marker = new google.maps.Marker({
 			uid: uid,
 			position: new google.maps.LatLng(position.lat, position.lng),
 			icon: {
-				url: scoutSrc,
+				url: ScoutSrc,
 				size: new google.maps.Size(size, size),
 				scaledSize: new google.maps.Size(size, size),
 				origin: new google.maps.Point(0, 0),
@@ -35,6 +34,16 @@ export default class Scout {
 		return this[key]
 	}
 
+	setIcon(icon) {
+		this.marker.setIcon({
+			url: icon,
+			size: new google.maps.Size(this.size, this.size),
+			scaledSize: new google.maps.Size(this.size, this.size),
+			origin: new google.maps.Point(0, 0),
+			anchor: new google.maps.Point(this.size / 2, this.size / 2)
+		})
+	}
+
 	setPosition(position) {
 		this.marker.setPosition(new google.maps.LatLng(position))
 	}
@@ -43,30 +52,28 @@ export default class Scout {
 		this.marker.setAnimation(animation)
 	}
 
-	walk(data) {
-		var interval = 200;
-		var now = (new Date).getTime()
-		var elapsed = ((now - data.timestamp) < 0) ? (interval * 2) : (now - data.timestamp) // @TODO unsure about this part...
-		var offset = (elapsed / interval) * 1.4
-
-		this.path = new Path(data.uid, data.path, '#3D91CB', '#3D91CB');
+	nextStep(data) {
+		var interval = 100;
+		var meterPerSecond = 1
+		var offset = ((data.timestamp - data.startTimestamp) / interval) * meterPerSecond
 
 		var walk = function() {
 			if (offset >= data.totalDist) {
-        clearInterval(this.pathTimer)
-
 				this.update({
-					totalDist: 0,
-					mode: "STANDING"
+					mode: "STANDING",
+					totalDist: null,
+					path: null,
+					timestamp: null,
+					startTimestamp: null
 				})
 			}
 			else {
-				offset = ((offset + 1.4) >= data.totalDist) ? data.totalDist : offset + 1.4;
-
-				var position = this.path.GetPointAtDistance(offset);
+				const point = ((offset + meterPerSecond) > data.totalDist) ? data.totalDist : offset
+				const position = this.path.GetPointAtDistance(point + meterPerSecond);
 
 				if (position != null) {
 					this.update({
+						timestamp: firebase.database.ServerValue.TIMESTAMP,
 						position: {
 							lat: position.lat(),
 							lng: position.lng()
@@ -76,18 +83,17 @@ export default class Scout {
 			}
 		}
 
-		this.pathTimer = setInterval(walk.bind(this), interval)
-
-		return this.path
+		this.pathTimer = setTimeout(walk.bind(this), interval)
 	}
 
 	stop() {
-		clearInterval(this.pathTimer)
-
 		return this.update({
-      totalDist: 0,
-      mode: "STANDING"
-    })
+			mode: "STANDING",
+			totalDist: null,
+			path: null,
+			timestamp: null,
+			startTimestamp: null
+		})
 	}
 
 	update(data) {

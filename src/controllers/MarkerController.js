@@ -9,8 +9,10 @@ import User from '../models/User';
 import Ward from '../models/Ward'
 import Gold from '../models/Gold'
 import Goblin from '../models/Goblin'
+import Path from '../models/Path';
 
-import ScoutSrc from '../assets/img/wolf-1.png';
+import ScoutSrc from '../assets/img/wolf-0.png';
+import ScoutSelectedSrc from '../assets/img/wolf-1.png';
 
 export default class MarkerController {
 	constructor(uid) {
@@ -30,6 +32,8 @@ export default class MarkerController {
 		this.storesRef = firebase.database().ref('stores')
 		this.wardsRef = null
 
+		this.path = null
+
 		this.myUser = null
 		this.myScout = null
 		this.myWardMarkers = []
@@ -45,8 +49,6 @@ export default class MarkerController {
 
 		this.userInfoWindow = null
 		this.scoutInfoWindow = null
-
-		this.isWalking = false
 	}
 
 	init(map) {
@@ -254,17 +256,21 @@ export default class MarkerController {
 		this.myScout = new Scout(uid, data.position, 40, data.mode);
 		this.myScout.marker.addListener('click', function(e) {
 			this.map.panTo(e.latLng)
-			this.myScout.marker.setAnimation(google.maps.Animation.BOUNCE)
+			this.myScout.setIcon(ScoutSelectedSrc)
 
 			window.dispatchEvent(new CustomEvent('cursor_changed', { detail: { type: "SCOUT" } }));
 		}.bind(this))
 
 		this.myScout.marker.setMap(this.map);
 
-		this.isWalking = (data.mode == "WALKING")
-
 		if (data.mode == "WALKING") {
- 			this.myScout.marker.setPosition(data.position)
+
+			if (this.myScout.path == null) {
+				this.myScout.path = new Path(data.uid, data.path, '#3D91CB', '#3D91CB');
+				this.myScout.path.setMap(this.map)
+			}
+
+			this.myScout.nextStep(data, this.path)
 		}
 
 		this.discover()
@@ -272,22 +278,26 @@ export default class MarkerController {
 
 	onMyScoutChanged(uid, data) {
 		this.myScout.set('mode', data.mode)
+		this.isWalking = this.myScout.isWalking
 
-		this.isWalking = (data.mode == "WALKING")
+		clearTimeout(this.myScout.pathTimer)
 
 		if (data.mode == "WALKING") {
 			this.myScout.setPosition(data.position)
 
 			if (this.myScout.path == null) {
-				var path = this.myScout.walk(data)
-				path.setMap(this.map)
+				this.myScout.path = new Path(data.uid, data.path, '#3D91CB', '#3D91CB');
+				this.myScout.path.setMap(this.map)
 			}
 
+			this.myScout.nextStep(data)
 		}
 
 		if (data.mode == "STANDING") {
-			this.myScout.path.setMap(null)
-			this.myScout.set('path', null)
+			if (this.myScout.path != null) {
+				this.myScout.path.setMap(null)
+				this.myScout.path = null
+			}
 
 			const title = '🔔 Scout Arrived';
 			const options = {

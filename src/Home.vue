@@ -66,7 +66,6 @@
         <li></li>
         <li></li>
         <li></li>
-        <li></li>
       </ul>
     </div>
 
@@ -109,7 +108,7 @@ import GeoService from './services/GeoService'
 // Import assets
 import KnightImg from './assets/img/knight-1.png'
 import ArcherImg from './assets/img/archer-1.png'
-import WolfImg from './assets/img/wolf-1.png'
+import WolfImg from './assets/img/wolf-0.png'
 import WardImg from './assets/img/ward-1.png'
 import GoldImg from './assets/img/coin.png'
 import WoodSwordImg from './assets/img/woodSword.png'
@@ -144,7 +143,6 @@ export default {
       itemController: new ItemController(firebase.auth().currentUser.uid),
       notificationController: new NotificationController,
       markerController: new MarkerController(firebase.auth().currentUser.uid),
-      isWalking: null,
       userClass: null,
       wardId: 0
     }
@@ -203,7 +201,7 @@ export default {
         lng: e.latLng.lng()
       }
 
-      this.markerController.myScout.marker.setAnimation(null)
+      this.markerController.myScout.setIcon(this.assets.scout)
 
       if (e.placeId) {
         e.stop()

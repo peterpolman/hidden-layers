@@ -17,13 +17,14 @@ export default class PathService {
 
           if (totalDist < 5000) {
             const data = {
-              mode: travelMode,
               uid: uid,
               position: {
                 lat: fromLatlng.lat(),
                 lng: fromLatlng.lng()
               },
+              mode: travelMode,
               totalDist: totalDist,
+              startTimestamp: firebase.database.ServerValue.TIMESTAMP,
               timestamp: firebase.database.ServerValue.TIMESTAMP,
               path: []
             }

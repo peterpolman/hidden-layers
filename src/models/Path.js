@@ -15,7 +15,6 @@ export default class Path {
     return new google.maps.Polyline({
         uid: uid,
         path: path,
-        strokeColor: strokeColor,
         strokeOpacity: 0,
         strokeWeight: 0,
         icons: [{
