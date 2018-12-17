@@ -21,7 +21,8 @@
 </template>
 
 <script>
-import firebase from 'firebase'
+import firebase from 'firebase/app';
+import 'firebase/auth';
 
 import MarkerController from './controllers/MarkerController';
 import MapBackground from './assets/img/map.png';

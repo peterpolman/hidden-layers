@@ -1,8 +1,8 @@
+import firebase from 'firebase/app';
+import 'firebase/database';
+
 import scoutSrc from '../assets/img/wolf-1.png';
-
-import firebase from 'firebase';
 import config from '../config.js'
-
 import Path from './Path';
 
 export default class Scout {

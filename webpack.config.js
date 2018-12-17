@@ -60,19 +60,7 @@ module.exports = {
         test: /\.js$/,
         loader: 'babel-loader',
         exclude: /node_modules/
-      },/*
-      {
-        test: /\.(png|jpg|gif)$/i,
-        use: [
-          {
-            loader: 'url-loader',
-            options: {
-              mimetype: 'image/png',
-              limit: 32768
-            }
-          }
-        ]
-      },*/
+      },
       {
         test: /\.(png|jpg|gif|svg)$/,
         loader: 'file-loader',
@@ -88,23 +76,23 @@ module.exports = {
     },
     extensions: ['*', '.js', '.vue', '.json']
   },
-  devServer: {
-    historyApiFallback: true,
-    noInfo: false,
-    overlay: true,
-    https: {
-      key: fs.readFileSync('certificates/localhost.key'),
-      cert: fs.readFileSync('certificates/localhost.crt')
-    }
-  },
+  // devServer: {
+  //   historyApiFallback: true,
+  //   noInfo: false,
+  //   overlay: true,
+  //   https: {
+  //     key: fs.readFileSync('certificates/localhost.key'),
+  //     cert: fs.readFileSync('certificates/localhost.crt')
+  //   }
+  // },
   performance: {
     hints: false
-  },
-  devtool: '#eval-source-map'
+  }
+  // devtool: '#eval-source-map'
 }
 
 if (process.env.NODE_ENV === 'production') {
-  module.exports.devtool = '#source-map'
+  // module.exports.devtool = '#source-map'
   // http://vue-loader.vuejs.org/en/workflow/production.html
   module.exports.plugins = (module.exports.plugins || []).concat([
     new webpack.DefinePlugin({
@@ -112,14 +100,16 @@ if (process.env.NODE_ENV === 'production') {
         NODE_ENV: '"production"'
       }
     }),
-    new webpack.optimize.UglifyJsPlugin({
-      sourceMap: false,
-      compress: {
-        warnings: false
-      }
-    }),
+    // new webpack.optimize.UglifyJsPlugin({
+    //   exclude: /\.jsts\.js/i,
+    //   sourceMap: false,
+    //   compress: {
+    //     warnings: false
+    //   }
+    // }),
     new webpack.LoaderOptionsPlugin({
-      minimize: true
+      minimize: true,
+      debug: false
     })
   ])
 }

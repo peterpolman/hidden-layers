@@ -91,7 +91,10 @@
 </template>
 
 <script>
-import firebase from 'firebase'
+import firebase from 'firebase/app';
+import 'firebase/auth';
+import 'firebase/database';
+
 import config from './config.js'
 
 // Import controllers

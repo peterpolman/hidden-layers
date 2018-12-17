@@ -1,4 +1,5 @@
-import firebase from 'firebase'
+import firebase from 'firebase/app';
+import 'firebase/database';
 
 import GoogleMapsLoader from 'google-maps';
 
@@ -73,7 +74,7 @@ export default class MapController {
             styles: mapStyle,
           }
           const map = new google.maps.Map(element, options)
-          
+
           resolve(map)
         })
     })

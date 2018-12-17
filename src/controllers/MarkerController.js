@@ -1,4 +1,5 @@
-import firebase from 'firebase';
+import firebase from 'firebase/app';
+import 'firebase/database';
 
 import GridService from '../services/GridService';
 import PathService from '../services/PathService'
