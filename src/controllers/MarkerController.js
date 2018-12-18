@@ -146,8 +146,11 @@ export default class MarkerController {
 			this.goblins[id] = goblin
 
 			this.goblins[id].marker.addListener('click', function(e) {
+				const dmg = Math.floor(Math.random() * 10);
+				this.goblins[id].setLabel( dmg )
+
 				goblin.talk();
-			})
+			}.bind(this))
 
 			this.goblins[id].marker.setMap(this.map)
 			this.goblins[id].marker.setVisible(false)
@@ -343,7 +346,7 @@ export default class MarkerController {
 		this.scouts[uid].marker.addListener('click', function(e) {
 			const dmg = Math.floor(Math.random() * 10);
 
-			this.scouts[uid].setLabel( dmg.toString() )
+			this.scouts[uid].setLabel( dmg )
 
 			// const username = this.userMarkers[uid].username
 			// const content = `<strong>Scout [${username}]</strong><br><small>Last move: ${new Date(data.timestamp).toLocaleString("nl-NL")}</small>`

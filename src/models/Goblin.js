@@ -44,7 +44,9 @@ export default class Gold {
     this.uid = uid
     this.marker = new google.maps.Marker({
       position: new google.maps.LatLng(position.lat, position.lng),
+      label: null,
       icon: {
+        labelOrigin: new google.maps.Point(size / 2, -10),
         url: goblinSrc,
         size: new google.maps.Size(size, size),
         scaledSize: new google.maps.Size(size, size),
@@ -54,6 +56,25 @@ export default class Gold {
     })
 
   }
+
+  setLabel(text) {
+    if (text == 0) {
+      text = 'MISS'
+    }
+
+		this.marker.setLabel({
+			text: text.toString(),
+			color: '#FA2A00',
+			fontWeight: 'bold',
+			fontSize: '14px',
+			fontFamily: 'Avenir'
+		})
+
+		this.labelTimer = setTimeout(function() {
+			this.marker.setLabel(null)
+			clearTimeout(this.labelTimer)
+		}.bind(this), 1000)
+	}
 
   talk() {
     return alert(`Goblin: ${this.greetings[Math.floor(Math.random() * this.greetings.length)]}`);

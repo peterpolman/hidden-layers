@@ -62,8 +62,12 @@ export default class Scout {
 	}
 
 	setLabel(text) {
+		if (text == 0) {
+      text = 'MISS'
+    }
+
 		this.marker.setLabel({
-			text: text,
+			text: text.toString(),
 			color: '#FA2A00',
 			fontWeight: 'bold',
 			fontSize: '14px',
