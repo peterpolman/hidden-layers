@@ -9,8 +9,7 @@ export default class Gold {
     amount
   ) {
     this.amount = amount
-
-    return new google.maps.Marker({
+    this.marker = new google.maps.Marker({
       uid: uid,
       id: id,
       position: new google.maps.LatLng(position.lat, position.lng),

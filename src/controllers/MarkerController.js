@@ -212,23 +212,22 @@ export default class MarkerController {
 	}
 
 	onLootAdded(id, data) {
-		const gold = new Gold(this.uid, this.id, data.position, 25, data.amount)
+		this.loot[id] = new Gold(this.uid, this.id, data.position, 25, data.amount)
 
-		gold.addListener('click', function(e) {
+		this.loot[id].marker.addListener('click', function(e) {
 			alert(`You picked up ${data.amount} Gold`)
 			this.removeGold(data)
 		}.bind(this))
 
-		this.lootMarkers[id] = gold
-		this.lootMarkers[id].setMap(this.map)
-		this.lootMarkers[id].setVisible(false)
+		this.loot[id].marker.setMap(this.map)
+		this.loot[id].marker.setVisible(false)
 
 		this.discover()
 	}
 
 	onLootRemoved(id, val) {
-		this.lootMarkers[id].setMap(null)
-		delete this.lootMarkers[id]
+		this.loot[id].marker.setMap(null)
+		delete this.loot[id]
 
 		this.discover()
 	}
@@ -333,12 +332,12 @@ export default class MarkerController {
 
 	onUserChanged(uid, data) {
 		const latlng = new google.maps.LatLng(data.position.lat, data.position.lng)
-		this.userMarkers[uid].setPosition(latlng)
+		this.users[uid].marker.setPosition(latlng)
 	}
 
 	onUserRemoved(uid) {
-		this.userMarkers[uid].setMap(null)
-		delete this.userMarkers[uid]
+		this.users[uid].marker.setMap(null)
+		delete this.users[uid]
 	}
 
 	onScoutAdded(uid, data) {
@@ -508,10 +507,7 @@ export default class MarkerController {
 	moveScout(toLatlng) {
 		if (this.myScout.path == null) {
 			this.pathService.route(this.uid, this.myScout.marker.position, toLatlng, "WALKING").then(function(data){
-
 				this.myScout.update(data)
-
-				console.log(`Let's walk ${data.totalDist}m`);
 			}.bind(this)).catch(function(err) {
 				console.log(err)
 			})
