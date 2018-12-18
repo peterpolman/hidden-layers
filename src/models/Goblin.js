@@ -6,7 +6,7 @@ export default class Gold {
     position,
     size
   ) {
-		const greetings = [
+		this.greetings = [
 			"I got what you need.",
 			"Got the best deals anywheres.",
 			"Can I lighten up that coin purse for ya?",
@@ -42,7 +42,6 @@ export default class Gold {
 		]
 
     this.uid = uid
-    this.greeting = greetings[Math.floor(Math.random() * greetings.length)]
     this.marker = new google.maps.Marker({
       position: new google.maps.LatLng(position.lat, position.lng),
       icon: {
@@ -54,6 +53,10 @@ export default class Gold {
       }
     })
 
+  }
+
+  talk() {
+    return alert(`Goblin: ${this.greetings[Math.floor(Math.random() * this.greetings.length)]}`);
   }
 
   set(key, value) {

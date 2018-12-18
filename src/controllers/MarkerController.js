@@ -38,13 +38,12 @@ export default class MarkerController {
 		this.myWardMarkers = []
 
 		this.store = null
+
 		this.stores = []
-
-		this.goblinMarkers = []
-		this.lootMarkers = []
-
-		this.userMarkers = []
-		this.scoutMarkers = []
+		this.goblins = []
+		this.loot = []
+		this.users = []
+		this.scouts = []
 
 		this.userInfoWindow = null
 		this.scoutInfoWindow = null
@@ -144,14 +143,14 @@ export default class MarkerController {
 
 		if ( randInt > 85 ) {
 			const goblin = new Goblin(this.uid, data.position, 40)
-			this.goblinMarkers[id] = goblin.marker
+			this.goblins[id] = goblin
 
-			this.goblinMarkers[id].addListener('click', function(e) {
-				alert('Goblin: "' + goblin.greeting + '"');
+			this.goblins[id].marker.addListener('click', function(e) {
+				goblin.talk();
 			})
 
-			this.goblinMarkers[id].setMap(this.map)
-			this.goblinMarkers[id].setVisible(false)
+			this.goblins[id].marker.setMap(this.map)
+			this.goblins[id].marker.setVisible(false)
 		}
 	}
 
@@ -185,10 +184,10 @@ export default class MarkerController {
 
 		visible = new google.maps.Polygon({paths: visibility})
 
-		this.userMarkers = this.gridService.discover(this.userMarkers, visible)
-		this.scoutMarkers = this.gridService.discover(this.scoutMarkers, visible)
-		this.lootMarkers = this.gridService.discover(this.lootMarkers, visible)
-		this.goblinMarkers = this.gridService.discover(this.goblinMarkers, visible)
+		this.users = this.gridService.discover(this.users, visible)
+		this.scouts = this.gridService.discover(this.scouts, visible)
+		this.loot = this.gridService.discover(this.loot, visible)
+		this.goblins = this.gridService.discover(this.goblins, visible)
 	}
 
 	onWardAdded(id, data) {
@@ -315,18 +314,18 @@ export default class MarkerController {
 	}
 
 	onUserAdded(uid, data) {
-		this.userMarkers[uid] = new User(uid, data.position, data.userClass, data.username, data.email, 50).marker;
-		this.userMarkers[uid].addListener('click', function(e) {
+		this.users[uid] = new User(uid, data.position, data.userClass, data.username, data.email, 50);
+		this.users[uid].marker.addListener('click', function(e) {
 			const content = `<strong>${data.username}</strong><br><small>Last online: ${new Date(data.lastOnline).toLocaleString("nl-NL")}</small>`
 
 			this.userInfoWindow.setContent(content);
-			this.userInfoWindow.open(this.map, this.userMarkers[uid]);
+			this.userInfoWindow.open(this.map, this.users[uid].marker);
 
 			this.map.panTo(e.latLng)
 		}.bind(this))
 
-		this.userMarkers[uid].setMap(this.map);
-		this.userMarkers[uid].setVisible(true);
+		this.users[uid].marker.setMap(this.map);
+		this.users[uid].marker.setVisible(true);
 	}
 
 	onUserChanged(uid, data) {
@@ -340,24 +339,28 @@ export default class MarkerController {
 	}
 
 	onScoutAdded(uid, data) {
-		this.scoutMarkers[uid] = new Scout(uid, data.position, 40, data.mode).marker;
-		this.scoutMarkers[uid].addListener('click', function(e) {
-			const username = this.userMarkers[uid].username
-			const content = `<strong>Scout [${username}]</strong><br><small>Last move: ${new Date(data.timestamp).toLocaleString("nl-NL")}</small>`
+		this.scouts[uid] = new Scout(uid, data.position, 40, data.mode);
+		this.scouts[uid].marker.addListener('click', function(e) {
+			const dmg = Math.floor(Math.random() * 10);
 
-			this.scoutInfoWindow.setContent(content);
-			this.scoutInfoWindow.open(this.map, this.scoutMarkers[uid]);
+			this.scouts[uid].setLabel( dmg.toString() )
+
+			// const username = this.userMarkers[uid].username
+			// const content = `<strong>Scout [${username}]</strong><br><small>Last move: ${new Date(data.timestamp).toLocaleString("nl-NL")}</small>`
+			//
+			// this.scoutInfoWindow.setContent(content);
+			// this.scoutInfoWindow.open(this.map, this.scoutMarkers[uid]);
 
 			this.map.panTo(e.latLng)
 		}.bind(this))
 
-		this.scoutMarkers[uid].setMap(this.map);
-		this.scoutMarkers[uid].setVisible(false)
+		this.scouts[uid].marker.setMap(this.map);
+		this.scouts[uid].marker.setVisible(false)
 	}
 
 	onScoutChanged(uid, data) {
-		this.scoutMarkers[uid].setPosition(data.position)
-		this.scoutMarkers[uid].set('mode', data.mode)
+		this.scouts[uid].setPosition(data.position)
+		this.scouts[uid].set('mode', data.mode)
 	}
 
 	createUser(uid, data) {

@@ -4,6 +4,7 @@
   margin: 0 auto;
   background: gray;
   display: block;
+  font-family: 'Avenir', Helvetica, Arial, sans-serif;
 }
 
 .btn {
@@ -221,6 +222,12 @@
   flex: 0 auto;
   position: relative;
   margin: 0px;
+}
+
+.label-dmg {
+  color: red;
+  font-weight: bold;
+  font-size: 1rem;
 }
 
 .geo-on,

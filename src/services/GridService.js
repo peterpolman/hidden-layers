@@ -6,8 +6,8 @@ export default class GridService {
 
   discover(markers, visibility) {
     for (let id in markers) {
-      var isHidden = google.maps.geometry.poly.containsLocation(markers[id].position, visibility)
-      markers[id].setVisible(!isHidden)
+      var isHidden = google.maps.geometry.poly.containsLocation(markers[id].marker.position, visibility)
+      markers[id].marker.setVisible(!isHidden)
     }
 
     return markers

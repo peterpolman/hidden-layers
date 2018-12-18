@@ -29,4 +29,8 @@ export default class User {
       }
     });
   }
+
+  setPosition(position) {
+    this.marker.setPosition(position)
+  }
 }
