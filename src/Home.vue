@@ -30,7 +30,6 @@
     <button class="btn btn-stop" v-on:click="onStopClick" v-if="markerController.isWalking">
       Stop
     </button>
-
     <div class="dialog dialog--store" v-if="markerController.store">
       <header>
         <h2>{{ markerController.stores[markerController.store].name }}</h2>
@@ -38,7 +37,7 @@
           Category: {{ markerController.stores[markerController.store].category }}
         </div>
         <div>
-          Owner: {{ (typeof markerController.userMarkers[markerController.stores[markerController.store].owner] != 'undefined') ? markerController.userMarkers[markerController.stores[markerController.store].owner]['username'] : 'you'  }}
+          Owner: {{ (typeof markerController.users[markerController.stores[markerController.store].owner] != 'undefined') ? markerController.users[markerController.stores[markerController.store].owner]['username'] : 'you'  }}
         </div>
         <button v-on:click="onCloseStore">Close</button>
       </header>
