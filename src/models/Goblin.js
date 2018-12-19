@@ -46,7 +46,7 @@ export default class Gold {
       position: new google.maps.LatLng(position.lat, position.lng),
       label: null,
       icon: {
-        labelOrigin: new google.maps.Point(size / 2, -10),
+        labelOrigin: new google.maps.Point(-10, -10),
         url: goblinSrc,
         size: new google.maps.Size(size, size),
         scaledSize: new google.maps.Size(size, size),
@@ -77,7 +77,7 @@ export default class Gold {
 	}
 
   talk() {
-    return alert(`Goblin: ${this.greetings[Math.floor(Math.random() * this.greetings.length)]}`);
+    return `Goblin: ${this.greetings[Math.floor(Math.random() * this.greetings.length)]}`;
   }
 
   set(key, value) {

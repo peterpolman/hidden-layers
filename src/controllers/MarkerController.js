@@ -47,6 +47,7 @@ export default class MarkerController {
 
 		this.userInfoWindow = null
 		this.scoutInfoWindow = null
+		this.goblinInfoWindow = null
 
 		this.isWalking = false
 	}
@@ -62,6 +63,7 @@ export default class MarkerController {
 
 		this.userInfoWindow = new google.maps.InfoWindow({isHidden: false});
 		this.scoutInfoWindow = new google.maps.InfoWindow({isHidden: false});
+		this.goblinInfoWindow = new google.maps.InfoWindow({isHidden: false});
 
 		this.connectedRef.on('value', function(snap) {
 			if (snap.val() === true) {
@@ -142,14 +144,14 @@ export default class MarkerController {
 		this.stores[id].items.sort()
 
 		if ( randInt > 85 ) {
-			const goblin = new Goblin(this.uid, data.position, 40)
-			this.goblins[id] = goblin
+			this.goblins[id] = new Goblin(this.uid, data.position, 40)
 
 			this.goblins[id].marker.addListener('click', function(e) {
 				const dmg = Math.floor(Math.random() * 10);
 				this.goblins[id].setLabel( dmg )
 
-				goblin.talk();
+				this.goblinInfoWindow.setContent(`<strong>${this.goblins[id].talk()}</strong>`);
+				this.goblinInfoWindow.open(this.map, this.goblins[id].marker);
 			}.bind(this))
 
 			this.goblins[id].marker.setMap(this.map)
