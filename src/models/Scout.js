@@ -6,13 +6,14 @@ import ScoutSrc from '../assets/img/wolf-0.png';
 import config from '../config.js'
 
 export default class Scout {
-	constructor(uid, position, size, mode) {
+	constructor(uid, position, size, mode, hp) {
 		this.scoutRef = firebase.database().ref('scouts').child(uid)
+
 		this.size = size
 		this.path = null
 		this.pathTimer = null
 		this.mode = 'STANDING'
-		this.hp = 100
+		this.hp = hp
 		this.isWalking = (mode == "WALKING")
 		this.marker = new google.maps.Marker({
 			uid: uid,
@@ -33,14 +34,30 @@ export default class Scout {
 			position: new google.maps.LatLng(position.lat, position.lng),
 			zIndex: -99,
 			icon: {
-	      path: 'M126,11c0,6.1-28.2,11-63,11S0,17.1,0,11S28.2,0,63,0S126,4.9,126,11z',
-	      fillColor: '#3D91CB',
-	      fillOpacity: 1,
-	      scale: .4,
+	      path: `M0,0v17h100V0H0z M101,15H${this.hp}l0-13H98V15z`,
+				fillColor: (this.hp > 50 ) ? '#8CC63E' : (this.hp > 25) ? '#FFBB33' : '#ED1C24',
+      	fillOpacity: 1,
+	      scale: .5,
 				strokeWeight: 0,
-				anchor: new google.maps.Point(67,-28)
+				anchor: new google.maps.Point(55,-40),
 	    }
 		});
+	}
+
+	renderHP(hp) {
+		return `M0,0v17h100V0H0z M101,15H${hp}l0-13H98V15z`
+	}
+
+	setHitPoints(hp) {
+		this.hp  = (hp < 0) ? 0 : hp
+		this.indicator.setIcon({
+      path: this.renderHP(hp),
+			fillColor: (this.hp > 50 ) ? '#8CC63E' : (this.hp > 25) ? '#FFBB33' : '#ED1C24',
+      fillOpacity: 1,
+      scale: .5,
+			strokeWeight: 0,
+			anchor: new google.maps.Point(55,-40),
+    })
 	}
 
 	set(key, value) {
@@ -123,6 +140,11 @@ export default class Scout {
 		this.pathTimer = setTimeout(walk.bind(this), interval)
 	}
 
+	setMap(map) {
+		this.marker.setMap(map)
+		this.indicator.setMap(map)
+	}
+
 	stop() {
 		return this.update({
 			mode: "STANDING",
@@ -135,5 +157,9 @@ export default class Scout {
 
 	update(data) {
 		return this.scoutRef.update(data);
+	}
+
+	die() {
+		return this.scoutRef.remove()
 	}
 }

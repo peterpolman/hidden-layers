@@ -304,6 +304,7 @@ export default {
   		if (this.markerController.myScout == null) {
   			this.markerController.createScout(this.uid, {
   				uid: this.uid,
+          hp: 100,
   				position: {
   					lat: this.markerController.myUser.marker.position.lat(),
   					lng: this.markerController.myUser.marker.position.lng()

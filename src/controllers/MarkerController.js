@@ -107,6 +107,8 @@ export default class MarkerController {
 			} else {
 				this.onMyScoutAdded(snap.key, snap.val())
 			}
+
+			this.discover()
 		}.bind(this));
 
 		this.scoutsRef.on('child_changed', function(snap) {
@@ -114,6 +116,16 @@ export default class MarkerController {
 				this.onScoutChanged(snap.key, snap.val());
 			} else {
 				this.onMyScoutChanged(snap.key, snap.val());
+			}
+
+			this.discover()
+		}.bind(this));
+
+		this.scoutsRef.on('child_removed', function(snap) {
+			if (snap.key != this.uid) {
+				this.onScoutRemoved(snap.key, snap.val());
+			} else {
+				this.onMyScoutRemoved(snap.key, snap.val());
 			}
 
 			this.discover()
@@ -147,10 +159,9 @@ export default class MarkerController {
 			this.goblins[id] = new Goblin(this.uid, data.position, 40)
 
 			this.goblins[id].marker.addListener('click', function(e) {
-				const dmg = Math.floor(Math.random() * 10);
-				this.goblins[id].setLabel( dmg )
+				const content = `<strong>${this.goblins[id].talk()}</strong>`
 
-				this.goblinInfoWindow.setContent(`<strong>${this.goblins[id].talk()}</strong>`);
+				this.goblinInfoWindow.setContent(content);
 				this.goblinInfoWindow.open(this.map, this.goblins[id].marker);
 			}.bind(this))
 
@@ -247,74 +258,11 @@ export default class MarkerController {
 
 		this.myUser.marker.setMap(this.map);
 		this.map.panTo(this.myUser.marker.position)
-
-		this.discover()
 	}
 
 	onMyUserChanged(uid, data) {
 		const latlng = new google.maps.LatLng(data.position.lat, data.position.lng)
 		this.myUser.marker.setPosition(latlng)
-	}
-
-	onMyScoutAdded(uid, data) {
-		this.myScout = new Scout(uid, data.position, 40, data.mode);
-		this.myScout.marker.addListener('click', function(e) {
-			this.map.panTo(e.latLng)
-			this.myScout.indicator.setPosition(e.latLng)
-			this.myScout.indicator.setMap(this.map)
-
-			window.dispatchEvent(new CustomEvent('cursor_changed', { detail: { type: "SCOUT" } }));
-		}.bind(this))
-
-		this.myScout.marker.setMap(this.map);
-
-		if (data.mode == "WALKING") {
-			this.isWalking = true
-
-			if (this.myScout.path == null) {
-				this.myScout.path = new Path(data.uid, data.path, '#3D91CB', '#3D91CB');
-				this.myScout.path.setMap(this.map)
-			}
-
-			this.myScout.nextStep(data, this.path)
-		}
-
-		this.discover()
-	}
-
-	onMyScoutChanged(uid, data) {
-		this.myScout.set('mode', data.mode)
-
-		clearTimeout(this.myScout.pathTimer)
-
-		if (data.mode == "WALKING") {
-			this.isWalking = true
-			this.myScout.setPosition(data.position)
-
-			if (this.myScout.path == null) {
-				this.myScout.path = new Path(data.uid, data.path, '#3D91CB', '#3D91CB');
-				this.myScout.path.setMap(this.map)
-			}
-
-			this.myScout.nextStep(data)
-		}
-
-		if (data.mode == "STANDING") {
-			this.isWalking = false
-			if (this.myScout.path != null) {
-				this.myScout.path.setMap(null)
-				this.myScout.path = null
-			}
-
-			const title = '🔔 Scout Arrived';
-			const options = {
-				body: `Scout has stopped walking.`,
-				icon: ScoutSrc
-			};
-
-			window.swRegistration.showNotification(title, options);
-
-		}
 	}
 
 	onUserAdded(uid, data) {
@@ -342,18 +290,85 @@ export default class MarkerController {
 		delete this.users[uid]
 	}
 
+	onMyScoutAdded(uid, data) {
+		this.myScout = new Scout(uid, data.position, 40, data.mode, data.hp);
+		this.myScout.setMap(this.map);
+
+		this.myScout.marker.addListener('click', function(e) {
+			this.map.panTo(e.latLng)
+			window.dispatchEvent(new CustomEvent('cursor_changed', { detail: { type: "SCOUT" } }));
+		}.bind(this))
+
+		if (data.mode == "WALKING") {
+			this.isWalking = true
+
+			if (this.myScout.path == null) {
+				this.myScout.path = new Path(data.uid, data.path, '#3D91CB', '#3D91CB');
+				this.myScout.path.setMap(this.map)
+			}
+
+			this.myScout.nextStep(data, this.path)
+		}
+	}
+
+	onMyScoutChanged(uid, data) {
+		this.myScout.set('mode', data.mode)
+		this.isWalking = false
+		clearTimeout(this.myScout.pathTimer)
+
+		if (data.mode == "FIGHTING") {
+			if (data.hp > 0) {
+				this.myScout.setLabel(data.hitDmg)
+				this.myScout.setHitPoints(data.hp)
+			}
+		}
+
+		if (data.mode == "WALKING") {
+			this.isWalking = true
+			this.myScout.setPosition(data.position)
+
+			if (this.myScout.path == null) {
+				this.myScout.path = new Path(data.uid, data.path, '#3D91CB', '#3D91CB');
+				this.myScout.path.setMap(this.map)
+			}
+
+			this.myScout.nextStep(data)
+		}
+
+		if (data.mode == "STANDING") {
+			if (this.myScout.path != null) {
+				this.myScout.path.setMap(null)
+				this.myScout.path = null
+			}
+
+			const title = '🔔 Scout Arrived';
+			const options = {
+				body: `Scout has stopped walking.`,
+				icon: ScoutSrc
+			};
+
+			window.swRegistration.showNotification(title, options);
+		}
+	}
+
+	onMyScoutRemoved(uid, data) {
+		this.myScout.marker.setMap(null)
+		this.myScout.indicator.setMap(null)
+		this.myScout = null
+	}
+
 	onScoutAdded(uid, data) {
-		this.scouts[uid] = new Scout(uid, data.position, 40, data.mode);
+		this.scouts[uid] = new Scout(uid, data.position, 40, data.mode, data.hp);
 		this.scouts[uid].marker.addListener('click', function(e) {
 			const dmg = Math.floor(Math.random() * 10);
 
-			this.scouts[uid].setLabel( dmg )
-
-			// const username = this.userMarkers[uid].username
-			// const content = `<strong>Scout [${username}]</strong><br><small>Last move: ${new Date(data.timestamp).toLocaleString("nl-NL")}</small>`
-			//
-			// this.scoutInfoWindow.setContent(content);
-			// this.scoutInfoWindow.open(this.map, this.scoutMarkers[uid]);
+			this.scouts[uid].stop()
+			this.scouts[uid].indicator.setMap(this.map)
+			this.scouts[uid].update({
+				mode: 'FIGHTING',
+				hitDmg: dmg,
+				hp: this.scouts[uid].hp - dmg
+			})
 
 			this.map.panTo(e.latLng)
 		}.bind(this))
@@ -363,8 +378,27 @@ export default class MarkerController {
 	}
 
 	onScoutChanged(uid, data) {
-		this.scouts[uid].setPosition(data.position)
 		this.scouts[uid].set('mode', data.mode)
+
+		if (data.mode == 'FIGHTING') {
+			if (data.hp > 0) {
+				this.scouts[uid].setLabel( data.hitDmg )
+				this.scouts[uid].setHitPoints( data.hp )
+			}
+			else {
+				this.scouts[uid].die()
+			}
+		}
+
+		if (data.mode == 'WALKING') {
+			this.scouts[uid].setPosition(data.position)
+		}
+	}
+
+	onScoutRemoved(uid, data) {
+		this.scouts[uid].marker.setMap(null)
+		this.scouts[uid].indicator.setMap(null)
+		delete this.scouts[uid]
 	}
 
 	createUser(uid, data) {
@@ -507,7 +541,7 @@ export default class MarkerController {
 	}
 
 	moveScout(toLatlng) {
-		if (this.myScout.path == null) {
+		if (this.myScout != null && this.myScout.path == null) {
 			this.pathService.route(this.uid, this.myScout.marker.position, toLatlng, "WALKING").then(function(data){
 				this.myScout.update(data)
 			}.bind(this)).catch(function(err) {
