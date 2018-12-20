@@ -64,7 +64,6 @@
         <li></li>
         <li></li>
         <li></li>
-        <li></li>
       </ul>
     </div>
 
@@ -113,6 +112,8 @@ import GoldImg from './assets/img/coin.png'
 import WoodSwordImg from './assets/img/woodSword.png'
 import BellImg from './assets/img/badge.png'
 import InventoryImg from './assets/img/backpack.png'
+import DiscoverImg from './assets/img/discover.png'
+
 import InventoryOpenImg from './assets/img/backpack_open.png'
 
 export default {
@@ -134,7 +135,8 @@ export default {
         gold: GoldImg,
         sword: WoodSwordImg,
         inventory: InventoryImg,
-        inventoryOpen: InventoryOpenImg
+        inventoryOpen: InventoryOpenImg,
+        discover: DiscoverImg
       },
       uid: firebase.auth().currentUser.uid,
       geoService: new GeoService,
@@ -186,6 +188,17 @@ export default {
     }
   },
   methods: {
+    onDiscoverMap() {
+      for (let uid in this.markerController.scouts) {
+        this.markerController.scouts[uid].marker.setVisible(true)
+
+        var timer = setTimeout(function() {
+          clearTimeout(timer)
+
+          this.markerController.discover()
+        }.bind(this), 3000)
+      }
+    },
     onFight() {
       alert(`Wooden Sword: "We'll be fightin those goblins very soon..."`);
     },

@@ -102,6 +102,11 @@ export default class Scout {
 		this.indicator.setPosition(new google.maps.LatLng(position))
 	}
 
+	setVisible(visibility) {
+		this.marker.setVisible(visibility)
+		this.indicator.setVisible(visibility)
+	}
+
 	setAnimation(animaton) {
 		this.marker.setAnimation(animation)
 	}

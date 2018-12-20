@@ -33,4 +33,8 @@ export default class User {
   setPosition(position) {
     this.marker.setPosition(position)
   }
+
+	setVisible(visibility) {
+		this.marker.setVisible(visibility)
+	}
 }

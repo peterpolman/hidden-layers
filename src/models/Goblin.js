@@ -88,4 +88,8 @@ export default class Gold {
     return this[key]
   }
 
+	setVisible(visibility) {
+		this.marker.setVisible(visibility)
+	}
+
 }

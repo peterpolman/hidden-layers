@@ -518,6 +518,13 @@ export default class MarkerController {
 							amount: 1,
 							class: 'btn-sword',
 							callback: 'onFight'
+						},
+						{
+							id: 'discover',
+							name: 'Map',
+							amount: 1,
+							class: 'btn-map',
+							callback: 'onDiscoverMap'
 						}
 					]
 
