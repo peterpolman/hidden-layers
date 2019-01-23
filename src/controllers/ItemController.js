@@ -8,31 +8,33 @@ export default class ItemController {
 
     this.itemsRef = firebase.database().ref('items').child(uid)
 
-    this.itemsRef.on('child_added', function(snap) {
+    this.itemsRef.on('child_added', (snap) => {
 			this.onItemAdded(snap.key, snap.val())
-		}.bind(this));
+		})
 
-		this.itemsRef.on('child_changed', function(snap) {
+		this.itemsRef.on('child_changed', (snap) => {
       this.onItemChanged(snap.key, snap.val())
-		}.bind(this));
+		})
 
-    this.itemsRef.on('child_removed', function(snap) {
+    this.itemsRef.on('child_removed', (snap) => {
       this.onItemRemoved(snap.key, snap.val())
-		}.bind(this));
+		})
 
-    window.addEventListener('item_substract', function(data) {
+    window.addEventListener('item_substract', (data) => {
       const inventory = this.substract(data.detail)
-      if (inventory) {
-        this.update(inventory)
-      }
-    }.bind(this))
 
-    window.addEventListener('item_add', function(data) {
-      const inventory = this.add(data.detail)
       if (inventory) {
         this.update(inventory)
       }
-    }.bind(this))
+    })
+
+    window.addEventListener('item_add', (data) => {
+      const inventory = this.add(data.detail)
+
+      if (inventory) {
+        this.update(inventory)
+      }
+    })
   }
 
   onItemAdded(key, data) {

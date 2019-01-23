@@ -1,6 +1,7 @@
 import goblinSrc from '../assets/img/goblin-1.png';
+import firebase from 'firebase/app';
 
-export default class Gold {
+export default class Goblin {
   constructor(
     uid,
     position,
@@ -77,7 +78,9 @@ export default class Gold {
 	}
 
   talk() {
-    return `Goblin: ${this.greetings[Math.floor(Math.random() * this.greetings.length)]}`;
+    const message = `Goblin: ${this.greetings[Math.floor(Math.random() * this.greetings.length)]}`
+    this.sendMessage(message)
+    return message
   }
 
   set(key, value) {
@@ -90,6 +93,16 @@ export default class Gold {
 
 	setVisible(visibility) {
 		this.marker.setVisible(visibility)
+	}
+
+	sendMessage(message) {
+		window.dispatchEvent(new CustomEvent('message_add', {
+			detail: {
+				uid: this.uid,
+				message: message,
+				timestamp: firebase.database.ServerValue.TIMESTAMP
+			}
+		}))
 	}
 
 }

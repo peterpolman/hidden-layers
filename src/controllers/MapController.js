@@ -1,7 +1,7 @@
-import firebase from 'firebase/app';
-import 'firebase/database';
+import firebase from 'firebase/app'
+import 'firebase/database'
 
-import GoogleMapsLoader from 'google-maps';
+import GoogleMapsLoader from 'google-maps'
 
 import config from '../config.js'
 import MapStyles from '../mapStyles.js'
@@ -13,49 +13,49 @@ export default class MapController {
 
   init() {
     return new Promise(function (resolve, reject) {
-        GoogleMapsLoader.KEY = config.maps.key;
-        GoogleMapsLoader.LIBRARIES = ['geometry', 'places'];
-        GoogleMapsLoader.LANGUAGE = 'nl';
-        GoogleMapsLoader.REGION = 'NL';
-        GoogleMapsLoader.VERSION = '3.34';
+        GoogleMapsLoader.KEY = config.maps.key
+        GoogleMapsLoader.LIBRARIES = ['geometry', 'places']
+        GoogleMapsLoader.LANGUAGE = 'nl'
+        GoogleMapsLoader.REGION = 'NL'
+        GoogleMapsLoader.VERSION = '3.34'
 
         GoogleMapsLoader.load(function(google) {
           // Don't forget to credit the guy
           google.maps.LatLng.prototype.distanceFrom = function(newLatLng) {
-          	var EarthRadiusMeters = 6378137.0; // meters
-          	var lat1 = this.lat();
-          	var lon1 = this.lng();
-          	var lat2 = newLatLng.lat();
-          	var lon2 = newLatLng.lng();
-          	var dLat = (lat2 - lat1) * Math.PI / 180;
-          	var dLon = (lon2 - lon1) * Math.PI / 180;
-          	var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-          	var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-          	var d = EarthRadiusMeters * c;
-          	return d;
+          	var EarthRadiusMeters = 6378137.0 // meters
+          	var lat1 = this.lat()
+          	var lon1 = this.lng()
+          	var lat2 = newLatLng.lat()
+          	var lon2 = newLatLng.lng()
+          	var dLat = (lat2 - lat1) * Math.PI / 180
+          	var dLon = (lon2 - lon1) * Math.PI / 180
+          	var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2)
+          	var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+          	var d = EarthRadiusMeters * c
+          	return d
           }
 
           google.maps.Polyline.prototype.GetPointAtDistance = function(metres) {
           	// some awkward special cases
           	if (metres == 0)
-          		return this.getPath().getAt(0);
+          		return this.getPath().getAt(0)
           	if (metres < 0)
-          		return null;
+          		return null
           	if (this.getPath().getLength() < 2)
-          		return null;
-          	var dist = 0;
-          	var olddist = 0;
+          		return null
+          	var dist = 0
+          	var olddist = 0
           	for (var i = 1; (i < this.getPath().getLength() && dist < metres); i++) {
           		olddist = dist;
-          		dist += this.getPath().getAt(i).distanceFrom(this.getPath().getAt(i - 1));
+          		dist += this.getPath().getAt(i).distanceFrom(this.getPath().getAt(i - 1))
           	}
           	if (dist < metres) {
-          		return null;
+          		return null
           	}
-          	var p1 = this.getPath().getAt(i - 2);
-          	var p2 = this.getPath().getAt(i - 1);
-          	var m = (metres - olddist) / (dist - olddist);
-          	return new google.maps.LatLng(p1.lat() + (p2.lat() - p1.lat()) * m, p1.lng() + (p2.lng() - p1.lng()) * m);
+          	var p1 = this.getPath().getAt(i - 2)
+          	var p2 = this.getPath().getAt(i - 1)
+          	var m = (metres - olddist) / (dist - olddist)
+          	return new google.maps.LatLng(p1.lat() + (p2.lat() - p1.lat()) * m, p1.lng() + (p2.lng() - p1.lng()) * m)
           }
 
           const hour = new Date().getHours()

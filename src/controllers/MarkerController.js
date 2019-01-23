@@ -1,17 +1,17 @@
-import firebase from 'firebase/app';
-import 'firebase/database';
+import firebase from 'firebase/app'
+import 'firebase/database'
 
-import GridService from '../services/GridService';
+import GridService from '../services/GridService'
 import PathService from '../services/PathService'
 
-import Scout from '../models/Scout';
-import User from '../models/User';
+import Scout from '../models/Scout'
+import User from '../models/User'
 import Ward from '../models/Ward'
 import Gold from '../models/Gold'
 import Goblin from '../models/Goblin'
-import Path from '../models/Path';
+import Path from '../models/Path'
 
-import ScoutSrc from '../assets/img/wolf-0.png';
+import ScoutSrc from '../assets/img/wolf-0.png'
 
 export default class MarkerController {
 	constructor(uid) {
@@ -50,40 +50,58 @@ export default class MarkerController {
 		this.goblinInfoWindow = null
 
 		this.isWalking = false
+		this.numOfUsers = 0
+		this.userCount = 0
+		this.loading = true
+
+		this.usernames = []
 	}
 
 	init(map) {
-		const userConnectionsRef = this.usersRef.child(this.uid).child('connections');
-		const lastOnlineRef = this.usersRef.child(this.uid).child('lastOnline');
+		const userConnectionsRef = this.usersRef.child(this.uid).child('connections')
+		const lastOnlineRef = this.usersRef.child(this.uid).child('lastOnline')
 
 		this.map = map
 		this.wardsRef = firebase.database().ref('wards').child(this.uid)
 
-		this.places = new google.maps.places.PlacesService(this.map);
+		this.places = new google.maps.places.PlacesService(this.map)
 
-		this.userInfoWindow = new google.maps.InfoWindow({isHidden: false});
-		this.scoutInfoWindow = new google.maps.InfoWindow({isHidden: false});
-		this.goblinInfoWindow = new google.maps.InfoWindow({isHidden: false});
+		this.userInfoWindow = new google.maps.InfoWindow({isHidden: false})
+		this.scoutInfoWindow = new google.maps.InfoWindow({isHidden: false})
+		this.goblinInfoWindow = new google.maps.InfoWindow({isHidden: false})
 
-		this.connectedRef.on('value', function(snap) {
-			if (snap.val() === true) {
-				const connection = userConnectionsRef.push();
+		this.usersRef.on('value', (snap) => {
+			this.numOfUsers = snap.numChildren()
 
-				connection.onDisconnect().remove();
-				connection.set(true);
-				lastOnlineRef.onDisconnect().set(firebase.database.ServerValue.TIMESTAMP);
+			if (this.numOfUsers == this.userCount) {
+				this.loading = false
 			}
-		});
+		})
 
-		this.usersRef.on('child_added', function(snap) {
+		this.connectedRef.on('value', (snap) => {
+			if (snap.val() === true) {
+				const connection = userConnectionsRef.push()
+
+				connection.onDisconnect().remove()
+				connection.set(true)
+				lastOnlineRef.onDisconnect().set(firebase.database.ServerValue.TIMESTAMP)
+
+				this.sendMessage('Connected')
+			}
+		})
+
+		this.usersRef.on('child_added', (snap) => {
 			if (snap.key != this.uid) {
 				this.onUserAdded(snap.key, snap.val())
 			} else {
 				this.onMyUserAdded(snap.key, snap.val())
 			}
-		}.bind(this));
 
-		this.usersRef.on('child_changed', function(snap) {
+			this.usernames[snap.key] = snap.val().username
+
+		})
+
+		this.usersRef.on('child_changed', (snap) => {
 			if (snap.key != this.uid) {
 				this.onUserChanged(snap.key, snap.val())
 			} else {
@@ -91,17 +109,17 @@ export default class MarkerController {
 			}
 
 			this.discover()
-		}.bind(this));
+		})
 
-		this.storesRef.on('child_added', function(snap) {
-			this.onStoreAdded(snap.key, snap.val());
-		}.bind(this));
+		this.storesRef.on('child_added', (snap) => {
+			this.onStoreAdded(snap.key, snap.val())
+		})
 
-		this.storesRef.on('child_changed', function(snap) {
-			this.onStoreChanged(snap.key, snap.val());
-		}.bind(this));
+		this.storesRef.on('child_changed', (snap) => {
+			this.onStoreChanged(snap.key, snap.val())
+		})
 
-		this.scoutsRef.on('child_added', function(snap) {
+		this.scoutsRef.on('child_added', (snap) => {
 			if (snap.key != this.uid) {
 				this.onScoutAdded(snap.key, snap.val())
 			} else {
@@ -109,43 +127,43 @@ export default class MarkerController {
 			}
 
 			this.discover()
-		}.bind(this));
+		})
 
-		this.scoutsRef.on('child_changed', function(snap) {
+		this.scoutsRef.on('child_changed', (snap) => {
 			if (snap.key != this.uid) {
-				this.onScoutChanged(snap.key, snap.val());
+				this.onScoutChanged(snap.key, snap.val())
 			} else {
-				this.onMyScoutChanged(snap.key, snap.val());
+				this.onMyScoutChanged(snap.key, snap.val())
 			}
 
 			this.discover()
-		}.bind(this));
+		})
 
-		this.scoutsRef.on('child_removed', function(snap) {
+		this.scoutsRef.on('child_removed', (snap) => {
 			if (snap.key != this.uid) {
-				this.onScoutRemoved(snap.key, snap.val());
+				this.onScoutRemoved(snap.key, snap.val())
 			} else {
-				this.onMyScoutRemoved(snap.key, snap.val());
+				this.onMyScoutRemoved(snap.key, snap.val())
 			}
 
 			this.discover()
-		}.bind(this));
+		})
 
-		this.wardsRef.on('child_added', function(snap) {
-			this.onWardAdded(snap.key, snap.val());
-		}.bind(this));
+		this.wardsRef.on('child_added', (snap) => {
+			this.onWardAdded(snap.key, snap.val())
+		})
 
-		this.wardsRef.on('child_removed', function(snap) {
-			this.onWardRemoved(snap.key, snap.val());
-		}.bind(this));
+		this.wardsRef.on('child_removed', (snap) => {
+			this.onWardRemoved(snap.key, snap.val())
+		})
 
-		this.lootRef.on('child_added', function(snap) {
-			this.onLootAdded(snap.key, snap.val());
-		}.bind(this));
+		this.lootRef.on('child_added', (snap) => {
+			this.onLootAdded(snap.key, snap.val())
+		})
 
-		this.lootRef.on('child_removed', function(snap) {
-			this.onLootRemoved(snap.key, snap.val());
-		}.bind(this));
+		this.lootRef.on('child_removed', (snap) => {
+			this.onLootRemoved(snap.key, snap.val())
+		})
 
 	}
 
@@ -158,12 +176,12 @@ export default class MarkerController {
 		if ( randInt > 85 ) {
 			this.goblins[id] = new Goblin(this.uid, data.position, 40)
 
-			this.goblins[id].marker.addListener('click', function(e) {
+			this.goblins[id].marker.addListener('click', (e) => {
 				const content = `<strong>${this.goblins[id].talk()}</strong>`
 
-				this.goblinInfoWindow.setContent(content);
-				this.goblinInfoWindow.open(this.map, this.goblins[id].marker);
-			}.bind(this))
+				this.goblinInfoWindow.setContent(content)
+				this.goblinInfoWindow.open(this.map, this.goblins[id].marker)
+			})
 
 			this.goblins[id].marker.setMap(this.map)
 			this.goblins[id].marker.setVisible(false)
@@ -191,12 +209,12 @@ export default class MarkerController {
 		}
 
 		// Should not be removed once out of the bounds_changed event
-		this.map.data.forEach(function(feature) {
-			this.map.data.remove(feature);
-		}.bind(this))
+		this.map.data.forEach((feature) => {
+			this.map.data.remove(feature)
+		})
 
 		this.map.data.add({geometry: new google.maps.Data.Polygon(visibility)})
-		this.map.data.setStyle({fillColor: '#000', fillOpacity: .75, strokeWeight: 0, clickable: false});
+		this.map.data.setStyle({fillColor: '#000', fillOpacity: .75, strokeWeight: 0, clickable: false})
 
 		visible = new google.maps.Polygon({paths: visibility})
 
@@ -209,9 +227,9 @@ export default class MarkerController {
 	onWardAdded(id, data) {
 		const ward = new Ward(this.uid, data.position, 40, this.map)
 
-		ward.addListener('click', function(e) {
+		ward.addListener('click', (e) => {
 			this.removeWard(id)
-		}.bind(this))
+		})
 
 		this.myWardMarkers[id] = ward
 
@@ -227,10 +245,10 @@ export default class MarkerController {
 	onLootAdded(id, data) {
 		this.loot[id] = new Gold(this.uid, this.id, data.position, 25, data.amount)
 
-		this.loot[id].marker.addListener('click', function(e) {
+		this.loot[id].marker.addListener('click', (e) => {
 			alert(`You picked up ${data.amount} Gold`)
 			this.removeGold(data)
-		}.bind(this))
+		})
 
 		this.loot[id].marker.setMap(this.map)
 		this.loot[id].marker.setVisible(false)
@@ -246,17 +264,17 @@ export default class MarkerController {
 	}
 
 	onMyUserAdded(uid, data) {
-		this.myUser = new User(uid, data.position, data.userClass, data.username, data.email, 50);
-		this.myUser.marker.addListener('click', function(e) {
+		this.myUser = new User(uid, data.position, data.userClass, data.username, data.email, 50)
+		this.myUser.marker.addListener('click', (e) => {
 			const content = `<strong>${data.username}</strong><br><small>Last online: ${new Date(data.lastOnline).toLocaleString("nl-NL")}</small>`
 
-			this.userInfoWindow.setContent(content);
-			this.userInfoWindow.open(this.map, this.myUser.marker);
+			this.userInfoWindow.setContent(content)
+			this.userInfoWindow.open(this.map, this.myUser.marker)
 
 			this.map.panTo(e.latLng)
-		}.bind(this))
+		})
 
-		this.myUser.marker.setMap(this.map);
+		this.myUser.marker.setMap(this.map)
 		this.map.panTo(this.myUser.marker.position)
 	}
 
@@ -266,18 +284,18 @@ export default class MarkerController {
 	}
 
 	onUserAdded(uid, data) {
-		this.users[uid] = new User(uid, data.position, data.userClass, data.username, data.email, 50);
-		this.users[uid].marker.addListener('click', function(e) {
+		this.users[uid] = new User(uid, data.position, data.userClass, data.username, data.email, 50)
+		this.users[uid].marker.addListener('click', (e) => {
 			const content = `<strong>${data.username}</strong><br><small>Last online: ${new Date(data.lastOnline).toLocaleString("nl-NL")}</small>`
 
-			this.userInfoWindow.setContent(content);
-			this.userInfoWindow.open(this.map, this.users[uid].marker);
+			this.userInfoWindow.setContent(content)
+			this.userInfoWindow.open(this.map, this.users[uid].marker)
 
 			this.map.panTo(e.latLng)
-		}.bind(this))
+		})
 
-		this.users[uid].marker.setMap(this.map);
-		this.users[uid].marker.setVisible(true);
+		this.users[uid].marker.setMap(this.map)
+		this.users[uid].marker.setVisible(true)
 	}
 
 	onUserChanged(uid, data) {
@@ -291,19 +309,19 @@ export default class MarkerController {
 	}
 
 	onMyScoutAdded(uid, data) {
-		this.myScout = new Scout(uid, data.position, 40, data.mode, data.hp);
-		this.myScout.setMap(this.map);
+		this.myScout = new Scout(uid, data.position, 40, data.mode, data.hp)
+		this.myScout.setMap(this.map)
 
-		this.myScout.marker.addListener('click', function(e) {
+		this.myScout.marker.addListener('click', (e) => {
 			this.map.panTo(e.latLng)
-			window.dispatchEvent(new CustomEvent('cursor_changed', { detail: { type: "SCOUT" } }));
-		}.bind(this))
+			window.dispatchEvent(new CustomEvent('cursor_changed', { detail: { type: "SCOUT" } }))
+		})
 
 		if (data.mode == "WALKING") {
 			this.isWalking = true
 
 			if (this.myScout.path == null) {
-				this.myScout.path = new Path(data.uid, data.path, '#3D91CB', '#3D91CB');
+				this.myScout.path = new Path(data.uid, data.path, '#3D91CB', '#3D91CB')
 				this.myScout.path.setMap(this.map)
 			}
 
@@ -328,7 +346,7 @@ export default class MarkerController {
 			this.myScout.setPosition(data.position)
 
 			if (this.myScout.path == null) {
-				this.myScout.path = new Path(data.uid, data.path, '#3D91CB', '#3D91CB');
+				this.myScout.path = new Path(data.uid, data.path, '#3D91CB', '#3D91CB')
 				this.myScout.path.setMap(this.map)
 			}
 
@@ -339,15 +357,17 @@ export default class MarkerController {
 			if (this.myScout.path != null) {
 				this.myScout.path.setMap(null)
 				this.myScout.path = null
+
+				const title = '🔔 Scout Arrived'
+				const options = {
+					body: `Scout has stopped walking.`,
+					icon: ScoutSrc
+				}
+
+				this.sendMessage('Scout has arrived')
+
+				window.swRegistration.showNotification(title, options)
 			}
-
-			const title = '🔔 Scout Arrived';
-			const options = {
-				body: `Scout has stopped walking.`,
-				icon: ScoutSrc
-			};
-
-			window.swRegistration.showNotification(title, options);
 		}
 	}
 
@@ -358,9 +378,9 @@ export default class MarkerController {
 	}
 
 	onScoutAdded(uid, data) {
-		this.scouts[uid] = new Scout(uid, data.position, 40, data.mode, data.hp);
-		this.scouts[uid].marker.addListener('click', function(e) {
-			const dmg = Math.floor(Math.random() * 10);
+		this.scouts[uid] = new Scout(uid, data.position, 40, data.mode, data.hp)
+		this.scouts[uid].marker.addListener('click', (e) => {
+			const dmg = Math.floor(Math.random() * 10)
 
 			this.scouts[uid].stop()
 			this.scouts[uid].indicator.setMap(this.map)
@@ -371,9 +391,9 @@ export default class MarkerController {
 			})
 
 			this.map.panTo(e.latLng)
-		}.bind(this))
+		})
 
-		this.scouts[uid].marker.setMap(this.map);
+		this.scouts[uid].marker.setMap(this.map)
 		this.scouts[uid].marker.setVisible(false)
 	}
 
@@ -384,6 +404,7 @@ export default class MarkerController {
 			if (data.hp > 0) {
 				this.scouts[uid].setLabel( data.hitDmg )
 				this.scouts[uid].setHitPoints( data.hp )
+				this.sendMessage(`${this.usernames[uid]}'s scout is being attacked!`)
 			}
 			else {
 				this.scouts[uid].die()
@@ -399,6 +420,8 @@ export default class MarkerController {
 		this.scouts[uid].marker.setMap(null)
 		this.scouts[uid].indicator.setMap(null)
 		delete this.scouts[uid]
+
+		this.sendMessage(`${this.usernames[uid]}'s scout has died...`)
 	}
 
 	createUser(uid, data) {
@@ -406,11 +429,11 @@ export default class MarkerController {
 	}
 
 	updateUser(uid, data) {
-		this.usersRef.child(uid).update(data);
+		this.usersRef.child(uid).update(data)
 	}
 
 	removeUser(uid) {
-		this.usersRef.child(uid).remove();
+		this.usersRef.child(uid).remove()
 	}
 
 	createScout(uid, data) {
@@ -430,7 +453,7 @@ export default class MarkerController {
 					class: 'btn-ward',
 					callback: 'onDropItem'
 				}
-			}));
+			}))
 		}
 		else {
 			alert('You can deploy up to 3 wards.')
@@ -449,7 +472,7 @@ export default class MarkerController {
 				class: 'btn-ward',
 				callback: 'onDropItem'
 			}
-		}));
+		}))
 	}
 
 	createGold(data) {
@@ -470,7 +493,7 @@ export default class MarkerController {
 					class: 'btn-gold',
 					callback: 'onDropItem'
 				}
-			}));
+			}))
 		}
 	}
 
@@ -485,7 +508,7 @@ export default class MarkerController {
 				class: 'btn-gold',
 				callback: 'onDropItem'
 			}
-		}));
+		}))
 	}
 
 	getPlaceDetails(e) {
@@ -494,7 +517,7 @@ export default class MarkerController {
 		} else {
 			this.places.getDetails({
 				placeId: e.placeId
-			}, function(place, status) {
+			}, (place, status) => {
 				if (status === google.maps.places.PlacesServiceStatus.OK) {
 					const dbRef = this.storesRef
 					const availableItems = [
@@ -515,14 +538,14 @@ export default class MarkerController {
 						{
 							id: 'sword',
 							name: 'Wooden Sword',
-							amount: 1,
+							amount: (Math.floor(Math.random() * 100) > 90) ? 1 : 0,
 							class: 'btn-sword',
 							callback: 'onFight'
 						},
 						{
 							id: 'discover',
 							name: 'Map',
-							amount: 1,
+							amount: (Math.floor(Math.random() * 100) > 90) ? 1 : 0,
 							class: 'btn-map',
 							callback: 'onDiscoverMap'
 						}
@@ -543,18 +566,28 @@ export default class MarkerController {
 					this.store = e.placeId
 
 				}
-			}.bind(this))
+			})
 		}
 	}
 
 	moveScout(toLatlng) {
 		if (this.myScout != null && this.myScout.path == null) {
-			this.pathService.route(this.uid, this.myScout.marker.position, toLatlng, "WALKING").then(function(data){
+			this.pathService.route(this.uid, this.myScout.marker.position, toLatlng, "WALKING").then((data) => {
 				this.myScout.update(data)
-			}.bind(this)).catch(function(err) {
+			}).catch((err) => {
 				console.log(err)
 			})
 		}
+	}
+
+	sendMessage(message) {
+		window.dispatchEvent(new CustomEvent('message_add', {
+			detail: {
+				uid: this.uid,
+				message: message,
+				timestamp: firebase.database.ServerValue.TIMESTAMP
+			}
+		}))
 	}
 
 }

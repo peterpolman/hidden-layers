@@ -1,10 +1,25 @@
 .google-map {
   width: 100%;
-  height: 100%;
+  height: calc(100% - 60px);
   margin: 0 auto;
   background: gray;
   display: block;
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  top: 60px;
+}
+
+.messages {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 50px;
+  overflow: auto;
+  font-size: 9px;
+  color: white;
+  background: black;
+  margin: 0;
+  padding: 5px;
 }
 
 .btn {
@@ -61,12 +76,12 @@
 }
 
 .section-pan .btn-ward {
-  top: 90px;
+  top: 150px;
   right: 0;
 }
 
 .btn-logout {
-  top: 0;
+  top: 60px;
   left: 0;
   font-size: 10px;
   color: white;
@@ -74,7 +89,7 @@
 }
 
 .btn-bell {
-  top: 45px;
+  top: 105px;
   left: 0px;
   bottom: auto;
   right: auto;
@@ -84,12 +99,12 @@
 }
 
 .btn-user {
-  top: 0;
+  top: 60px;
   right: 0;
 }
 
 .btn-scout {
-  top: 45px;
+  top: 105px;
   right: 0;
 }
 

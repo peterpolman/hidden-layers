@@ -15,17 +15,17 @@ export default class GeoService {
   }
 
   getPosition() {
-    return new Promise(function (resolve, reject) {
+    return new Promise((resolve, reject) => {
       navigator.geolocation.getCurrentPosition(function(r) {
         const position = {
           lat: r.coords.latitude,
           lng: r.coords.longitude
         }
         resolve(position);
-      }.bind(this), function(err) {
+      }, (err) => {
         reject(err);
       }, this.options);
-    }.bind(this))
+    })
   }
 
   watchPosition() {

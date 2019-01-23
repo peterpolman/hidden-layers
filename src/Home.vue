@@ -2,6 +2,12 @@
   <section class="section section-home">
     <div class="google-map" id="home-map"></div>
 
+    <div class="messages">
+      <div v-for="message of messageController.messages" :key="message.key">
+        [{{ messageController.getDateTime(message.timestamp) }}] <strong>{{ markerController.usernames[message.uid] }}:</strong> {{ message.message }}
+      </div>
+    </div>
+
     <button class="btn btn-logout" v-on:click="logout">
       EXIT
     </button>
@@ -91,6 +97,7 @@
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/database';
+import 'firebase/functions';
 
 import config from './config.js'
 
@@ -99,6 +106,7 @@ import MapController from './controllers/MapController'
 import ItemController from './controllers/ItemController'
 import NotificationController from './controllers/NotificationController'
 import MarkerController from './controllers/MarkerController'
+import MessageController from './controllers/MessageController'
 
 // Import services
 import GeoService from './services/GeoService'
@@ -144,8 +152,10 @@ export default {
       itemController: new ItemController(firebase.auth().currentUser.uid),
       notificationController: new NotificationController,
       markerController: new MarkerController(firebase.auth().currentUser.uid),
+      messageController: new MessageController(),
       userClass: null,
-      wardId: 0
+      wardId: 0,
+      messages: [],
     }
   },
   mounted() {
@@ -158,10 +168,6 @@ export default {
       this.map.addListener('click', function(e) {
         this.onMapClick(e);
       }.bind(this))
-
-      // this.map.addListener('bounds_changed', function(e) {
-      //   this.onPan()
-      // }.bind(this))
 
     }.bind(this)).catch(function(err) {
       console.log(err)
@@ -261,9 +267,20 @@ export default {
       if (item.amount > 0) {
         var inventory = this.itemController.add(item)
         this.itemController.update(inventory)
+
+        this.sendMessage(`Picked up ${item.amount} ${item.name}`)
       }
 
       storesRef.child(id).child('items').child(key).update({ amount: 0 })
+    },
+    sendMessage(message) {
+      window.dispatchEvent(new CustomEvent('message_add', {
+  			detail: {
+  				uid: this.uid,
+  				message: message,
+  				timestamp: firebase.database.ServerValue.TIMESTAMP
+  			}
+  		}))
     },
     onCloseStore() {
       this.markerController.store = null
