@@ -54,7 +54,7 @@ export default class MarkerController {
 		this.userCount = 0
 		this.loading = true
 
-		this.usernames = []
+		this.userNames = []
 	}
 
 	init(map) {
@@ -97,7 +97,7 @@ export default class MarkerController {
 				this.onMyUserAdded(snap.key, snap.val())
 			}
 
-			this.usernames[snap.key] = snap.val().username
+			this.userNames[snap.key] = snap.val().username
 
 		})
 
@@ -292,6 +292,7 @@ export default class MarkerController {
 			this.userInfoWindow.open(this.map, this.users[uid].marker)
 
 			this.map.panTo(e.latLng)
+			this.sendMessage(`Hi ${data.username}!`)
 		})
 
 		this.users[uid].marker.setMap(this.map)
@@ -309,7 +310,7 @@ export default class MarkerController {
 	}
 
 	onMyScoutAdded(uid, data) {
-		this.myScout = new Scout(uid, data.position, 40, data.mode, data.hp)
+		this.myScout = new Scout(uid, data.mode, data.position, data.hp)
 		this.myScout.setMap(this.map)
 
 		this.myScout.marker.addListener('click', (e) => {
@@ -378,16 +379,16 @@ export default class MarkerController {
 	}
 
 	onScoutAdded(uid, data) {
-		this.scouts[uid] = new Scout(uid, data.position, 40, data.mode, data.hp)
+		this.scouts[uid] = new Scout(uid, data.mode, data.position, data.hp)
 		this.scouts[uid].marker.addListener('click', (e) => {
 			const dmg = Math.floor(Math.random() * 10)
 
-			this.scouts[uid].stop()
+			this.scouts[uid].setMode("STANDING")
 			this.scouts[uid].indicator.setMap(this.map)
 			this.scouts[uid].update({
 				mode: 'FIGHTING',
 				hitDmg: dmg,
-				hp: this.scouts[uid].hp - dmg
+				hp: this.scouts[uid].hitPoints - dmg
 			})
 
 			this.map.panTo(e.latLng)
@@ -404,7 +405,7 @@ export default class MarkerController {
 			if (data.hp > 0) {
 				this.scouts[uid].setLabel( data.hitDmg )
 				this.scouts[uid].setHitPoints( data.hp )
-				this.sendMessage(`${this.usernames[uid]}'s scout is being attacked!`)
+				this.sendMessage(`${this.userNames[uid]}'s scout is being attacked!`)
 			}
 			else {
 				this.scouts[uid].die()
@@ -421,7 +422,7 @@ export default class MarkerController {
 		this.scouts[uid].indicator.setMap(null)
 		delete this.scouts[uid]
 
-		this.sendMessage(`${this.usernames[uid]}'s scout has died...`)
+		this.sendMessage(`${this.userNames[uid]}'s scout has died...`)
 	}
 
 	createUser(uid, data) {

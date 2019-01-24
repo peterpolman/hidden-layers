@@ -4,7 +4,9 @@
 
     <div class="messages">
       <div v-for="message of messageController.messages" :key="message.key">
-        [{{ messageController.getDateTime(message.timestamp) }}] <strong>{{ markerController.usernames[message.uid] }}:</strong> {{ message.message }}
+        [{{ messageController.getDateTime(message.timestamp) }}]
+        <strong>{{ markerController.userNames[message.uid] }}:</strong>
+        {{ message.message }}
       </div>
     </div>
 
@@ -310,7 +312,7 @@ export default {
       window.dispatchEvent(new CustomEvent('cursor_changed', { detail: { type: "WARD" } }))
     },
     onStopClick() {
-      this.markerController.myScout.stop()
+      this.markerController.myScout.setMode("STANDING")
     },
     onSignalClick() {
       this.geoService.getPosition().then(function(r) {
