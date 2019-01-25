@@ -50,7 +50,6 @@ export default class GeoService {
   onError(err) {
     if (typeof err != 'undefined') {
       this.signal = 'geo-off'
-      console.log(`Issue with the positioning system: [${err.code}] ${err.message}`);
     }
   }
 }

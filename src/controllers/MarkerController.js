@@ -11,8 +11,6 @@ import Gold from '../models/Gold'
 import Goblin from '../models/Goblin'
 import Path from '../models/Path'
 
-import ScoutSrc from '../assets/img/wolf-0.png'
-
 export default class MarkerController {
 	constructor(uid) {
 		this.uid = uid
@@ -362,7 +360,7 @@ export default class MarkerController {
 				const title = '🔔 Scout Arrived'
 				const options = {
 					body: `Scout has stopped walking.`,
-					icon: ScoutSrc
+					icon: require('../assets/img/wolf-0.png')
 				}
 
 				this.sendMessage('Scout has arrived')
