@@ -21,12 +21,12 @@ export default class Scout extends Character {
             zIndex: 1,
             label: null,
             icon: {
-                labelOrigin: new google.maps.Point(iconSize / 2, -5),
-                url: require('../assets/img/wolf-0.png'),
+				labelOrigin: new google.maps.Point(iconSize / 2, -10),
+				url: require('../assets/img/wolf-0.png'),
                 size: new google.maps.Size(iconSize, iconSize),
                 scaledSize: new google.maps.Size(iconSize, iconSize),
                 origin: new google.maps.Point(0, 0),
-                anchor: new google.maps.Point(iconSize / 2, iconSize / 2)
+                anchor: new google.maps.Point(iconSize / 2, (iconSize / 2) - 5)
             }
         });
 	}
@@ -63,11 +63,6 @@ export default class Scout extends Character {
 		}
 
 		this.pathTimer = setTimeout(walk.bind(this), interval)
-	}
-
-	setMap(map) {
-		this.marker.setMap(map)
-		this.indicator.setMap(map)
 	}
 
 	setMode(mode) {

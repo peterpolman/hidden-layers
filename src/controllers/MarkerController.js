@@ -165,32 +165,6 @@ export default class MarkerController {
 
 	}
 
-	onStoreAdded(id, data) {
-		const randInt = Math.floor(Math.random() * 100)
-
-		this.stores[id] = data
-		this.stores[id].items.sort()
-
-		if ( randInt > 85 ) {
-			this.goblins[id] = new Goblin(this.uid, data.position, 40)
-
-			this.goblins[id].marker.addListener('click', (e) => {
-				const content = `<strong>${this.goblins[id].talk()}</strong>`
-
-				this.goblinInfoWindow.setContent(content)
-				this.goblinInfoWindow.open(this.map, this.goblins[id].marker)
-			})
-
-			this.goblins[id].marker.setMap(this.map)
-			this.goblins[id].marker.setVisible(false)
-		}
-	}
-
-	onStoreChanged(id, data) {
-		this.stores[id] = data
-		this.stores[id].items.sort()
-	}
-
 	createMarkerId(latLng) {
 		const id = (latLng.lat + "_" + latLng.lng)
 		return id.replace(/\./g, '')
@@ -262,7 +236,7 @@ export default class MarkerController {
 	}
 
 	onMyUserAdded(uid, data) {
-		this.myUser = new User(uid, data.position, data.userClass, data.username, data.email, 50)
+		this.myUser = new User(uid, data.position, data.userClass, data.username, data.email, data.hitPoints)
 		this.myUser.marker.addListener('click', (e) => {
 			const content = `<strong>${data.username}</strong><br><small>Last online: ${new Date(data.lastOnline).toLocaleString("nl-NL")}</small>`
 
@@ -279,18 +253,27 @@ export default class MarkerController {
 	onMyUserChanged(uid, data) {
 		const latlng = new google.maps.LatLng(data.position.lat, data.position.lng)
 		this.myUser.marker.setPosition(latlng)
+
+		if (data.mode == "FIGHTING") {
+			if (data.hp > 0) {
+				this.myScout.setLabel(data.hitDmg)
+				this.myScout.setHitPoints(data.hp)
+			}
+		}
 	}
 
 	onUserAdded(uid, data) {
-		this.users[uid] = new User(uid, data.position, data.userClass, data.username, data.email, 50)
+		this.users[uid] = new User(uid, data.position, data.userClass, data.username, data.email, data.hitPoints)
 		this.users[uid].marker.addListener('click', (e) => {
 			const content = `<strong>${data.username}</strong><br><small>Last online: ${new Date(data.lastOnline).toLocaleString("nl-NL")}</small>`
+			const damage = Math.floor(Math.random() * 10)
 
-			this.userInfoWindow.setContent(content)
-			this.userInfoWindow.open(this.map, this.users[uid].marker)
-
-			this.map.panTo(e.latLng)
-			this.sendMessage(`Hi ${data.username}!`)
+			this.users[uid].indicator.setMap(this.map)
+			this.users[uid].update({
+				mode: 'FIGHTING',
+				hitDmg: damage,
+				hitPoints: this.users[uid].hitPoints - damage
+			})
 		})
 
 		this.users[uid].marker.setMap(this.map)
@@ -300,6 +283,19 @@ export default class MarkerController {
 	onUserChanged(uid, data) {
 		const latlng = new google.maps.LatLng(data.position.lat, data.position.lng)
 		this.users[uid].marker.setPosition(latlng)
+
+		if (data.mode == 'FIGHTING') {
+			if (data.hitPoints > 0) {
+				this.users[uid].setLabel( data.hitDmg )
+				this.users[uid].setHitPoints( data.hitPoints )
+				this.sendMessage(`hits ${this.userNames[uid]} with ${data.hitDmg} damage.`)
+			}
+			else {
+				// this.users[uid].setMap(null)
+				alert('You died..')
+				this.users[uid].setHitPoints(100)
+			}
+		}
 	}
 
 	onUserRemoved(uid) {
@@ -421,6 +417,54 @@ export default class MarkerController {
 		delete this.scouts[uid]
 
 		this.sendMessage(`${this.userNames[uid]}'s scout has died...`)
+	}
+
+	onStoreAdded(id, data) {
+		const randInt = Math.floor(Math.random() * 100)
+
+		this.stores[id] = data
+		this.stores[id].items.sort()
+
+		if ( randInt > 85 ) {
+			this.goblins[id] = new Goblin(data.position, 40)
+
+			this.goblins[id].marker.addListener('click', (e) => {
+				const dmg = Math.floor(Math.random() * 10)
+				this.goblins[id].talk()
+				// const content = `<strong>${this.goblins[id].talk()}</strong>`
+				const hitPoints = (this.goblins[id].hitPoints - dmg)
+
+				// this.goblinInfoWindow.setContent(content)
+				// this.goblinInfoWindow.open(this.map, this.goblins[id].marker)
+
+				this.goblins[id].indicator.setMap(this.map)
+
+				if (this.goblins[id].hitPoints > 0) {
+					this.goblins[id].setLabel( dmg )
+					this.goblins[id].setHitPoints( hitPoints )
+
+					this.sendMessage(`Fighting a goblin!`)
+				}
+				else {
+					this.goblins[id].setMap(null)
+					this.sendMessage(`Killed a goblin..`)
+				}
+
+				// this.goblins[id].update({
+				// 	mode: 'FIGHTING',
+				// 	hitDmg: dmg,
+				// 	hp: this.goblins[id].hitPoints - dmg
+				// })
+			})
+
+			this.goblins[id].marker.setMap(this.map)
+			this.goblins[id].marker.setVisible(false)
+		}
+	}
+
+	onStoreChanged(id, data) {
+		this.stores[id] = data
+		this.stores[id].items.sort()
 	}
 
 	createUser(uid, data) {

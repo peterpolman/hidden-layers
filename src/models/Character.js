@@ -7,6 +7,7 @@ export default class Character {
         this.labelTimer = null
         this.hitPoints = hitPoints
         this.position = latlng
+        this.marker = null
         this.indicator = new google.maps.Marker({
             position: this.position,
             icon: null,
@@ -24,6 +25,11 @@ export default class Character {
         return this[key]
     }
 
+	setMap(map) {
+		this.marker.setMap(map)
+		this.indicator.setMap(map)
+	}
+
     setHitPoints(hitPoints) {
         this.hitPoints = (hitPoints < 0) ? 0 : hitPoints
         this.indicator.setIcon({
@@ -32,7 +38,7 @@ export default class Character {
             fillOpacity: 1,
             scale: .5,
             strokeWeight: 0,
-            anchor: new google.maps.Point(55,-40),
+            anchor: new google.maps.Point(50,-55),
         })
     }
 

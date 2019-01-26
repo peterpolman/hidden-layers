@@ -1,8 +1,11 @@
-import goblinSrc from '../assets/img/goblin-1.png';
-import firebase from 'firebase/app';
+import firebase from 'firebase/app'
+import Character from './Character.js'
 
-export default class Goblin {
-    constructor(uid, position, size) {
+export default class Goblin extends Character {
+    constructor(position, size) {
+        super(position, 100)
+        const iconSize = 40
+
         this.greetings = [
             "I got what you need.",
             "Got the best deals anywheres.",
@@ -38,61 +41,35 @@ export default class Goblin {
             "Make sense!"
         ]
 
-        this.uid = uid
         this.marker = new google.maps.Marker({
             position: new google.maps.LatLng(position.lat, position.lng),
             label: null,
             icon: {
-                labelOrigin: new google.maps.Point(-10, -10),
-                url: goblinSrc,
-                size: new google.maps.Size(size, size),
-                scaledSize: new google.maps.Size(size, size),
+                labelOrigin: new google.maps.Point(iconSize / 2, -10),
+                url: require('../assets/img/goblin-1.png'),
+                size: new google.maps.Size(iconSize, iconSize),
+                scaledSize: new google.maps.Size(iconSize, iconSize),
                 origin: new google.maps.Point(0, 0),
-                anchor: new google.maps.Point(size / 1, size)
+                anchor: new google.maps.Point(iconSize / 2, (iconSize / 2) - 5)
             }
         })
 
     }
 
-    setLabel(text) {
-        if (text == 0) {
-            text = 'MISS'
-        }
-
-        this.marker.setLabel({text: text.toString(), color: '#FA2A00', fontWeight: 'bold', fontSize: '14px', fontFamily: 'Avenir'})
-
-        this.labelTimer = setTimeout(function() {
-            this.marker.setLabel(null)
-            clearTimeout(this.labelTimer)
-        }.bind(this), 1000)
-    }
-
     talk() {
         const message = `Goblin: ${this.greetings[Math.floor(Math.random() * this.greetings.length)]}`
-        this.sendMessage(message)
-        return message
-    }
-
-    set(key, value) {
-        this[key] = value
-    }
-
-    get(key) {
-        return this[key]
-    }
-
-    setVisible(visibility) {
-        this.marker.setVisible(visibility)
-    }
-
-    sendMessage(message) {
         window.dispatchEvent(new CustomEvent('message_add', {
             detail: {
-                uid: this.uid,
                 message: message,
                 timestamp: firebase.database.ServerValue.TIMESTAMP
             }
         }))
+
+        return `Goblin: ${message}`
     }
+
+	// update(data) {
+	// 	return this.scoutRef.update(data);
+	// }
 
 }

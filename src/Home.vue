@@ -5,7 +5,7 @@
     <div class="messages">
         <div v-for="message of messageController.messages" :key="message.key">
             [{{ messageController.getDateTime(message.timestamp) }}]
-            <strong>{{ markerController.userNames[message.uid] }}:</strong>
+            <strong v-if="message.uid">{{ markerController.userNames[message.uid] }}:</strong>
             {{ message.message }}
         </div>
     </div>
