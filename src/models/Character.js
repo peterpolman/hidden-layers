@@ -1,20 +1,21 @@
+import firebase from 'firebase/app'
+import 'firebase/database'
+
 export default class Character {
     constructor(position, hitPoints) {
-        // debugger
-        const latlng = new google.maps.LatLng(position.lat, position.lng)
-
         this.attackPower = 5
         this.labelTimer = null
-        this.hitPoints = hitPoints
-        this.position = latlng
-        this.marker = null
+        this.hitPoints = 0
+        this.position = null
+        this.marker = new google.maps.Marker({
+            position: position
+        })
         this.indicator = new google.maps.Marker({
-            position: this.position,
-            icon: null,
             zIndex: -99,
         });
 
-        this.setHitPoints(this.hitPoints)
+        this.setPosition(position)
+        this.setHitPoints(hitPoints)
     }
 
     set(key, value) {
@@ -75,5 +76,15 @@ export default class Character {
     setVisible(visibility) {
         this.marker.setVisible(visibility)
         this.indicator.setVisible(visibility)
+    }
+
+    setMessage(uid = null, message) {
+        window.dispatchEvent(new CustomEvent('message_add', {
+			detail: {
+				uid: uid,
+				message: message,
+				timestamp: firebase.database.ServerValue.TIMESTAMP
+			}
+		}))
     }
 }

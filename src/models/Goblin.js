@@ -6,6 +6,7 @@ export default class Goblin extends Character {
         super(position, 100)
         const iconSize = 40
 
+        this.hasTalked = false
         this.greetings = [
             "I got what you need.",
             "Got the best deals anywheres.",
@@ -64,6 +65,8 @@ export default class Goblin extends Character {
                 timestamp: firebase.database.ServerValue.TIMESTAMP
             }
         }))
+
+        this.hasTalked = true
 
         return `Goblin: ${message}`
     }

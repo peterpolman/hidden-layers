@@ -21,7 +21,7 @@ export default class Scout extends Character {
             zIndex: 1,
             label: null,
             icon: {
-				labelOrigin: new google.maps.Point(iconSize / 2, -10),
+				labelOrigin: new google.maps.Point(iconSize / 2, (iconSize / 2) - 5),
 				url: require('../assets/img/wolf-0.png'),
                 size: new google.maps.Size(iconSize, iconSize),
                 scaledSize: new google.maps.Size(iconSize, iconSize),

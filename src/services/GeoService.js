@@ -1,12 +1,12 @@
 import firebase from 'firebase/app';
 import 'firebase/auth';
-import MarkerController from '../controllers/MarkerController'
+import UserController from '../controllers/UserController'
 
 export default class GeoService {
   constructor() {
     this.signal = 'geo-off'
     this.watcher = null
-    this.markerController = new MarkerController(firebase.auth().currentUser.uid)
+    this.userController = new UserController(firebase.auth().currentUser.uid)
     this.options = {
       enableHighAccuracy: true,
       maximumAge: 1000,
@@ -36,7 +36,7 @@ export default class GeoService {
   onWatchPosition(position) {
     this.signal = 'geo-on'
 
-    const uid = this.markerController.uid
+    const uid = this.userController.uid
     const data = {
       position: {
         lat: position.coords.latitude,
@@ -44,7 +44,7 @@ export default class GeoService {
       }
     }
 
-    this.markerController.updateUser(uid, data)
+    this.userController.updateUser(uid, data)
   }
 
   onError(err) {

@@ -2,26 +2,23 @@
 <section class="section section-home">
     <div class="google-map" id="home-map"></div>
 
-    <div class="messages">
+    <div class="messages" v-if="messageController">
         <div v-for="message of messageController.messages" :key="message.key">
-            [{{ messageController.getDateTime(message.timestamp) }}]
-            <strong v-if="message.uid">{{ markerController.userNames[message.uid] }}:</strong>
-            {{ message.message }}
+            <span>[{{ messageController.getDateTime(message.timestamp) }}]</span>
+            <strong v-if="userController.userNames[message.uid]">{{ userController.userNames[message.uid] }}:</strong>
+            <span>{{ message.message }}</span>
         </div>
     </div>
 
     <button class="btn btn-logout" v-on:click="logout">
         EXIT
     </button>
-    <button v-bind:style="{ backgroundImage: 'url(' + assets.bell + ')', backgroundColor: (notificationController.isSubscribed) ? '#63EE23' : '#FF6B6B' }" v-on:click="onSetBellClick" class="btn btn-bell" v-if="notificationController.pushEnabled">
-        PUSH
-    </button>
     <button v-on:click="onSignalClick" :class="geoService.signal">
 
     </button>
 
     <div class="section-pan">
-        <button v-bind:style="{ backgroundImage: 'url(' + assets.knight + ')' }" v-on:click="onPanUserClick" class="btn btn-user" v-if="markerController.myUser">
+        <button v-bind:style="{ backgroundImage: 'url(' + assets.knight + ')' }" v-on:click="onPanUserClick" class="btn btn-user">
             User
         </button>
         <button v-bind:style="{ backgroundImage: 'url(' + assets.scout + ')' }" v-on:click="onPanScoutClick" class="btn btn-scout">
@@ -35,45 +32,46 @@
     <button v-bind:style="{ backgroundImage: 'url(' + ( (ui.dialogs.inventory) ? assets.inventoryOpen : assets.inventory )+ ')' }" v-on:click="onInventoryClick" class="btn btn-inventory">
         Inventory
     </button>
-    <button class="btn btn-stop" v-on:click="onStopClick" v-if="markerController.isWalking">
+    <button class="btn btn-stop" v-on:click="onStopClick" v-if="scoutController && scoutController.isWalking">
         Stop
     </button>
-    <div class="dialog dialog--store" v-if="markerController.store">
+    <div class="dialog dialog--store" v-if="storeController && storeController.store">
         <header>
-            <h2>{{ markerController.stores[markerController.store].name }}</h2>
+            <h2>{{ storeController.stores[storeController.store].name }}</h2>
             <div>
-                Category: {{ markerController.stores[markerController.store].category }}
-            </div>
-            <div>
-                Owner: {{ (typeof markerController.users[markerController.stores[markerController.store].owner] != 'undefined') ? markerController.users[markerController.stores[markerController.store].owner]['username'] : 'you'  }}
+                Category: {{ storeController.stores[storeController.store].category }}<br>
+                Owner: {{ userController.userNames[storeController.stores[storeController.store].owner]  }}
             </div>
             <button v-on:click="onCloseStore">Close</button>
         </header>
 
         <ul>
-            <li v-for="(item, key) in markerController.stores[markerController.store].items">
-                <button :key="key" v-if="item" v-bind:style="{ backgroundImage: 'url(' + assets[item.id] + ')' }" v-bind:class="`btn ${item.class}`" v-on:click="onGetItemFromStore(markerController.store, key, item)">
+            <li :key="item.slug"
+                v-if="(item.amount > 0)"
+                v-for="item in storeController.stores[storeController.store].items">
+                <button
+                    v-bind:style="{ backgroundImage: `url(${assets[item.slug]})` }"
+                    v-bind:class="`btn btn-${item.slug}`"
+                    v-on:click="onGetItemFromStore(storeController.store, item)
+                    ">
                     {{ item.name }}
                     <small>
                         {{ item.amount }}
                     </small>
                 </button>
             </li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
         </ul>
     </div>
 
-    <div class="dialog dialog--inventory" v-if="itemController.inventoryOpen">
+    <div class="dialog dialog--inventory" v-if="itemController && itemController.inventoryOpen">
         <ul>
-            <li v-for="item in itemController.inventory">
-                <button :key="item.id" v-if="item" v-bind:style="{ backgroundImage: 'url(' + assets[item.id] + ')' }" v-bind:class="`btn ${item.class}`" v-on:click="onItemClick(item)">
+            <li :key="item.slug"
+                v-if="(item.amount > 0)"
+                v-for="item in itemController.inventory">
+                <button
+                    v-bind:style="{ backgroundImage: `url(${assets[item.slug]})` }"
+                    v-bind:class="`btn btn-${item.slug}`"
+                    v-on:click="onItemClick(item)">
                     {{ item.name }}
                     <small v-if="item.amount">
                         {{ item.amount }}
@@ -93,28 +91,17 @@ import 'firebase/functions';
 
 import config from './config.js'
 
-// Import controllers
-import MapController from './controllers/MapController'
-import ItemController from './controllers/ItemController'
-import NotificationController from './controllers/NotificationController'
-import MarkerController from './controllers/MarkerController'
-import MessageController from './controllers/MessageController'
-
 // Import services
+import MapService from './services/MapService'
 import GeoService from './services/GeoService'
 
-// Import assets
-import KnightImg from './assets/img/knight-1.png'
-import ArcherImg from './assets/img/archer-1.png'
-import WolfImg from './assets/img/wolf-0.png'
-import WardImg from './assets/img/ward-1.png'
-import GoldImg from './assets/img/coin.png'
-import WoodSwordImg from './assets/img/woodSword.png'
-import BellImg from './assets/img/badge.png'
-import InventoryImg from './assets/img/backpack.png'
-import DiscoverImg from './assets/img/discover.png'
-
-import InventoryOpenImg from './assets/img/backpack_open.png'
+// Import controllers
+import UserController from './controllers/UserController'
+import ScoutController from './controllers/ScoutController'
+import StoreController from './controllers/StoreController'
+import ItemController from './controllers/ItemController'
+import MessageController from './controllers/MessageController'
+import LootController from './controllers/LootController'
 
 export default {
     name: 'home',
@@ -127,124 +114,129 @@ export default {
                 }
             },
             assets: {
-                ward: WardImg,
-                knight: KnightImg,
-                scout: WolfImg,
-                archer: ArcherImg,
-                bell: BellImg,
-                gold: GoldImg,
-                sword: WoodSwordImg,
-                inventory: InventoryImg,
-                inventoryOpen: InventoryOpenImg,
-                discover: DiscoverImg
+                ward: require('./assets/img/ward-1.png'),
+                knight: require('./assets/img/knight-1.png'),
+                archer: require('./assets/img/archer-1.png'),
+                scout: require('./assets/img/wolf-0.png'),
+                gold: require('./assets/img/coin.png'),
+                sword: require('./assets/img/woodSword.png'),
+                inventory: require('./assets/img/backpack.png'),
+                inventoryOpen: require('./assets/img/backpack_open.png'),
+                discover: require('./assets/img/discover.png')
             },
-            uid: firebase.auth().currentUser.uid,
-            geoService: new GeoService,
-            mapController: new MapController,
-            itemController: new ItemController(firebase.auth().currentUser.uid),
-            notificationController: new NotificationController,
-            markerController: new MarkerController(firebase.auth().currentUser.uid),
-            messageController: new MessageController(),
             userClass: null,
             wardId: 0,
+            users: [],
+            scouts: [],
             messages: [],
+            selectedStore: {},
+            uid: firebase.auth().currentUser.uid,
+            mapService: new MapService(),
+            geoService: new GeoService(),
+            userController: null,
+            scoutController: null,
+            storeController: null,
+            itemController: null,
+            messageController: new MessageController()
         }
     },
     mounted() {
-        // Initialize the map
-        this.mapController.init().then(function(map) {
-            this.map = map
+        this.mapService.init().then((map) => {
+            const uid = firebase.auth().currentUser.uid
+            const usersRef = firebase.database().ref('users')
+            const scoutsRef = firebase.database().ref('scouts')
+            const lootRef = firebase.database().ref('loot')
 
-            this.markerController.init(this.map)
+            // These controllers should be created when the map is loaded.
+            this.userController = new UserController(uid)
+            this.scoutController = new ScoutController(uid)
+            this.lootController = new LootController(uid)
+            this.storeController = new StoreController()
+            this.itemController = new ItemController()
 
-            this.map.addListener('click', function(e) {
+            MAP.addListener('click', (e) => {
                 this.onMapClick(e);
-            }.bind(this))
+            })
 
-        }.bind(this)).catch(function(err) {
+            window.addEventListener('cursor_changed', (e) => {
+                this.cursorMode = e.detail.type
+            })
+
+            scoutsRef.on('child_added', (snap) => this.discover() )
+            scoutsRef.on('child_changed', (snap) => this.discover() )
+            scoutsRef.on('child_removed', (snap) => this.discover() )
+            usersRef.on('child_changed', (snap) => this.discover() )
+            lootRef.on('child_added', (snap) => this.discover() )
+            lootRef.on('child_changed', (snap) => this.discover() )
+            lootRef.on('child_removed', (snap) => this.discover() )
+        }).then(() => {
+            this.discover()
+        }).catch((err) => {
             console.log(err)
-        });
-
-        // Add custom event listeners
-        window.addEventListener('cursor_changed', function(e) {
-            this.cursorMode = e.detail.type
-        }.bind(this))
-
-        // Start the service worker if available
-        if ('serviceWorker' in navigator && 'PushManager' in window) {
-            this.notificationController.pushEnabled = true
-
-            navigator.serviceWorker.register('sw.js')
-                .then(function(swReg) {
-                    window.swRegistration = swReg;
-                    const isPermissionGranted = this.notificationController.verifyPermission()
-                    this.notificationController.isSubscribed = isPermissionGranted
-                }.bind(this))
-                .catch(function(error) {
-                    console.error('Service Worker Error', error);
-                });
-        } else {
-            console.warn('Push messaging is not supported');
-        }
+        })
     },
     methods: {
-        onDiscoverMap() {
-            for (let uid in this.markerController.scouts) {
-                this.markerController.scouts[uid].marker.setVisible(true)
-
-                var timer = setTimeout(function() {
-                    clearTimeout(timer)
-
-                    this.markerController.discover()
-                }.bind(this), 3000)
+    	discover() {
+            const visibility = {
+                user: this.userController.myUser,
+                scout: this.scoutController.myScout,
+                wards: this.lootController.myWardMarkers
             }
-        },
-        onFight() {
-            alert(`Wooden Sword: "We'll be fightin those goblins very soon..."`);
-        },
-        onPan() {
-            if (this.markerController.myUser && this.markerController.myScout) {
-                this.markerController.discover()
+
+            const positions = {
+                users: this.userController.users,
+                scouts: this.scoutController.scouts,
+                goblins: this.storeController.goblins,
+                loot: this.lootController.loot
             }
-        },
+
+            const discovered = this.mapService.getVisibleObjects(visibility, positions)
+
+            this.userController.users = discovered.users
+            this.scoutController.scouts = discovered.scouts
+            this.storeController.goblins = discovered.goblins
+            this.lootController.loot = discovered.loot
+    	},
         onMapClick(e) {
-            const position = {
-                lat: e.latLng.lat(),
-                lng: e.latLng.lng()
+            const visibility = {
+                user: this.userController.myUser,
+                scout: this.scoutController.myScout,
+                wards: this.lootController.myWardMarkers
             }
+
+            const isHidden = this.mapService.isPositionHidden(e.latLng, visibility)
 
             if (e.placeId) {
-                e.stop()
-
-                const visibility = this.markerController.gridService.setGrid(this.markerController.myUser.marker, this.markerController.myScout.marker, this.markerController.myWardMarkers)
-                const visible = new google.maps.Polygon({
-                    paths: visibility
-                })
-                const isHidden = google.maps.geometry.poly.containsLocation(e.latLng, visible)
-
                 if (!isHidden) {
-                    this.markerController.getPlaceDetails(e)
+                    this.storeController.getPlaceDetails(e)
                     this.cursorMode = null
                 }
+                e.stop()
             }
 
             switch (this.cursorMode) {
-                case "WARD":
-                    this.markerController.createWard({
-                        position: position,
-                        id: this.markerController.createMarkerId(position)
-                    })
-                    break
-                case "GOLD":
-                    this.markerController.createGold({
-                        uid: this.uid,
-                        position: position,
-                        id: this.markerController.createMarkerId(position),
-                        amount: this.amountToDrop
-                    })
+                case "LOOT":
+                    if (!isHidden) {
+                        const position = {
+                            lat: e.latLng.lat(),
+                            lng: e.latLng.lng(),
+                        }
+                        const data = {
+                            uid: this.uid,
+                            id: this.lootController.createMarkerId(position),
+                            slug: this.itemToDrop.slug,
+                            name: this.itemToDrop.name,
+                            position: position,
+                            size: this.itemToDrop.size,
+                            amount: this.itemToDrop.amount,
+                        }
+                        this.lootController.drop(data)
+                        console.log(this.lootController.myWardMarkers)
+
+                    }
                     break
                 case "SCOUT":
-                    this.markerController.moveScout(e.latLng)
+                    this.scoutController.moveScout(e.latLng)
                     break
             }
         },
@@ -252,24 +244,14 @@ export default {
             this.itemController.inventoryOpen = !this.itemController.inventoryOpen
 
             if (!this.itemController.inventoryOpen) {
-                this.mapController.cursorMode = null
+                this.cursorMode = null
             }
         },
-        onGetItemFromStore(id, key, item) {
-            const storesRef = this.markerController.storesRef
-
+        onGetItemFromStore(id, item) {
             this.itemController.inventoryOpen = true
-
-            if (item.amount > 0) {
-                var inventory = this.itemController.add(item)
-                this.itemController.update(inventory)
-
-                this.sendMessage(`Picked up ${item.amount} ${item.name}`)
-            }
-
-            storesRef.child(id).child('items').child(key).update({
-                amount: 0
-            })
+            this.itemController.add(item)
+            this.storeController.storesRef.child(id).child('items').child(item.slug).remove()
+            this.sendMessage(`Got ${item.amount} ${item.name} from store`)
         },
         sendMessage(message) {
             window.dispatchEvent(new CustomEvent('message_add', {
@@ -281,69 +263,46 @@ export default {
             }))
         },
         onCloseStore() {
-            this.markerController.store = null
+            this.storeController.store = null
         },
         onItemClick(item) {
-            return this[item.callback](item);
-        },
-        onDropItem(item) {
-            if (item.id === 'ward') {
-                this.cursorMode = "WARD"
-                this.amountToDrop = 1
-            }
-
-            if (item.id === 'gold') {
-                this.cursorMode = "GOLD"
-                this.amountToDrop = item.amount
-            }
-        },
-        onSetBellClick() {
-            if (this.notificationController.verifyPermission()) {
-                this.notificationController.unsubscribeUser();
-            } else {
-                this.notificationController.subscribeUser();
-            }
-        },
-        onSpawnWardClick() {
-            window.dispatchEvent(new CustomEvent('cursor_changed', {
-                detail: {
-                    type: "WARD"
-                }
-            }))
+            this.cursorMode = "LOOT"
+            this.itemToDrop = item
         },
         onStopClick() {
-            this.markerController.myScout.setMode("STANDING")
+            this.scoutController.myScout.setMode("STANDING")
         },
         onSignalClick() {
             this.geoService.getPosition().then(function(r) {
-                this.map.panTo(r)
+                MAP.panTo(r)
                 this.geoService.watchPosition()
             }.bind(this)).catch(function(err) {
                 console.log(err)
             })
         },
         onPanWardClick() {
-            const wardMarkers = this.markerController.myWardMarkers
+            const wardMarkers = this.lootController.myWardMarkers
 
             if (wardMarkers.length > 0) {
-                this.map.panTo(wardMarkers[Object.keys(wardMarkers)[0]].position);
+                MAP.panTo(wardMarkers[Object.keys(wardMarkers)[0]].position);
             }
         },
         onPanUserClick() {
-            this.map.panTo(this.markerController.myUser.marker.position)
+            MAP.panTo(this.userController.myUser.marker.position)
         },
         onPanScoutClick() {
-            if (this.markerController.myScout == null) {
-                this.markerController.createScout(this.uid, {
+            if (this.scoutController.myScout == null) {
+                this.scoutController.createScout(this.uid, {
                     uid: this.uid,
                     hp: 100,
                     position: {
-                        lat: this.markerController.myUser.marker.position.lat(),
-                        lng: this.markerController.myUser.marker.position.lng()
+                        lat: this.userController.myUser.marker.position.lat(),
+                        lng: this.userController.myUser.marker.position.lng()
                     }
                 })
             } else {
-                this.map.panTo(this.markerController.myScout.marker.position)
+                MAP.panTo(this.scoutController.myScout.marker.position)
+                this.cursorMode = "SCOUT"
             }
         },
         logout() {

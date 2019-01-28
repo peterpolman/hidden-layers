@@ -24,14 +24,14 @@
 import firebase from 'firebase/app';
 import 'firebase/auth';
 
-import MarkerController from './controllers/MarkerController';
+import UserController from './controllers/UserController';
 import MapBackground from './assets/img/map.png';
 
 export default {
   name: 'register',
   data: function () {
     return {
-      markerController: new MarkerController(null),
+      userController: new UserController(null),
       email: '',
       password: '',
       userClass: '',
@@ -69,7 +69,7 @@ export default {
             username: this.username,
           }
 
-          this.markerController.createUser(r.user.uid, data)
+          this.userController.createUser(r.user.uid, data)
           this.$router.replace('/')
         }.bind(this))
         .catch( function(err) {
