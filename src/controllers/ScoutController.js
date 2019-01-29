@@ -129,7 +129,7 @@ export default class ScoutController {
 
 			this.scouts[uid].setMode("STANDING")
 
-			this.scouts[uid].setMessage(`${this.userNames[uid]}'s scout got hit by ${this.userNames[data.attacker]} with ${damage} damage.`)
+			this.scouts[uid].setMessage(`${this.userNames[data.attacker]} hits ${this.userNames[uid]}'s scout for ${damage} damage.`)
 			this.scouts[uid].indicator.setMap(MAP)
 			this.scouts[uid].update({
 				mode: 'FIGHTING',
@@ -154,7 +154,8 @@ export default class ScoutController {
 				this.scouts[uid].setHitPoints( data.hp )
 			}
 			else {
-				this.scouts[uid].die()
+				this.scouts[uid].setMessage(`${this.userNames[data.attacker]} kills ${this.userNames[uid]}'s like it's nothing..`)
+				this.scouts[uid].kill()
 			}
 		}
 
@@ -164,9 +165,7 @@ export default class ScoutController {
 	}
 
 	onScoutRemoved(uid, data) {
-		this.scouts[uid].marker.setMap(null)
-		this.scouts[uid].indicator.setMap(null)
-		this.scouts[uid].setMessage(`${this.userNames[uid]}'s scout has died...`)
+		this.scouts[uid].die()
 		delete this.scouts[uid]
 	}
 

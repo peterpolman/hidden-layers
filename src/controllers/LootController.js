@@ -35,7 +35,7 @@ export default class LootController {
 		this.loot[key].marker.setMap(MAP)
 
 		// TODO: Non generic code, should be integrated in itemFactory or itemService
-		if (data.slug == 'ward') {
+		if (data.slug == 'ward' && data.uid === this.uid) {
 			const ward = this.loot[key]
 			const id = this.createMarkerId(ward.marker.position)
 
@@ -45,7 +45,7 @@ export default class LootController {
 
 	onLootRemoved(key, data) {
 		// TODO: Non generic code, should be integrated in itemFactory or itemService
-		if (data.slug == 'ward') {
+		if (data.slug == 'ward' && data.uid === this.uid) {
 			const ward = this.loot[key]
 			const id = this.createMarkerId(ward.marker.position)
 

@@ -84,7 +84,6 @@ export default class Scout extends Character {
 	}
 
 	die() {
-		return this.scoutRef.remove()
-		// return this.setMap(null)
+		return this.setMap(null)
 	}
 }

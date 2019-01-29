@@ -23,7 +23,7 @@ export default class ScoutController {
                 connection.set(true)
                 lastOnlineRef.onDisconnect().set(firebase.database.ServerValue.TIMESTAMP)
 
-                this.sendMessage(`Is now connected.`)
+                this.setMessage(`Is now connected.`)
             }
         })
 
@@ -64,7 +64,7 @@ export default class ScoutController {
 		usersRef.child(uid).remove()
 	}
 
-	sendMessage(message) {
+	setMessage(message) {
 		window.dispatchEvent(new CustomEvent('message_add', {
 			detail: {
 				uid: this.uid,
@@ -79,15 +79,11 @@ export default class ScoutController {
 
 		this.myUser = new User(uid, data.position, data.userClass, data.username, data.email, data.hitPoints)
 		this.myUser.marker.addListener('click', (e) => {
-			const content = `<strong>${data.username}</strong><br><small>Last online: ${new Date(data.lastOnline).toLocaleString("nl-NL")}</small>`
-
-			this.userInfoWindow.setContent(content)
-			this.userInfoWindow.open(MAP, this.myUser.marker)
-
+			this.setMessage(`Hi!`)
 			MAP.panTo(e.latLng)
 		})
 
-		this.myUser.marker.setMap(MAP)
+		this.myUser.setMap(MAP)
 		MAP.panTo(this.myUser.marker.position)
 	}
 
@@ -98,10 +94,10 @@ export default class ScoutController {
 		if (data.mode == "FIGHTING") {
 			if (data.hitPoints > 0) {
 				this.myUser.setLabel(data.hitDmg)
-				this.myUser.setHitPoints(data.hp)
+				this.myUser.setHitPoints(data.hitPoints)
 			}
 			else {
-				this.myUser.setMessage(`I got killed by ${this.userNames[data.attacker]}!`)
+				this.myUser.setHitPoints(100)
 			}
 		}
 	}
@@ -109,10 +105,8 @@ export default class ScoutController {
 	onUserAdded(uid, data) {
 		this.users[uid] = new User(uid, data.position, data.userClass, data.username, data.email, data.hitPoints)
 		this.users[uid].marker.addListener('click', (e) => {
-			const content = `<strong>${data.username}</strong><br><small>Last online: ${new Date(data.lastOnline).toLocaleString("nl-NL")}</small>`
 			const damage = Math.floor(Math.random() * 10)
 
-			this.users[uid].indicator.setMap(MAP)
 			this.users[uid].update({
 				mode: 'FIGHTING',
 				hitDmg: damage,
@@ -120,7 +114,8 @@ export default class ScoutController {
 				hitPoints: this.users[uid].hitPoints - damage
 			})
 
-			this.users[uid].setMessage(`${this.userNames[uid]} got hit by ${this.userNames[data.attacker]} with ${damage} damage.`)
+			this.users[uid].indicator.setMap(MAP)
+			this.users[uid].setMessage(`${this.userNames[data.attacker]} hits ${this.userNames[uid]} for ${damage} damage.`)
 		})
 
 		this.users[uid].marker.setMap(MAP)
@@ -136,7 +131,8 @@ export default class ScoutController {
 				this.users[uid].setHitPoints( data.hitPoints )
 			}
 			else {
-				this.users[uid].setHitPoints(100) // Temporary revival. Implement potions for this.
+				this.users[uid].setHitPoints(100)
+				this.users[uid].setMessage(`${this.userNames[data.attacker]} killed ${this.userNames[uid]}! But.. ${this.userNames[uid]} survives!`)
 			}
 		}
 	}
