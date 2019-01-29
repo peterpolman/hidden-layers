@@ -217,7 +217,7 @@ export default {
 
             switch (this.cursorMode) {
                 case "LOOT":
-                    if (!isHidden) {
+                    if (!isHidden && this.selectedItem) {
                         const position = {
                             lat: e.latLng.lat(),
                             lng: e.latLng.lng(),
@@ -225,13 +225,14 @@ export default {
                         const data = {
                             uid: this.uid,
                             id: this.createMarkerId(position),
-                            slug: this.itemToDrop.slug,
-                            name: this.itemToDrop.name,
+                            slug: this.selectedItem.slug,
+                            name: this.selectedItem.name,
                             position: position,
-                            size: this.itemToDrop.size,
-                            amount: this.itemToDrop.amount,
+                            size: this.selectedItem.size,
+                            amount: this.selectedItem.amount,
                         }
                         this.lootController.drop(data)
+                        this.selectedItem = null
                     }
                     break
                 case "SCOUT":
@@ -269,8 +270,8 @@ export default {
             this.storeController.store = null
         },
         onItemClick(item) {
+            this.selectedItem = item
             this.cursorMode = "LOOT"
-            this.itemToDrop = item
         },
         onStopClick() {
             this.scoutController.myScout.setMode("STANDING")
