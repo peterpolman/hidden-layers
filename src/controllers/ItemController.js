@@ -37,11 +37,11 @@ export default class ItemController {
     }
 
     onItemChanged(key, data) {
+        Vue.delete(this.inventory, key)
         this.inventory[key] = data
     }
 
     onItemRemoved(key) {
-        // Execute Vue.delete here so the array is updated
         Vue.delete(this.inventory, key)
     }
 
@@ -57,7 +57,12 @@ export default class ItemController {
     }
 
     substract(item) {
-        this.inventory[item.slug].amount -= item.amount
+        if (item.slug == 'ward') {
+            this.inventory[item.slug].amount--
+        }
+        else {
+            this.inventory[item.slug].amount -= item.amount
+        }
 
         if (this.inventory[item.slug].amount <= 0) {
             this.remove(item.slug)

@@ -29,6 +29,7 @@ export default class LootController {
 		this.loot[key] = new Item(this.uid, key, data.slug, data.name, data.position, data.size, data.amount)
 
 		this.loot[key].marker.addListener('click', (e) => {
+			data.amount = (data.slug == 'ward') ? 1 : data.amount
 			this.pickup(data)
 		})
 
@@ -54,7 +55,6 @@ export default class LootController {
 
 		this.loot[key].marker.setMap(null)
 		delete this.loot[key]
-
 	}
 
 	drop(item) {

@@ -28,6 +28,7 @@ export default class StoreController {
 				if (status === google.maps.places.PlacesServiceStatus.OK) {
                     if (place.types[0] === 'light_rail_station' || place.types[0] === 'transit_station' || place.types[0] === 'train_station' || place.types[0] === 'subway_station') {
                         alert('Soon you will be able to travel great distances into new adventures!')
+                        this.travelTo(place)
                     }
                     else {
                         this.visitStore(place)
@@ -36,6 +37,10 @@ export default class StoreController {
 			})
 		}
 	}
+
+    travelTo(origin) {
+
+    }
 
     visitStore(place) {
         const availableItems = {
@@ -95,8 +100,8 @@ export default class StoreController {
 			this.goblins[id] = new Goblin(data.position, 40)
 
 			this.goblins[id].marker.addListener('click', (e) => {
-				const dmg = Math.floor(Math.random() * 10)
-				const hitPoints = (this.goblins[id].hitPoints - dmg)
+				const damage = Math.floor(Math.random() * 10)
+				const hitPoints = (this.goblins[id].hitPoints - damage)
 
                 this.goblins[id].indicator.setMap(MAP)
 
@@ -104,9 +109,9 @@ export default class StoreController {
                     this.goblins[id].talk()
                 }
                 if (this.goblins[id].hitPoints > 0) {
-					this.goblins[id].setLabel( dmg )
+					this.goblins[id].setLabel( damage )
                     this.goblins[id].setHitPoints( hitPoints )
-                    this.goblins[id].setMessage(`A goblin takes ${dmg} damage.`)
+                    this.goblins[id].setMessage(`A goblin takes ${damage} damage.`)
 				}
 				else {
 					this.goblins[id].setMap(null)

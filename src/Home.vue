@@ -73,7 +73,7 @@
                     v-bind:class="`btn btn-${item.slug}`"
                     v-on:click="onItemClick(item)">
                     {{ item.name }}
-                    <small v-if="item.amount">
+                    <small v-if="(item.amount > 1)">
                         {{ item.amount }}
                     </small>
                 </button>
