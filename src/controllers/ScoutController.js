@@ -62,23 +62,12 @@ export default class ScoutController {
 		}
 	}
 
-	sendMessage(message) {
-		window.dispatchEvent(new CustomEvent('message_add', {
-			detail: {
-				uid: this.uid,
-				message: message,
-				timestamp: firebase.database.ServerValue.TIMESTAMP
-			}
-		}))
-	}
-
     onMyScoutAdded(uid, data) {
 		this.myScout = new Scout(uid, data.mode, data.position, data.hp)
 		this.myScout.setMap(MAP)
 
 		this.myScout.marker.addListener('click', (e) => {
 			MAP.panTo(e.latLng)
-			window.dispatchEvent(new CustomEvent('cursor_changed', { detail: { type: "SCOUT" } }))
 		})
 
 		if (data.mode == "WALKING") {
@@ -122,7 +111,7 @@ export default class ScoutController {
 				this.myScout.path.setMap(null)
 				this.myScout.path = null
 
-				this.myScout.setMessage('Scout has arrived')
+				this.myScout.setMessage(`${this.userNames[uid]}'s scout has arrived`)
 			}
 		}
 	}
@@ -136,17 +125,21 @@ export default class ScoutController {
 	onScoutAdded(uid, data) {
 		this.scouts[uid] = new Scout(uid, data.mode, data.position, data.hp)
 		this.scouts[uid].marker.addListener('click', (e) => {
-			const dmg = Math.floor(Math.random() * 10)
+			const damage = Math.floor(Math.random() * 10)
 
 			this.scouts[uid].setMode("STANDING")
+
 			this.scouts[uid].indicator.setMap(MAP)
 			this.scouts[uid].update({
 				mode: 'FIGHTING',
-				hitDmg: dmg,
-				hp: this.scouts[uid].hitPoints - dmg
+				attacker: this.uid,
+				hitDmg: damage,
+				hp: this.scouts[uid].hitPoints - damage
 			})
 
 			MAP.panTo(e.latLng)
+
+			this.scouts[uid].setMessage(`${this.userNames[uid]}'s scout got hit by ${this.userNames[data.attacker]} with ${damage} damage.`)
 		})
 
 		this.scouts[uid].marker.setMap(MAP)
@@ -160,7 +153,6 @@ export default class ScoutController {
 			if (data.hp > 0) {
 				this.scouts[uid].setLabel( data.hitDmg )
 				this.scouts[uid].setHitPoints( data.hp )
-				this.scouts[uid].setMessage(uid, `My scout is being attacked!`)
 			}
 			else {
 				this.scouts[uid].die()
@@ -177,7 +169,7 @@ export default class ScoutController {
 		this.scouts[uid].indicator.setMap(null)
 		delete this.scouts[uid]
 
-		this.sendMessage(`${this.userNames[uid]}'s scout has died...`)
+		this.scouts[uid].setMessage(`${this.userNames[uid]}'s scout has died...`)
 	}
 
 }

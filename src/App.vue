@@ -90,6 +90,7 @@ input[type="password"] {
   border: 0;
   width: 100%;
   margin: 0 auto 1rem;
+  font-size: 14px;
 
   & ~ p {
     text-align: center;
@@ -120,10 +121,84 @@ input[type="password"] {
 
 .google-map {
   width: 100vw;
-  height: 30vh;
+  height: 25vh;
   margin: 0 auto;
   background: gray;
   background-size: cover;
+}
+
+.form-item {
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.form-radio + label {
+  min-height: 20px;
+  padding-left: calc(20px + .5rem);
+  margin-bottom: 0;
+  font-weight: normal;
+  cursor: pointer;
+  position: relative;
+  margin-right: 1rem;
+
+  &:before {
+    position: absolute;
+    content: '';
+    display: block;
+    width: 18px;
+    height: 18px;
+    left: 0;
+    top: 0;
+    border-radius: 3px;
+    border: 2px solid #2c3e50;
+    background-color: transparent;
+    transition: .2s background-color ease;
+  }
+
+  &:after {
+    box-sizing: content-box;
+    position: absolute;
+    content: '';
+    display: block;
+    opacity: 0;
+    transition: .2s opacity ease;
+  }
+}
+
+.form-radio {
+  position: absolute;
+  opacity: 0;
+
+  &:focus + label:before {
+    border: 2px solid #2c3e50;
+  }
+
+  &:checked + label:before,
+  &:checked:focus + label:before{
+    border-color: #2c3e50;
+    background-color: white;
+  }
+
+  &:checked + label:after {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.form-radio + label {
+  &:before {
+    border-radius: 50%;
+  }
+
+  &:after {
+    background-color: #2c3e50;
+    border-radius: 50%;
+    width: 14px;
+    height: 14px;
+    top: 4px;
+    left: 4px;
+    border: 0;
+  }
 }
 
 </style>

@@ -13,23 +13,23 @@
     <button class="btn btn-logout" v-on:click="logout">
         EXIT
     </button>
-    <button v-on:click="onSignalClick" :class="geoService.signal">
+    <button v-if="userController && userController.myUser" v-on:click="onSignalClick" :class="geoService.signal">
 
     </button>
 
     <div class="section-pan">
-        <button v-bind:style="{ backgroundImage: 'url(' + assets.knight + ')' }" v-on:click="onPanUserClick" class="btn btn-user">
+        <button v-if="userController && userController.myUser" v-bind:style="{ backgroundImage: 'url(' + assets.knight + ')' }" v-on:click="onPanUserClick" class="btn btn-user">
             User
         </button>
-        <button v-bind:style="{ backgroundImage: 'url(' + assets.scout + ')' }" v-on:click="onPanScoutClick" class="btn btn-scout">
+        <button v-if="scoutController" v-bind:style="{ backgroundImage: 'url(' + assets.scout + ')' }" v-on:click="onPanScoutClick" class="btn btn-scout">
             Scout
         </button>
-        <button v-if="lootController && lootController.myWards" v-bind:style="{ backgroundImage: 'url(' + assets.ward + ')' }" v-on:click="onPanWardClick" class="btn btn-ward">
+        <button v-if="lootController && lootController.myWards.length" v-bind:style="{ backgroundImage: 'url(' + assets.ward + ')' }" v-on:click="onPanWardClick" class="btn btn-ward">
             Ward
         </button>
     </div>
 
-    <button v-bind:style="{ backgroundImage: 'url(' + ( (ui.dialogs.inventory) ? assets.inventoryOpen : assets.inventory )+ ')' }" v-on:click="onInventoryClick" class="btn btn-inventory">
+    <button v-if="itemController && itemController.inventory" v-bind:style="{ backgroundImage: 'url(' + ( (ui.dialogs.inventory) ? assets.inventoryOpen : assets.inventory )+ ')' }" v-on:click="onInventoryClick" class="btn btn-inventory">
         Inventory
     </button>
     <button class="btn btn-stop" v-on:click="onStopClick" v-if="scoutController && scoutController.isWalking">
@@ -139,7 +139,7 @@ export default {
             storeController: null,
             itemController: null,
             lootController: null,
-            messageController: new MessageController()
+            messageController: null
         }
     },
     mounted() {
@@ -150,11 +150,14 @@ export default {
             const lootRef = firebase.database().ref('loot')
 
             // These controllers should be created when the map is loaded.
+            this.messageController = new MessageController()
             this.userController = new UserController(uid)
             this.scoutController = new ScoutController(uid)
             this.lootController = new LootController(uid)
             this.storeController = new StoreController()
             this.itemController = new ItemController()
+
+            this.scoutController.userNames = this.userController.userNames
 
             MAP.addListener('click', (e) => {
                 this.onMapClick(e);
@@ -241,10 +244,6 @@ export default {
                     break
             }
         },
-        createMarkerId(latLng) {
-            const id = (latLng.lat + "_" + latLng.lng)
-            return id.replace(/\./g, '')
-        },
         onInventoryClick() {
             this.itemController.inventoryOpen = !this.itemController.inventoryOpen
 
@@ -256,16 +255,7 @@ export default {
             this.itemController.inventoryOpen = true
             this.itemController.add(item)
             this.storeController.storesRef.child(id).child('items').child(item.slug).remove()
-            this.sendMessage(`Got ${item.amount} ${item.name} from store`)
-        },
-        sendMessage(message) {
-            window.dispatchEvent(new CustomEvent('message_add', {
-                detail: {
-                    uid: this.uid,
-                    message: message,
-                    timestamp: firebase.database.ServerValue.TIMESTAMP
-                }
-            }))
+            this.sendMessage(`Picked up ${item.amount} ${item.name} from store`)
         },
         onCloseStore() {
             this.storeController.store = null
@@ -296,19 +286,34 @@ export default {
             MAP.panTo(this.userController.myUser.marker.position)
         },
         onPanScoutClick() {
-            if (this.scoutController.myScout == null) {
-                this.scoutController.createScout(this.uid, {
+            this.cursorMode = "SCOUT"
+
+            if (this.scoutController.myScout != null) {
+                MAP.panTo(this.scoutController.myScout.marker.position)
+            } else {
+                const data = {
                     uid: this.uid,
                     hp: 100,
                     position: {
                         lat: this.userController.myUser.marker.position.lat(),
                         lng: this.userController.myUser.marker.position.lng()
                     }
-                })
-            } else {
-                MAP.panTo(this.scoutController.myScout.marker.position)
-                this.cursorMode = "SCOUT"
+                }
+                this.scoutController.createScout(this.uid, data)
             }
+        },
+        sendMessage(message) {
+            window.dispatchEvent(new CustomEvent('message_add', {
+                detail: {
+                    uid: this.uid,
+                    message: message,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                }
+            }))
+        },
+        createMarkerId(latLng) {
+            const id = (latLng.lat + "_" + latLng.lng)
+            return id.replace(/\./g, '')
         },
         logout() {
             firebase.auth().signOut().then(() => {

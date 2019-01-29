@@ -23,7 +23,7 @@ export default class ScoutController {
                 connection.set(true)
                 lastOnlineRef.onDisconnect().set(firebase.database.ServerValue.TIMESTAMP)
 
-                this.sendMessage('Connected')
+                this.sendMessage(`Is now connected.`)
             }
         })
 
@@ -120,7 +120,7 @@ export default class ScoutController {
 				hitPoints: this.users[uid].hitPoints - damage
 			})
 
-			this.myUser.setMessage(`${this.userNames[uid]} got hit by ${this.userNames[data.attacker]} with ${damage} damage.`)
+			this.users[uid].setMessage(`${this.userNames[uid]} got hit by ${this.userNames[data.attacker]} with ${damage} damage.`)
 		})
 
 		this.users[uid].marker.setMap(MAP)
@@ -136,7 +136,7 @@ export default class ScoutController {
 				this.users[uid].setHitPoints( data.hitPoints )
 			}
 			else {
-				this.users[uid].setHitPoints(100)
+				this.users[uid].setHitPoints(100) // Temporary revival. Implement potions for this.
 			}
 		}
 	}

@@ -1,8 +1,12 @@
+body {
+    background: black;
+}
+
 .google-map {
   width: 100%;
   height: calc(100% - 60px);
   margin: 0 auto;
-  background: gray;
+  background: black;
   display: block;
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   top: 60px;
@@ -162,6 +166,7 @@
   bottom: 155px;
   right: 70px;
   width: 150px;
+  min-height: 50px;
 }
 
 .dialog--store header {
