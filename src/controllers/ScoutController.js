@@ -167,9 +167,8 @@ export default class ScoutController {
 	onScoutRemoved(uid, data) {
 		this.scouts[uid].marker.setMap(null)
 		this.scouts[uid].indicator.setMap(null)
-		delete this.scouts[uid]
-
 		this.scouts[uid].setMessage(`${this.userNames[uid]}'s scout has died...`)
+		delete this.scouts[uid]
 	}
 
 }
