@@ -2,7 +2,7 @@
 <section class="section section-home">
     <div class="google-map" id="home-map"></div>
 
-    <div class="messages" v-if="messageController">
+    <div class="messages" v-if="messageController && userController">
         <div v-for="message of messageController.messages" :key="message.key">
             <span>[{{ messageController.getDateTime(message.timestamp) }}]</span>
             <strong v-if="userController.userNames[message.uid]">{{ userController.userNames[message.uid] }}:</strong>
@@ -24,7 +24,7 @@
         <button v-bind:style="{ backgroundImage: 'url(' + assets.scout + ')' }" v-on:click="onPanScoutClick" class="btn btn-scout">
             Scout
         </button>
-        <button v-bind:style="{ backgroundImage: 'url(' + assets.ward + ')' }" v-on:click="onPanWardClick" class="btn btn-ward">
+        <button v-if="lootController && lootController.myWards" v-bind:style="{ backgroundImage: 'url(' + assets.ward + ')' }" v-on:click="onPanWardClick" class="btn btn-ward">
             Ward
         </button>
     </div>
@@ -138,6 +138,7 @@ export default {
             scoutController: null,
             storeController: null,
             itemController: null,
+            lootController: null,
             messageController: new MessageController()
         }
     },
