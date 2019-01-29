@@ -10,6 +10,7 @@ export default class Item {
             ward: require('../assets/img/ward-1.png'),
             discover: require('../assets/img/discover.png'),
             sword: require('../assets/img/woodSword.png'),
+            potion: require('../assets/img/potion.png'),
         }
         this.marker = new google.maps.Marker({
             id: id,

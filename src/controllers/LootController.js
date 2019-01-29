@@ -10,7 +10,7 @@ export default class LootController {
 		this.uid = firebase.auth().currentUser.uid
 		this.gridService = new GridService()
 		this.loot = {}
-		this.myWardMarkers = []
+		this.myWards = []
 		this.lootRef = firebase.database().ref('loot')
 		this.lootRef.on('child_added', (snap) => {
 			this.onLootAdded(snap.key, snap.val())
@@ -21,7 +21,7 @@ export default class LootController {
 	}
 
     createMarkerId(latLng) {
-        const id = (latLng.lat + "_" + latLng.lng)
+        const id = (latLng.lat() + "_" + latLng.lng())
         return id.replace(/\./g, '')
     }
 
@@ -34,18 +34,22 @@ export default class LootController {
 
 		this.loot[key].marker.setMap(MAP)
 
+		// TODO: Non generic code, should be integrated in itemFactory or itemService
 		if (data.slug == 'ward') {
-			const marker = this.loot[key].marker
-			const id = this.createMarkerId(marker.position)
-			this.myWardMarkers[id] = marker
+			const ward = this.loot[key]
+			const id = this.createMarkerId(ward.marker.position)
+
+			this.myWards[id] = ward
 		}
 	}
 
 	onLootRemoved(key, data) {
+		// TODO: Non generic code, should be integrated in itemFactory or itemService
 		if (data.slug == 'ward') {
-			const marker = this.loot[key].marker
-			const id = this.createMarkerId(marker.position)
-			delete this.myWardMarkers[id]
+			const ward = this.loot[key]
+			const id = this.createMarkerId(ward.marker.position)
+
+			delete this.myWards[id]
 		}
 
 		this.loot[key].marker.setMap(null)

@@ -50,6 +50,12 @@ export default class StoreController {
 							name: 'Map',
                             size: 30,
 							amount: (Math.floor(Math.random() * 100) > 90) ? 1 : 0,
+						},
+                        discover: {
+							slug: 'potion',
+							name: 'Potion',
+                            size: 25,
+							amount: (Math.floor(Math.random() * 100) > 90) ? 1 : 0,
 						}
 					}
 
@@ -92,11 +98,11 @@ export default class StoreController {
                 if (this.goblins[id].hitPoints > 0) {
 					this.goblins[id].setLabel( dmg )
                     this.goblins[id].setHitPoints( hitPoints )
-                    this.goblins[id].setMessage(this.uid, `Goblin takes ${dmg} damage.`)
+                    this.goblins[id].setMessage(`A goblin takes ${dmg} damage.`)
 				}
 				else {
 					this.goblins[id].setMap(null)
-					this.goblins[id].setMessage(this.uid, `Sayonara goblin..`)
+					this.goblins[id].setMessage(`A goblin has died..`)
 				}
 			})
 

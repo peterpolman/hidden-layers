@@ -12,14 +12,14 @@ export default class MapController {
     }
 
     isPositionHidden(position, visibility) {
-        let visibilityGeom = this.gridService.getVisibility(visibility.user.marker, visibility.scout.marker, visibility.wards)
+        let visibilityGeom = this.gridService.getVisibility(visibility.user, visibility.scout, visibility.wards)
         let visibilityPath = new google.maps.Polygon({paths: visibilityGeom})
 
         return google.maps.geometry.poly.containsLocation(position, visibilityPath)
     }
 
     getVisibleObjects(visibility, positions) {
-        let visibilityGeom = this.gridService.getVisibility(visibility.user.marker, visibility.scout.marker, visibility.wards)
+        let visibilityGeom = this.gridService.getVisibility(visibility.user, visibility.scout, visibility.wards)
         let visibilityPath = new google.maps.Polygon({paths: visibilityGeom})
 
         MAP.data.forEach((feature) => MAP.data.remove(feature))

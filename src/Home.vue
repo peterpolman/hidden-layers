@@ -119,6 +119,7 @@ export default {
                 archer: require('./assets/img/archer-1.png'),
                 scout: require('./assets/img/wolf-0.png'),
                 gold: require('./assets/img/coin.png'),
+                potion: require('./assets/img/potion.png'),
                 sword: require('./assets/img/woodSword.png'),
                 inventory: require('./assets/img/backpack.png'),
                 inventoryOpen: require('./assets/img/backpack_open.png'),
@@ -180,7 +181,7 @@ export default {
             const visibility = {
                 user: this.userController.myUser,
                 scout: this.scoutController.myScout,
-                wards: this.lootController.myWardMarkers
+                wards: this.lootController.myWards
             }
 
             const positions = {
@@ -201,7 +202,7 @@ export default {
             const visibility = {
                 user: this.userController.myUser,
                 scout: this.scoutController.myScout,
-                wards: this.lootController.myWardMarkers
+                wards: this.lootController.myWards
             }
 
             const isHidden = this.mapService.isPositionHidden(e.latLng, visibility)
@@ -223,7 +224,7 @@ export default {
                         }
                         const data = {
                             uid: this.uid,
-                            id: this.lootController.createMarkerId(position),
+                            id: this.createMarkerId(position),
                             slug: this.itemToDrop.slug,
                             name: this.itemToDrop.name,
                             position: position,
@@ -231,14 +232,16 @@ export default {
                             amount: this.itemToDrop.amount,
                         }
                         this.lootController.drop(data)
-                        console.log(this.lootController.myWardMarkers)
-
                     }
                     break
                 case "SCOUT":
                     this.scoutController.moveScout(e.latLng)
                     break
             }
+        },
+        createMarkerId(latLng) {
+            const id = (latLng.lat + "_" + latLng.lng)
+            return id.replace(/\./g, '')
         },
         onInventoryClick() {
             this.itemController.inventoryOpen = !this.itemController.inventoryOpen
@@ -281,10 +284,10 @@ export default {
             })
         },
         onPanWardClick() {
-            const wardMarkers = this.lootController.myWardMarkers
+            const wards = this.lootController.myWards
 
-            if (wardMarkers.length > 0) {
-                MAP.panTo(wardMarkers[Object.keys(wardMarkers)[0]].position);
+            if (wards.length > 0) {
+                MAP.panTo(wards[Object.keys(wards)[0]].marker.position);
             }
         },
         onPanUserClick() {

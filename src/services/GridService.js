@@ -21,7 +21,7 @@ export default class GridService {
         return id.replace(/\./g, '')
     }
 
-    getVisibility(myUserMarker, myScoutMarker, myWardMarkers = []) {
+    getVisibility(myUser, myScout, myWards = []) {
         const outerBounds = [
             new google.maps.LatLng({lng: -11.3600718975, lat: 40.4630057984}),
             new google.maps.LatLng({lng: 31.5241158009, lat: 40.4630057984}),
@@ -34,15 +34,17 @@ export default class GridService {
 
         var geoms = {}
 
-        var myUserMarkerPath = this.circlePath(myUserMarker.position, 100, 128)
-        var myUserMarkerPoly = new google.maps.Polygon({paths: [myUserMarkerPath]})
-        myUserMarkerPoly.path = myUserMarkerPath
-        var userGeom = this.jstsPoly(myUserMarkerPoly);
-        userGeom.id = this.createMarkerId({lat: myUserMarkerPath[0].lat(), lng: myUserMarkerPath[0].lng()})
-        geoms[userGeom.id] = userGeom;
+        if (myUser != null) {
+            var myUserMarkerPath = this.circlePath(myUser.marker.position, 100, 128)
+            var myUserMarkerPoly = new google.maps.Polygon({paths: [myUserMarkerPath]})
+            myUserMarkerPoly.path = myUserMarkerPath
+            var userGeom = this.jstsPoly(myUserMarkerPoly);
+            userGeom.id = this.createMarkerId({lat: myUserMarkerPath[0].lat(), lng: myUserMarkerPath[0].lng()})
+            geoms[userGeom.id] = userGeom;
+        }
 
-        if (myScoutMarker != null) {
-            var myScoutMarkerPath = this.circlePath(myScoutMarker.position, 50, 128)
+        if (myScout != null) {
+            var myScoutMarkerPath = this.circlePath(myScout.marker.position, 50, 128)
             var myScoutMarkerPoly = new google.maps.Polygon({paths: [myScoutMarkerPath]})
             myScoutMarkerPoly.path = myScoutMarkerPath
             var scoutGeom = this.jstsPoly(myScoutMarkerPoly);
@@ -52,13 +54,12 @@ export default class GridService {
 
         var myWardMarkersPath = []
 
-        myWardMarkers.length = 0
+        myWards.length = 0
+        if (myWards != []) {
+            for (var id in myWards) {
+                myWards.length++
 
-        if (myWardMarkers != []) {
-            for (var id in myWardMarkers) {
-                myWardMarkers.length++
-
-                var wardPath = this.circlePath(myWardMarkers[id].position, 50, 128)
+                var wardPath = this.circlePath(myWards[id].marker.position, 50, 128)
                 var wardPoly = new google.maps.Polygon({paths: [wardPath]})
                 wardPoly.path = wardPath
                 var wardGeom = this.jstsPoly(wardPoly);

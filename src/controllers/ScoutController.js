@@ -122,7 +122,7 @@ export default class ScoutController {
 				this.myScout.path.setMap(null)
 				this.myScout.path = null
 
-				this.sendMessage('Scout has arrived')
+				this.myScout.setMessage('Scout has arrived')
 			}
 		}
 	}
@@ -160,7 +160,7 @@ export default class ScoutController {
 			if (data.hp > 0) {
 				this.scouts[uid].setLabel( data.hitDmg )
 				this.scouts[uid].setHitPoints( data.hp )
-				this.sendMessage(`${this.userNames[uid]}'s scout is being attacked!`)
+				this.scouts[uid].setMessage(uid, `My scout is being attacked!`)
 			}
 			else {
 				this.scouts[uid].die()

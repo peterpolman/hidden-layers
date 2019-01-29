@@ -78,10 +78,9 @@ export default class Character {
         this.indicator.setVisible(visibility)
     }
 
-    setMessage(uid = null, message) {
+    setMessage(message) {
         window.dispatchEvent(new CustomEvent('message_add', {
 			detail: {
-				uid: uid,
 				message: message,
 				timestamp: firebase.database.ServerValue.TIMESTAMP
 			}

@@ -162,7 +162,6 @@
   bottom: 155px;
   right: 70px;
   width: 150px;
-  height: 210px;
 }
 
 .dialog--store header {
@@ -230,6 +229,9 @@
 
 .dialog--inventory ul {
   flex-direction: column;
+  flex-wrap: nowrap;
+  overflow: auto;
+  height: 100%;
 }
 
 .dialog .btn {

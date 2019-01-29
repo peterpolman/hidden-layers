@@ -101,7 +101,7 @@ export default class ScoutController {
 				this.myUser.setHitPoints(data.hp)
 			}
 			else {
-				this.sendMessage(`You got killed by ${this.userNames[data.attacker]}!`)
+				this.myUser.setMessage(`I got killed by ${this.userNames[data.attacker]}!`)
 			}
 		}
 	}
@@ -112,8 +112,6 @@ export default class ScoutController {
 			const content = `<strong>${data.username}</strong><br><small>Last online: ${new Date(data.lastOnline).toLocaleString("nl-NL")}</small>`
 			const damage = Math.floor(Math.random() * 10)
 
-			console.log(this.users[uid].marker.visible)
-
 			this.users[uid].indicator.setMap(MAP)
 			this.users[uid].update({
 				mode: 'FIGHTING',
@@ -121,6 +119,8 @@ export default class ScoutController {
 				attacker: this.uid,
 				hitPoints: this.users[uid].hitPoints - damage
 			})
+
+			this.myUser.setMessage(`${this.userNames[uid]} got hit by ${this.userNames[data.attacker]} with ${damage} damage.`)
 		})
 
 		this.users[uid].marker.setMap(MAP)
@@ -134,10 +134,8 @@ export default class ScoutController {
 			if (data.hitPoints > 0) {
 				this.users[uid].setLabel( data.hitDmg )
 				this.users[uid].setHitPoints( data.hitPoints )
-				this.sendMessage(`hits ${this.userNames[uid]} with ${data.hitDmg} damage.`)
 			}
 			else {
-				this.sendMessage(`I killed ${this.userNames[uid]}`)
 				this.users[uid].setHitPoints(100)
 			}
 		}
