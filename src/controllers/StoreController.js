@@ -31,7 +31,7 @@ export default class StoreController {
 							slug: 'ward',
 							name: 'Ward',
                             size: 40,
-							amount: Math.floor(Math.random() * 3),
+                            amount: (Math.floor(Math.random() * 100) > 90) ? 1 : 0,
 						},
 						gold: {
 							slug: 'gold',
