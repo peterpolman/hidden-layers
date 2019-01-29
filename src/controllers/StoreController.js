@@ -51,7 +51,7 @@ export default class StoreController {
                             size: 30,
 							amount: (Math.floor(Math.random() * 100) > 90) ? 1 : 0,
 						},
-                        discover: {
+                        potion: {
 							slug: 'potion',
 							name: 'Potion',
                             size: 25,

@@ -129,6 +129,7 @@ export default class ScoutController {
 
 			this.scouts[uid].setMode("STANDING")
 
+			this.scouts[uid].setMessage(`${this.userNames[uid]}'s scout got hit by ${this.userNames[data.attacker]} with ${damage} damage.`)
 			this.scouts[uid].indicator.setMap(MAP)
 			this.scouts[uid].update({
 				mode: 'FIGHTING',
@@ -138,8 +139,6 @@ export default class ScoutController {
 			})
 
 			MAP.panTo(e.latLng)
-
-			this.scouts[uid].setMessage(`${this.userNames[uid]}'s scout got hit by ${this.userNames[data.attacker]} with ${damage} damage.`)
 		})
 
 		this.scouts[uid].marker.setMap(MAP)
