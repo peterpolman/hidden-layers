@@ -175,10 +175,8 @@ export default {
             lootRef.on('child_changed', (snap) => this.discover() )
             lootRef.on('child_removed', (snap) => this.discover() )
 
-            var i
             window.addEventListener('user.click', (data) => {
                 this.onUserClick(data.detail)
-                console.log(i++)
             })
 
         }).then(() => {
@@ -210,8 +208,6 @@ export default {
             this.lootController.loot = discovered.loot
     	},
         onUserClick(uid) {
-            console.log(uid)
-            console.log(this.cursorMode)
             switch (this.cursorMode) {
                 case 'potion':
                     if (this.selectedItem) {
@@ -223,7 +219,6 @@ export default {
                         })
                         this.selectedItem = null
                         this.cursorMode = null
-                        console.log('x')
                     }
                     break
                 case 'sword':
@@ -236,7 +231,6 @@ export default {
             				attacker: this.uid,
             				hitPoints: this.userController.users[uid].hitPoints - damage
                         })
-                        console.log('y')
                     }
                     break
                 default:

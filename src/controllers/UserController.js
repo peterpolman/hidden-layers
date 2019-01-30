@@ -12,7 +12,7 @@ export default class ScoutController {
 
 		this.uid = uid
         this.myUser = null
-		this.users = []
+		this.users = {}
 		this.userNames = []
 
         connectedRef.on('value', (snap) => {
@@ -107,7 +107,7 @@ export default class ScoutController {
 			if (healAmount > 0) {
 				this.myUser.setLabel(healAmount, true)
 				this.myUser.setHitPoints(100)
-				this.setMessage(`YAY! Healed for ${healAmount} hit points!`)
+				this.setMessage(`Healed for ${healAmount} hit points!`)
 			}
 		}
 	}
@@ -147,7 +147,7 @@ export default class ScoutController {
 			if (healAmount > 0) {
 				this.users[uid].setLabel(healAmount, true)
 				this.users[uid].setHitPoints(100)
-				this.users[uid].setMessage(`YAY! ${this.userNames[data.healer]} heals ${this.userNames[uid]} for ${healAmount} hit points!`)
+				this.users[uid].setMessage(`${this.userNames[data.healer]} heals ${this.userNames[uid]} for ${healAmount} hit points!`)
 			}
 		}
 	}
