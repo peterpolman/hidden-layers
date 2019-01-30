@@ -234,7 +234,10 @@ export default {
                     }
                     break
                 default:
-                    this.setMessage(`Hi ${this.userController.userNames[uid]}!`)
+                    if (this.uid != uid) {
+                        this.setMessage(`Hi ${this.userController.userNames[uid]}!`)
+                    }
+
                     break
             }
         },
