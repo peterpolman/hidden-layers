@@ -23,10 +23,6 @@ export default class ItemController {
             this.onItemRemoved(snap.key, snap.val())
         })
 
-        window.addEventListener('item.substract', (data) => {
-            this.substract(data.detail)
-        })
-
         window.addEventListener('item.add', (data) => {
             this.add(data.detail)
         })
@@ -53,31 +49,28 @@ export default class ItemController {
             this.inventory[item.slug] = item
         }
 
-        this.update(this.inventory[item.slug])
+        this.itemsRef.child(item.slug).update(this.inventory[item.slug])
     }
 
-    substract(item) {
-        if (item.slug == 'ward') {
-            this.inventory[item.slug].amount--
-        }
-        else {
-            this.inventory[item.slug].amount -= item.amount
-        }
+    substractAll(item) {
+        item.amount -= item.amount
 
-        if (this.inventory[item.slug].amount <= 0) {
-            this.remove(item.slug)
-        }
-        else {
-            this.update(this.inventory[item.slug])
-        }
+        this.update(item)
+    }
+
+    substract(item, amount) {
+        item.amount = item.amount - amount
+
+        this.update(item)
     }
 
     update(item) {
-        this.itemsRef.child(item.slug).update(item)
-    }
-
-    remove(key) {
-        this.itemsRef.child(key).remove()
+        if (this.inventory[item.slug].amount <= 0) {
+            this.itemsRef.child(item.slug).remove()
+        }
+        else {
+            this.itemsRef.child(item.slug).update(item)
+        }
     }
 
 }

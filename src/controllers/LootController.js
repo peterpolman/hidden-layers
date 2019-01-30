@@ -29,7 +29,6 @@ export default class LootController {
 		this.loot[key] = new Item(this.uid, key, data.slug, data.name, data.position, data.size, data.amount)
 
 		this.loot[key].marker.addListener('click', (e) => {
-			data.amount = (data.slug == 'ward') ? 1 : data.amount
 			this.pickup(data)
 		})
 
@@ -57,12 +56,13 @@ export default class LootController {
 		delete this.loot[key]
 	}
 
-	drop(item) {
+	drop(item, amount) {
+		item.amount = amount
 		this.lootRef.child(item.id).set(item)
+	}
 
-		window.dispatchEvent(new CustomEvent('item.substract', {
-			detail: item
-		}))
+	dropAll(item) {
+		this.lootRef.child(item.id).set(item)
 	}
 
 	pickup(item) {

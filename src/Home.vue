@@ -174,6 +174,13 @@ export default {
             lootRef.on('child_added', (snap) => this.discover() )
             lootRef.on('child_changed', (snap) => this.discover() )
             lootRef.on('child_removed', (snap) => this.discover() )
+
+            var i
+            window.addEventListener('user.click', (data) => {
+                this.onUserClick(data.detail)
+                console.log(i++)
+            })
+
         }).then(() => {
             this.discover()
         }).catch((err) => {
@@ -202,14 +209,65 @@ export default {
             this.storeController.goblins = discovered.goblins
             this.lootController.loot = discovered.loot
     	},
+        onUserClick(uid) {
+            console.log(uid)
+            console.log(this.cursorMode)
+            switch (this.cursorMode) {
+                case 'potion':
+                    if (this.selectedItem) {
+                        this.itemController.substract(this.selectedItem, 1)
+                        this.userController.updateUser(uid, {
+                            mode: "HEALING",
+                            hitPoints: 100,
+                            healer: this.uid
+                        })
+                        this.selectedItem = null
+                        this.cursorMode = null
+                        console.log('x')
+                    }
+                    break
+                case 'sword':
+                    if (this.uid != uid) {
+                        const damage = Math.floor(Math.random() * 10)
+
+                        this.userController.updateUser(uid, {
+                            mode: 'FIGHTING',
+            				hitDmg: damage,
+            				attacker: this.uid,
+            				hitPoints: this.userController.users[uid].hitPoints - damage
+                        })
+                        console.log('y')
+                    }
+                    break
+                default:
+                    this.setMessage(`Hi ${this.userController.userNames[uid]}!`)
+                    break
+            }
+        },
         onMapClick(e) {
+            let item
             const visibility = {
                 user: this.userController.myUser,
                 scout: this.scoutController.myScout,
                 wards: this.lootController.myWards
             }
-
             const isHidden = this.mapService.isPositionHidden(e.latLng, visibility)
+            const position = {
+                lat: e.latLng.lat(),
+                lng: e.latLng.lng(),
+            }
+
+            if (this.selectedItem) {
+                item = {
+                    uid: this.uid,
+                    id: this.createMarkerId(position),
+                    slug: this.selectedItem.slug,
+                    name: this.selectedItem.name,
+                    position: position,
+                    size: this.selectedItem.size,
+                    amount: this.selectedItem.amount,
+                }
+            }
 
             if (e.placeId) {
                 if (!isHidden) {
@@ -220,28 +278,26 @@ export default {
             }
 
             switch (this.cursorMode) {
-                case "LOOT":
-                    if (!isHidden && this.selectedItem) {
-                        const position = {
-                            lat: e.latLng.lat(),
-                            lng: e.latLng.lng(),
-                        }
-                        const data = {
-                            uid: this.uid,
-                            id: this.createMarkerId(position),
-                            slug: this.selectedItem.slug,
-                            name: this.selectedItem.name,
-                            position: position,
-                            size: this.selectedItem.size,
-                            amount: this.selectedItem.amount,
-                        }
-                        this.lootController.drop(data)
-                        this.selectedItem = null
-                    }
-                    break
-                case "SCOUT":
+                case "scout":
                     this.scoutController.moveScout(e.latLng)
                     break
+                case "ward":
+                    if (!isHidden && this.selectedItem) {
+                        this.itemController.substract(this.selectedItem, 1)
+                        this.lootController.drop(item, 1)
+                        this.selectedItem = null
+                        this.cursorMode = null
+                    }
+                    break
+                default :
+                    if (!isHidden && this.selectedItem) {
+                        this.itemController.substractAll(this.selectedItem)
+                        this.lootController.dropAll(item)
+                        this.selectedItem = null
+                        this.cursorMode = null
+                    }
+                    break
+
             }
         },
         onInventoryClick() {
@@ -255,14 +311,14 @@ export default {
             this.itemController.inventoryOpen = true
             this.itemController.add(item)
             this.storeController.storesRef.child(id).child('items').child(item.slug).remove()
-            this.sendMessage(`Picked up ${item.amount} ${item.name} from store`)
+            this.setMessage(`Picked up ${item.amount} ${item.name} from store`)
         },
         onCloseStore() {
             this.storeController.store = null
         },
         onItemClick(item) {
             this.selectedItem = item
-            this.cursorMode = "LOOT"
+            this.cursorMode = item.slug
         },
         onStopClick() {
             this.scoutController.myScout.setMode("STANDING")
@@ -286,7 +342,7 @@ export default {
             MAP.panTo(this.userController.myUser.marker.position)
         },
         onPanScoutClick() {
-            this.cursorMode = "SCOUT"
+            this.cursorMode = "scout"
 
             if (this.scoutController.myScout != null) {
                 MAP.panTo(this.scoutController.myScout.marker.position)
@@ -302,7 +358,7 @@ export default {
                 this.scoutController.createScout(this.uid, data)
             }
         },
-        sendMessage(message) {
+        setMessage(message) {
             window.dispatchEvent(new CustomEvent('message_add', {
                 detail: {
                     uid: this.uid,

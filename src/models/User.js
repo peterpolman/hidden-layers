@@ -11,12 +11,12 @@ export default class User extends Character {
             knight: require('../assets/img/knight-1.png'),
             archer: require('../assets/img/archer-1.png')
         }
-        this.userRef = firebase.database().ref('users').child(uid)
+        this.uid = uid
+        this.username = username
+        this.email = email
+        // this.userRef = firebase.database().ref('users').child(uid)
         this.marker = new google.maps.Marker({
-            uid: uid,
             position: new google.maps.LatLng(position.lat, position.lng),
-            username: username,
-            email: email,
             icon: {
                 labelOrigin: new google.maps.Point(iconSize / 2, -10),
                 url: avatars[userClass],
@@ -25,10 +25,10 @@ export default class User extends Character {
                 origin: new google.maps.Point(0, 0),
                 anchor: new google.maps.Point(iconSize / 2, iconSize / 2)
             }
-        });
+        })
     }
-
-	update(data) {
-		return this.userRef.update(data);
-	}
+    //
+	// update(data) {
+	// 	return this.userRef.update(data);
+	// }
 }

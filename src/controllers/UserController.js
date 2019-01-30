@@ -79,7 +79,11 @@ export default class ScoutController {
 
 		this.myUser = new User(uid, data.position, data.userClass, data.username, data.email, data.hitPoints)
 		this.myUser.marker.addListener('click', (e) => {
+			window.dispatchEvent(new CustomEvent('user.click', {
+				detail: uid
+			}))
 			this.setMessage(`Hi!`)
+
 			MAP.panTo(e.latLng)
 		})
 
@@ -96,8 +100,14 @@ export default class ScoutController {
 				this.myUser.setLabel(data.hitDmg)
 				this.myUser.setHitPoints(data.hitPoints)
 			}
-			else {
+		}
+
+		if (data.mode == "HEALING") {
+			const healAmount = data.hitPoints - this.myUser.hitPoints
+			if (healAmount > 0) {
+				this.myUser.setLabel(healAmount, true)
 				this.myUser.setHitPoints(100)
+				this.setMessage(`YAY! Healed for ${healAmount} hit points!`)
 			}
 		}
 	}
@@ -105,17 +115,12 @@ export default class ScoutController {
 	onUserAdded(uid, data) {
 		this.users[uid] = new User(uid, data.position, data.userClass, data.username, data.email, data.hitPoints)
 		this.users[uid].marker.addListener('click', (e) => {
-			const damage = Math.floor(Math.random() * 10)
 
-			this.users[uid].update({
-				mode: 'FIGHTING',
-				hitDmg: damage,
-				attacker: this.uid,
-				hitPoints: this.users[uid].hitPoints - damage
-			})
+			window.dispatchEvent(new CustomEvent('user.click', {
+				detail: uid
+			}))
 
 			this.users[uid].indicator.setMap(MAP)
-			this.users[uid].setMessage(`${this.userNames[data.attacker]} hits ${this.userNames[uid]} for ${damage} damage.`)
 		})
 
 		this.users[uid].marker.setMap(MAP)
@@ -127,12 +132,22 @@ export default class ScoutController {
 
 		if (data.mode == 'FIGHTING') {
 			if (data.hitPoints > 0) {
-				this.users[uid].setLabel( data.hitDmg )
-				this.users[uid].setHitPoints( data.hitPoints )
+				this.users[uid].setLabel(data.hitDmg)
+				this.users[uid].setHitPoints(data.hitPoints)
+				this.users[uid].setMessage(`${this.userNames[data.attacker]} hits ${this.userNames[uid]} for ${data.hitDmg} damage.`)
 			}
 			else {
+				this.users[uid].setHitPoints(0)
+				this.users[uid].setMessage(`${this.userNames[data.attacker]} slays ${this.userNames[uid]}!!`)
+			}
+		}
+
+		if (data.mode == 'HEALING') {
+			const healAmount = data.hitPoints - this.users[uid].hitPoints
+			if (healAmount > 0) {
+				this.users[uid].setLabel(healAmount, true)
 				this.users[uid].setHitPoints(100)
-				this.users[uid].setMessage(`${this.userNames[data.attacker]} killed ${this.userNames[uid]}! But.. ${this.userNames[uid]} survives!`)
+				this.users[uid].setMessage(`YAY! ${this.userNames[data.healer]} heals ${this.userNames[uid]} for ${healAmount} hit points!`)
 			}
 		}
 	}

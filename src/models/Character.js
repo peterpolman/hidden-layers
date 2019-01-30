@@ -53,7 +53,7 @@ export default class Character {
         })
     }
 
-    setLabel(text) {
+    setLabel(text, heal = false) {
         const labelTimer = setTimeout(() => {
             this.marker.setLabel(null)
             clearTimeout(labelTimer)
@@ -61,7 +61,7 @@ export default class Character {
 
         return this.marker.setLabel({
             text: ((text == 0) ? 'MISS' : text.toString()),
-            color: '#FA2A00',
+            color: (heal) ? '#00FF00' : '#FA2A00',
             fontWeight: 'bold',
             fontSize: '14px',
             fontFamily: 'Avenir'
