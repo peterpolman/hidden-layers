@@ -92,8 +92,7 @@ export default class ScoutController {
 	}
 
 	onMyUserChanged(uid, data) {
-		const latlng = new google.maps.LatLng(data.position.lat, data.position.lng)
-		this.myUser.marker.setPosition(latlng)
+		this.myUser.setPosition(data.position)
 
 		if (data.mode == "FIGHTING") {
 			if (data.hitPoints > 0) {

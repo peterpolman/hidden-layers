@@ -14,7 +14,6 @@ export default class User extends Character {
         this.uid = uid
         this.username = username
         this.email = email
-        // this.userRef = firebase.database().ref('users').child(uid)
         this.marker = new google.maps.Marker({
             position: new google.maps.LatLng(position.lat, position.lng),
             icon: {
@@ -27,8 +26,4 @@ export default class User extends Character {
             }
         })
     }
-    //
-	// update(data) {
-	// 	return this.userRef.update(data);
-	// }
 }

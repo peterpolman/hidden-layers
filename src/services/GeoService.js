@@ -1,6 +1,5 @@
 import firebase from 'firebase/app';
 import 'firebase/auth';
-import UserController from '../controllers/UserController'
 
 export default class GeoService {
     constructor() {
@@ -26,30 +25,5 @@ export default class GeoService {
                 reject(err);
             }, this.options);
         })
-    }
-
-    watchPosition() {
-        navigator.geolocation.clearWatch(this.watcher);
-        this.watcher = navigator.geolocation.watchPosition(this.onWatchPosition.bind(this), this.onError.bind(this), this.options);
-    }
-
-    onWatchPosition(position) {
-        this.signal = 'geo-on'
-
-        const uid = firebase.auth().currentUser.uid
-        const data = {
-            position: {
-                lat: position.coords.latitude,
-                lng: position.coords.longitude
-            }
-        }
-
-        new UserController(uid).updateUser(uid, data)
-    }
-
-    onError(err) {
-        if (typeof err != 'undefined') {
-            this.signal = 'geo-off'
-        }
     }
 }

@@ -132,6 +132,7 @@ export default {
             messages: [],
             selectedStore: {},
             uid: firebase.auth().currentUser.uid,
+            watcher: null,
             mapService: new MapService(),
             geoService: new GeoService(),
             userController: null,
@@ -323,10 +324,32 @@ export default {
         onSignalClick() {
             this.geoService.getPosition().then(function(r) {
                 MAP.panTo(r)
-                this.geoService.watchPosition()
+                this.onWatchPosition()
             }.bind(this)).catch(function(err) {
                 console.log(err)
             })
+        },
+        onWatchPosition() {
+            navigator.geolocation.clearWatch(this.watcher)
+
+            this.watcher = navigator.geolocation.watchPosition((position) => {
+                this.geoService.signal = 'geo-on'
+
+                const data = {
+                    position: {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    }
+                }
+
+                this.userController.updateUser(this.uid, data)
+
+            }, this.onWatchError.bind(this), { enableHighAccuracy: true, maximumAge: 1000, timeout: 30000 })
+        },
+        onWatchError(err) {
+            if (typeof err != 'undefined') {
+                this.geoService.signal = 'geo-off'
+            }
         },
         onPanWardClick() {
             const wards = this.lootController.myWards
