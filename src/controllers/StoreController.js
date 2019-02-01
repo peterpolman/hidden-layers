@@ -1,3 +1,4 @@
+import Vue from 'vue';
 import firebase from 'firebase/app'
 import 'firebase/database'
 
@@ -27,7 +28,6 @@ export default class StoreController {
 			new google.maps.places.PlacesService(MAP).getDetails({ placeId: e.placeId }, (place, status) => {
 				if (status === google.maps.places.PlacesServiceStatus.OK) {
                     if (place.types[0] === 'light_rail_station' || place.types[0] === 'transit_station' || place.types[0] === 'train_station' || place.types[0] === 'subway_station') {
-                        alert('Soon you will be able to travel great distances into new adventures!')
                         this.travelTo(place)
                     }
                     else {
@@ -39,7 +39,7 @@ export default class StoreController {
 	}
 
     travelTo(origin) {
-
+        alert('Soon you will be able to travel great distances into new adventures!')
     }
 
     visitStore(place) {
@@ -117,7 +117,8 @@ export default class StoreController {
 	}
 
 	onStoreChanged(id, data) {
-		this.stores[id] = data
+        Vue.delete(this.stores, id)
+        this.stores[id] = data
 	}
 
 }

@@ -1,11 +1,15 @@
 <template>
 <section>
 
-    <button v-if="(itemController && itemController.inventory)" v-bind:style="{ backgroundImage: 'url(' + ( (inventoryOpen) ? assets.inventoryOpen : assets.inventory )+ ')' }" v-on:click="onInventoryClick" v-on:dblclick="alert('test')" class="btn btn-inventory">
+    <button
+        v-if="(itemController && itemController.inventory)"
+        v-bind:style="{ backgroundImage: 'url(' + ( (itemController.inventoryOpen) ? assets.inventoryOpen : assets.inventory )+ ')' }"
+        v-on:click="onInventoryClick"
+        class="btn btn-inventory">
         Inventory
     </button>
 
-    <ul class="dialog dialog--inventory" v-if="inventoryOpen">
+    <ul class="dialog dialog--inventory" v-if="itemController && itemController.inventoryOpen">
         <li :key="item.slug" v-if="(item.amount > 0)" v-for="item in itemController.inventory">
             <button v-bind:style="{ backgroundImage: `url(${assets[item.slug]})` }" v-bind:class="`btn btn-${item.slug}`" v-on:click="onItemClick(item)">
                 {{ item.name }}
@@ -28,8 +32,6 @@ export default {
         return {
             itemController: null,
             selectedItem: null,
-            inventoryOpen: false,
-            inventory: {},
             assets: {
                 ward: require('../assets/img/ward-1.png'),
                 knight: require('../assets/img/knight-1.png'),
@@ -49,7 +51,6 @@ export default {
     },
     methods: {
         onItemClick(item) {
-
             this.$parent.cursorMode = 'drop'
             this.$parent.$refs.equipment.equipment.hand = item
 
@@ -62,7 +63,7 @@ export default {
             }
         },
         onInventoryClick() {
-            this.inventoryOpen = !this.inventoryOpen
+            this.itemController.inventoryOpen = !this.itemController.inventoryOpen
         },
     }
 }
