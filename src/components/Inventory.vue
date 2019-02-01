@@ -2,7 +2,7 @@
     <section>
 
         <button v-if="(itemController && itemController.inventory)"
-            v-bind:style="{ backgroundImage: 'url(' + ( (itemController.inventoryOpen) ? assets.inventoryOpen : assets.inventory )+ ')' }"
+            v-bind:style="{ backgroundImage: 'url(' + ( (inventoryOpen) ? assets.inventoryOpen : assets.inventory )+ ')' }"
             v-on:click="onInventoryClick"
             v-on:dblclick="alert('test')"
             class="btn btn-inventory">

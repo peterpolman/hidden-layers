@@ -133,7 +133,7 @@ export default class ScoutController {
 			if (data.hitPoints > 0) {
 				this.users[uid].setLabel(data.hitDmg)
 				this.users[uid].setHitPoints(data.hitPoints)
-				this.users[uid].setMessage(`${this.userNames[data.attacker]} hits ${this.userNames[uid]} for ${data.hitDmg} damage.`)
+				
 			}
 			else {
 				this.users[uid].setHitPoints(0)

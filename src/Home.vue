@@ -207,19 +207,28 @@ export default {
                 case 'sword':
                     if (this.uid != uid) {
                         const damage = Math.floor(Math.random() * 10)
-
-                        this.userController.updateUser(uid, {
+                        const data = {
                             mode: 'FIGHTING',
                             hitDmg: damage,
                             attacker: this.uid,
                             hitPoints: this.userController.users[uid].hitPoints - damage
-                        })
+                        }
+
+                        if (data.hitDmg > 0) {
+                            this.setMessage(null, `${this.userController.userNames[data.attacker]} hits ${this.userController.userNames[uid]} for ${data.hitDmg} damage.`)
+                            this.userController.updateUser(uid, data)
+                        }
+                        else {
+                            this.setMessage(null, `${this.userController.userNames[data.attacker]} failed to hit ${this.userController.userNames[uid]}...`)
+                        }
+
+
                     }
                     break
                 default:
                     this.$refs.equipment.active = false
                     if (this.uid != uid) {
-                        this.setMessage(`Hi ${this.userController.userNames[uid]}!`)
+                        this.setMessage(this.uid, `Hi ${this.userController.userNames[uid]}!`)
                     }
 
                     break
@@ -294,7 +303,7 @@ export default {
             this.$refs.inventory.itemController.inventoryOpen = true
             this.$refs.inventory.itemController.add(item)
             this.storeController.storesRef.child(id).child('items').child(item.slug).remove()
-            this.setMessage(`Picked up ${item.amount} ${item.name} from store`)
+            this.setMessage(this.uid, `Picked up ${item.amount} ${item.name} from store`)
         },
         onCloseStore() {
             this.storeController.store = null
@@ -367,10 +376,10 @@ export default {
                 this.scoutController.createScout(this.uid, data)
             }
         },
-        setMessage(message) {
+        setMessage(uid, message) {
             window.dispatchEvent(new CustomEvent('message_add', {
                 detail: {
-                    uid: this.uid,
+                    uid: uid,
                     message: message,
                     timestamp: firebase.database.ServerValue.TIMESTAMP
                 }

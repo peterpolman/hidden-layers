@@ -34,7 +34,7 @@ export default class Character {
     setHitPoints(hitPoints) {
         this.hitPoints = (hitPoints < 0) ? 0 : hitPoints
         this.indicator.setIcon({
-            path: `M0,0v17h100V0H0z M101,15H${ hitPoints }l0-13H98V15z`,
+            path: `M0,0v17h100V0H0z M101,15H${ (this.hitPoints <= 0) ? 2 : this.hitPoints }l0-13H98V15z`,
             fillColor: (this.hitPoints > 50 ) ? '#8CC63E' : (this.hitPoints > 25) ? '#FFBB33' : '#ED1C24',
             fillOpacity: 1,
             scale: .5,
@@ -64,7 +64,7 @@ export default class Character {
             color: (heal) ? '#00FF00' : '#FA2A00',
             fontWeight: 'bold',
             fontSize: '14px',
-            fontFamily: 'Avenir'
+            fontFamily: 'Roboto'
         })
     }
 

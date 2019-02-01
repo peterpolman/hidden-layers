@@ -23,7 +23,7 @@ body {
     width: 100%;
     height: 100%;
     background: #EFEFEF;
-    font-family: 'Avenir', Helvetica, Arial, sans-serif;
+    font-family: 'Roboto', Helvetica, Arial, sans-serif;
     margin: 0;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
