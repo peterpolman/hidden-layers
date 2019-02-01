@@ -36,7 +36,7 @@ export default class PathService {
             resolve(data);
           }
           else {
-            reject(`Don't go so far! 5000 meter is max.`);
+            reject(`You can't scout that far.`);
           }
         } else {
           reject(`Directions request failed due to ${status}`);

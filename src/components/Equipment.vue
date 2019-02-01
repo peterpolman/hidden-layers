@@ -3,7 +3,7 @@
     v-if="equipment.hand"
     v-bind:style="{ backgroundImage: 'url(' + ( (equipment.hand != null) ? assets[equipment.hand.slug] : assets.hand )+ ')' }"
     v-on:click="onEquippedItemClick"
-    :class="`btn btn-hand ${(active) ? 'btn-active' : ''}`">
+    :class="`btn btn-hand btn-${equipment.hand.slug} ${(active) ? 'btn-active' : ''}`">
         Equipment
     </button>
 </template>
@@ -101,4 +101,7 @@ export default {
     box-shadow: 0 0 5px 3px #3D91CB;
 }
 
+.btn-gold {
+    background-size: 40% 40%;
+}
 </style>

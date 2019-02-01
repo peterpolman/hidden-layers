@@ -34,7 +34,7 @@ export default class Character {
     setHitPoints(hitPoints) {
         this.hitPoints = (hitPoints < 0) ? 0 : hitPoints
         this.indicator.setIcon({
-            path: `M0,0v17h100V0H0z M101,15H${ (this.hitPoints <= 0) ? 2 : this.hitPoints }l0-13H98V15z`,
+            path: `M0,0v17h100V0H0z M101,15H${ (this.hitPoints <= 0)? 2 : this.hitPoints }l0-13H98V15z`,
             fillColor: (this.hitPoints > 50 ) ? '#8CC63E' : (this.hitPoints > 25) ? '#FFBB33' : '#ED1C24',
             fillOpacity: 1,
             scale: .5,
@@ -78,9 +78,10 @@ export default class Character {
         this.indicator.setVisible(visibility)
     }
 
-    setMessage(message) {
+    setMessage(uid, message) {
         window.dispatchEvent(new CustomEvent('message_add', {
 			detail: {
+                uid: uid,
 				message: message,
 				timestamp: firebase.database.ServerValue.TIMESTAMP
 			}

@@ -23,7 +23,7 @@ export default class ScoutController {
                 connection.set(true)
                 lastOnlineRef.onDisconnect().set(firebase.database.ServerValue.TIMESTAMP)
 
-                this.setMessage(`Is now connected.`)
+                this.setMessage(this.uid, `Is now connected.`)
             }
         })
 
@@ -64,10 +64,10 @@ export default class ScoutController {
 		usersRef.child(uid).remove()
 	}
 
-	setMessage(message) {
+	setMessage(uid, message) {
 		window.dispatchEvent(new CustomEvent('message_add', {
 			detail: {
-				uid: this.uid,
+				uid: uid,
 				message: message,
 				timestamp: firebase.database.ServerValue.TIMESTAMP
 			}
@@ -133,11 +133,11 @@ export default class ScoutController {
 			if (data.hitPoints > 0) {
 				this.users[uid].setLabel(data.hitDmg)
 				this.users[uid].setHitPoints(data.hitPoints)
-				
+				// this.users[uid].setMessage(null, `${this.userNames[data.attacker]} hits ${this.userNames[uid]} for ${data.hitDmg} damage.`)
 			}
 			else {
 				this.users[uid].setHitPoints(0)
-				this.users[uid].setMessage(`${this.userNames[data.attacker]} slays ${this.userNames[uid]}!!`)
+				// this.users[uid].setMessage(null, `${this.userNames[data.attacker]} slays ${this.userNames[uid]}!!`)
 			}
 		}
 

@@ -91,6 +91,10 @@ export default class StoreController {
         this.store = place.place_id
     }
 
+    updateGoblin(id, ) {
+        
+    }
+
     onStoreAdded(id, data) {
 		const randInt = Math.floor(Math.random() * 100)
 
@@ -100,23 +104,16 @@ export default class StoreController {
 			this.goblins[id] = new Goblin(data.position, 40)
 
 			this.goblins[id].marker.addListener('click', (e) => {
-				const damage = Math.floor(Math.random() * 10)
-				const hitPoints = (this.goblins[id].hitPoints - damage)
 
-                this.goblins[id].indicator.setMap(MAP)
+                window.dispatchEvent(new CustomEvent('user.click', {
+    				detail: id
+    			}))
+
+				this.goblins[id].indicator.setMap(MAP)
 
                 if (!this.goblins[id].hasTalked) {
                     this.goblins[id].talk()
                 }
-                if (this.goblins[id].hitPoints > 0) {
-					this.goblins[id].setLabel( damage )
-                    this.goblins[id].setHitPoints( hitPoints )
-                    this.goblins[id].setMessage(`A goblin takes ${damage} damage.`)
-				}
-				else {
-					this.goblins[id].setMap(null)
-					this.goblins[id].setMessage(`A goblin has died..`)
-				}
 			})
 
 			this.goblins[id].setMap(MAP)

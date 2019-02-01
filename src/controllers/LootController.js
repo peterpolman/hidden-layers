@@ -35,7 +35,7 @@ export default class LootController {
 		this.loot[key].marker.setMap(MAP)
 
 		// TODO: Non generic code, should be integrated in itemFactory or itemService
-		if (data.slug == 'ward' && data.uid === this.uid) {
+		if (data.slug == 'ward' && data.uid === this.uid && data.amount == 1) {
 			const ward = this.loot[key]
 			const id = this.createMarkerId(ward.marker.position)
 
@@ -45,7 +45,7 @@ export default class LootController {
 
 	onLootRemoved(key, data) {
 		// TODO: Non generic code, should be integrated in itemFactory or itemService
-		if (data.slug == 'ward' && data.uid === this.uid) {
+		if (data.slug == 'ward' && data.uid === this.uid && data.amount == 1) {
 			const ward = this.loot[key]
 			const id = this.createMarkerId(ward.marker.position)
 
@@ -72,14 +72,13 @@ export default class LootController {
 			detail: item
 		}))
 
-		this.sendMessage(`Picked up ${item.amount} ${item.name}`)
+		this.setMessage(this.uid, `Picked up ${item.amount} ${item.name}`)
 	}
 
-
-	sendMessage(message) {
+	setMessage(uid, message) {
 		window.dispatchEvent(new CustomEvent('message_add', {
 			detail: {
-				uid: this.uid,
+				uid: uid,
 				message: message,
 				timestamp: firebase.database.ServerValue.TIMESTAMP
 			}

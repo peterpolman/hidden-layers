@@ -2,32 +2,28 @@
 <section class="section section-home">
     <div class="google-map" id="home-map"></div>
 
-    <section class="messages" v-if="messageController && userController">
-        <div v-for="message of messageController.messages" :key="message.key">
-            <span>[{{ messageController.getDateTime(message.timestamp) }}]</span>
-            <strong v-if="userController.userNames[message.uid]">{{ userController.userNames[message.uid] }}:</strong>
-            <span>{{ message.message }}</span>
-        </div>
+    <Messages ref="messages" />
+
+    <section class="section-settings">
+        <button class="btn btn-logout" v-on:click="logout">
+            EXIT
+        </button>
+        <button
+            :class="`btn btn-geo ${geoService.signal}`"
+            v-if="userController && userController.myUser"
+            v-on:click="onSignalClick">
+            <span></span>
+        </button>
     </section>
 
-    <button class="btn btn-logout" v-on:click="logout">
-        EXIT
-    </button>
-    <button
-        :class="`btn btn-geo ${geoService.signal}`"
-        v-if="userController && userController.myUser"
-        v-on:click="onSignalClick">
-        <span></span>
-    </button>
-
     <section class="section-pan">
-        <button v-if="userController && userController.myUser" v-bind:style="{ backgroundImage: 'url(' + assets.knight + ')' }" v-on:click="onPanUserClick" class="btn btn-user">
+        <button v-if="userController && userController.myUser" v-bind:style="{ backgroundImage: 'url(' + assets.knight + ')' }" v-on:click="onPanUserClick" class="btn">
             User
         </button>
-        <button v-if="scoutController" v-bind:style="{ backgroundImage: 'url(' + assets.scout + ')' }" v-on:click="onPanScoutClick" class="btn btn-scout">
+        <button v-if="scoutController" v-bind:style="{ backgroundImage: 'url(' + assets.scout + ')' }" v-on:click="onPanScoutClick" class="btn">
             Scout
         </button>
-        <button v-if="lootController && lootController.myWards.length" v-bind:style="{ backgroundImage: 'url(' + assets.ward + ')' }" v-on:click="onPanWardClick" class="btn btn-ward">
+        <button v-if="lootController && lootController.myWards.length" v-bind:style="{ backgroundImage: 'url(' + assets.ward + ')' }" v-on:click="onPanWardClick" class="btn">
             Ward
         </button>
     </section>
@@ -35,6 +31,7 @@
     <button class="btn btn-stop" v-on:click="onStopClick" v-if="scoutController && scoutController.isWalking">
         Stop
     </button>
+
     <section class="dialog dialog--store" v-if="storeController && storeController.store">
         <header>
             <h2>{{ storeController.stores[storeController.store].name }}</h2>
@@ -58,6 +55,7 @@
     </section>
 
     <Equipment ref="equipment" />
+
     <Inventory ref="inventory" />
 
 </section>
@@ -71,6 +69,7 @@ import 'firebase/database';
 import config from './config.js'
 
 // Components
+import Messages from './components/Messages.vue'
 import Equipment from './components/Equipment.vue'
 import Inventory from './components/Inventory.vue'
 
@@ -82,22 +81,17 @@ import GeoService from './services/GeoService'
 import UserController from './controllers/UserController'
 import ScoutController from './controllers/ScoutController'
 import StoreController from './controllers/StoreController'
-import MessageController from './controllers/MessageController'
 import LootController from './controllers/LootController'
 
 export default {
     name: 'home',
     components: {
+        Messages,
         Equipment,
-        Inventory
+        Inventory,
     },
     data() {
         return {
-            ui: {
-                dialogs: {
-                    store: true
-                }
-            },
             assets: {
                 ward: require('./assets/img/ward-1.png'),
                 knight: require('./assets/img/knight-1.png'),
@@ -123,7 +117,6 @@ export default {
             scoutController: null,
             storeController: null,
             lootController: null,
-            messageController: null
         }
     },
     mounted() {
@@ -134,7 +127,6 @@ export default {
             const lootRef = firebase.database().ref('loot')
 
             // These controllers should be created when the map is loaded.
-            this.messageController = new MessageController()
             this.userController = new UserController(uid)
             this.scoutController = new ScoutController(uid)
             this.lootController = new LootController(uid)
@@ -161,7 +153,6 @@ export default {
             window.addEventListener('user.click', (data) => {
                 this.onUserClick(data.detail)
             })
-
         }).then(() => {
             this.discover()
         }).catch((err) => {
@@ -192,20 +183,59 @@ export default {
         },
         onUserClick(uid) {
             switch (this.cursorMode) {
+                // case 'gold':
+                //     this.$refs.inventory.itemController.substract(this.selectedItem, 1)
+                //     this.$refs.inventory.itemController.give(uid, this.selectedItem, 1)
+                //     break;
                 case 'potion':
                     if (this.selectedItem) {
                         this.$refs.inventory.itemController.substract(this.selectedItem, 1)
-                        this.userController.updateUser(uid, {
-                            mode: "HEALING",
-                            hitPoints: 100,
-                            healer: this.uid
-                        })
+
+                        if (typeof this.userController.users[uid] != 'undefined') {
+                            this.userController.updateUser(uid, {
+                                mode: "HEALING",
+                                hitPoints: 100,
+                                healer: this.uid
+                            })
+                        }
+                        if (typeof this.storeController.goblins[uid] != 'undefined') {
+                            const hitPoints = 100
+                            const goblin = this.storeController.goblins[uid]
+
+                            goblin.setHitPoints(hitPoints)
+                            goblin.setMessage(null, `${this.userController.userNames[this.uid]} heals an injured Goblin.`)
+
+                            this.storeController.goblins[uid] = goblin
+                        }
+
                         this.selectedItem = null
                         this.cursorMode = null
                     }
                     break
                 case 'sword':
-                    if (this.uid != uid) {
+
+                    if (typeof this.storeController.goblins[uid] != 'undefined') {
+                        const goblin = this.storeController.goblins[uid]
+                        const damage = Math.floor(Math.random() * 10)
+                        const hitPoints = (goblin.hitPoints - damage)
+
+                        if (goblin.hitPoints > 0) {
+                            goblin.setLabel( damage )
+                            goblin.setHitPoints( hitPoints )
+                            this.setMessage(null, `${this.userController.userNames[this.uid]} hits a Goblin for ${damage} damage.`)
+                        }
+                        else if (goblin.hitPoints <= 0) {
+                            this.setMessage(null, `${this.userController.userNames[this.uid]} hits a Goblin it's dead corpse...`)
+                        }
+                        else {
+                            goblin.setMap(null)
+                            this.setMessage(null, `${this.userController.userNames[this.uid]} failed to hit a Goblin...`)
+                        }
+
+                        this.storeController.goblins[uid] = goblin
+                    }
+
+                    if (this.uid != uid && (typeof this.userController.users[uid] != 'undefined')) {
                         const damage = Math.floor(Math.random() * 10)
                         const data = {
                             mode: 'FIGHTING',
@@ -214,24 +244,26 @@ export default {
                             hitPoints: this.userController.users[uid].hitPoints - damage
                         }
 
-                        if (data.hitDmg > 0) {
+                        if ((data.hitDmg > 0) && (this.userController.users[uid].hitPoints > 0)) {
                             this.setMessage(null, `${this.userController.userNames[data.attacker]} hits ${this.userController.userNames[uid]} for ${data.hitDmg} damage.`)
                             this.userController.updateUser(uid, data)
+                        }
+                        else if (this.userController.users[uid].hitPoints <= 0) {
+                            this.setMessage(null, `${this.userController.userNames[data.attacker]} hits ${this.userController.userNames[uid]}'s dead corpse...`)
                         }
                         else {
                             this.setMessage(null, `${this.userController.userNames[data.attacker]} failed to hit ${this.userController.userNames[uid]}...`)
                         }
-
-
                     }
                     break
                 default:
                     this.$refs.equipment.active = false
-                    if (this.uid != uid) {
+                    if (this.uid != uid && (typeof this.userController.users[uid] != 'undefined')) {
                         this.setMessage(this.uid, `Hi ${this.userController.userNames[uid]}!`)
                     }
-
-                    break
+                    if (typeof this.storeController.goblins[uid] != 'undefined') {
+                        this.setMessage(this.uid, `Hi Goblin!`)
+                    }
             }
         },
         onMapClick(e) {
