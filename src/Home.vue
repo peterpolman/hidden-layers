@@ -153,8 +153,6 @@ export default {
             window.addEventListener('user.click', (data) => {
                 this.onUserClick(data.detail)
             })
-        }).then(() => {
-            this.discover()
         }).catch((err) => {
             console.log(err)
         })

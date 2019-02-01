@@ -53,24 +53,24 @@ export default class ItemController {
         this.itemsRef.child(item.slug).update(this.inventory[item.slug])
     }
 
-    give(uid, item, amount) {
-        const targetItemsRef = firebase.database().ref('items').child(uid)
-
-        console.log(targetItemsRef)
-
-        targetItemsRef.on('value', (snap) => {
-            console.log(snap.key, snap.val())
-        })
-
-        // if (this.inventory[item.slug]) {
-        //     this.inventory[item.slug].amount += item.amount
-        // }
-        // else {
-        //     this.inventory[item.slug] = item
-        // }
-        //
-        // this.itemsRef.child(item.slug).update(this.inventory[item.slug])
-    }
+    // give(uid, item, amount) {
+    //     const targetItemsRef = firebase.database().ref('items').child(uid)
+    //
+    //     console.log(targetItemsRef)
+    //
+    //     targetItemsRef.on('value', (snap) => {
+    //         console.log(snap.key, snap.val())
+    //     })
+    //
+    //     // if (this.inventory[item.slug]) {
+    //     //     this.inventory[item.slug].amount += item.amount
+    //     // }
+    //     // else {
+    //     //     this.inventory[item.slug] = item
+    //     // }
+    //     //
+    //     // this.itemsRef.child(item.slug).update(this.inventory[item.slug])
+    // }
 
     substractAll(item) {
         item.amount -= item.amount

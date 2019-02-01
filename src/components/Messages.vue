@@ -35,8 +35,7 @@ export default {
     position: fixed;
     top: 0;
     left: 0;
-    width: auto;
-    width: calc(100% - 75px);
+    width: calc(100% - 80px);
     height: 55px;
     overflow: auto;
     margin: 0;

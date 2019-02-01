@@ -59,10 +59,12 @@ export default class LootController {
 	drop(item, amount) {
 		item.amount = amount
 		this.lootRef.child(item.id).set(item)
+		this.setMessage(this.uid, `Deployed ${amount} ${item.name}`)
 	}
 
 	dropAll(item) {
 		this.lootRef.child(item.id).set(item)
+		this.setMessage(this.uid, `Dropped ${item.amount} ${item.name}`)
 	}
 
 	pickup(item) {

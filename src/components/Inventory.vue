@@ -85,7 +85,6 @@ export default {
     right: 60px;
     flex-direction: column;
     flex-wrap: nowrap;
-    overflow: auto;
     padding: 10px 0;
 
     li {

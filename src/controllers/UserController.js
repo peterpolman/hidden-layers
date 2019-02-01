@@ -22,8 +22,6 @@ export default class ScoutController {
                 connection.onDisconnect().remove()
                 connection.set(true)
                 lastOnlineRef.onDisconnect().set(firebase.database.ServerValue.TIMESTAMP)
-
-                this.setMessage(this.uid, `Is now connected.`)
             }
         })
 
@@ -32,6 +30,7 @@ export default class ScoutController {
 				this.onUserAdded(snap.key, snap.val())
 			} else {
 				this.onMyUserAdded(snap.key, snap.val())
+				this.setMessage(this.uid, `Entered the world.`)
 			}
 
 			this.userNames[snap.key] = snap.val().username
@@ -82,7 +81,7 @@ export default class ScoutController {
 			window.dispatchEvent(new CustomEvent('user.click', {
 				detail: uid
 			}))
-			this.setMessage(`Hi!`)
+			this.setMessage(uid, `Hi!`)
 
 			MAP.panTo(e.latLng)
 		})
@@ -103,10 +102,11 @@ export default class ScoutController {
 
 		if (data.mode == "HEALING") {
 			const healAmount = data.hitPoints - this.myUser.hitPoints
+
 			if (healAmount > 0) {
 				this.myUser.setLabel(healAmount, true)
 				this.myUser.setHitPoints(100)
-				this.setMessage(`Healed for ${healAmount} hit points!`)
+				this.setMessage(this.uid, `Healed for ${healAmount} hit points!`)
 			}
 		}
 	}
@@ -133,11 +133,9 @@ export default class ScoutController {
 			if (data.hitPoints > 0) {
 				this.users[uid].setLabel(data.hitDmg)
 				this.users[uid].setHitPoints(data.hitPoints)
-				// this.users[uid].setMessage(null, `${this.userNames[data.attacker]} hits ${this.userNames[uid]} for ${data.hitDmg} damage.`)
 			}
 			else {
 				this.users[uid].setHitPoints(0)
-				// this.users[uid].setMessage(null, `${this.userNames[data.attacker]} slays ${this.userNames[uid]}!!`)
 			}
 		}
 
@@ -146,7 +144,7 @@ export default class ScoutController {
 			if (healAmount > 0) {
 				this.users[uid].setLabel(healAmount, true)
 				this.users[uid].setHitPoints(100)
-				this.users[uid].setMessage(`${this.userNames[data.healer]} heals ${this.userNames[uid]} for ${healAmount} hit points!`)
+				this.users[uid].setMessage(null, `${this.userNames[data.healer]} heals ${this.userNames[uid]} for ${healAmount} hit points!`)
 			}
 		}
 	}

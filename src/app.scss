@@ -157,7 +157,7 @@ body {
 .dialog--store header {
     position: absolute;
     background: black;
-    top: -100%;
+    top: -61px;
     box-sizing: border-box;
     left: 0;
     color: white;
@@ -193,26 +193,12 @@ body {
 .dialog--store h2 {
     text-transform: uppercase;
     font-size: 12px;
-    width: 125px;
+    width: 160px;
     margin: 0 0 5px 0;
     display: block;
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
-}
-
-.dialog--inventory {
-    width: 50px;
-    height: 210px;
-    bottom: 155px;
-    right: 0;
-}
-
-.dialog--inventory ul {
-    flex-direction: column;
-    flex-wrap: nowrap;
-    overflow: auto;
-    height: 100%;
 }
 
 .dialog .btn {
