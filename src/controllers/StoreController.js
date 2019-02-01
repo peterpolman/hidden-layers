@@ -92,7 +92,7 @@ export default class StoreController {
     }
 
     updateGoblin(id, ) {
-        
+
     }
 
     onStoreAdded(id, data) {
@@ -109,11 +109,6 @@ export default class StoreController {
     				detail: id
     			}))
 
-				this.goblins[id].indicator.setMap(MAP)
-
-                if (!this.goblins[id].hasTalked) {
-                    this.goblins[id].talk()
-                }
 			})
 
 			this.goblins[id].setMap(MAP)

@@ -200,6 +200,8 @@ export default {
                             const hitPoints = 100
                             const goblin = this.storeController.goblins[uid]
 
+                            goblin.indicator.setMap(MAP)
+
                             goblin.setHitPoints(hitPoints)
                             goblin.setMessage(null, `${this.userController.userNames[this.uid]} heals an injured Goblin.`)
 
@@ -217,20 +219,31 @@ export default {
                         const damage = Math.floor(Math.random() * 10)
                         const hitPoints = (goblin.hitPoints - damage)
 
-                        if (goblin.hitPoints > 0) {
+                        goblin.indicator.setMap(MAP)
+
+                        if (!goblin.hasTalked) {
+                            goblin.talk()
+                        }
+
+                        if (damage > 0 && goblin.hitPoints > 0) {
                             goblin.setLabel( damage )
                             goblin.setHitPoints( hitPoints )
+
+                            this.storeController.goblins[uid] = goblin
+
                             this.setMessage(null, `${this.userController.userNames[this.uid]} hits a Goblin for ${damage} damage.`)
                         }
                         else if (goblin.hitPoints <= 0) {
-                            this.setMessage(null, `${this.userController.userNames[this.uid]} hits a Goblin it's dead corpse...`)
+                            goblin.setMap(null)
+
+                            delete this.storeController.goblins[uid]
+
+                            this.setMessage(null, `${this.userController.userNames[this.uid]} killed a goblin...`)
                         }
                         else {
-                            goblin.setMap(null)
                             this.setMessage(null, `${this.userController.userNames[this.uid]} failed to hit a Goblin...`)
                         }
 
-                        this.storeController.goblins[uid] = goblin
                     }
 
                     if (this.uid != uid && (typeof this.userController.users[uid] != 'undefined')) {
