@@ -29,6 +29,7 @@ export default class ItemController {
     }
 
     onItemAdded(key, data) {
+        Vue.delete(this.inventory, key)
         this.inventory[key] = data
     }
 

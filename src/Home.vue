@@ -2,22 +2,25 @@
 <section class="section section-home">
     <div class="google-map" id="home-map"></div>
 
-    <div class="messages" v-if="messageController && userController">
+    <section class="messages" v-if="messageController && userController">
         <div v-for="message of messageController.messages" :key="message.key">
             <span>[{{ messageController.getDateTime(message.timestamp) }}]</span>
             <strong v-if="userController.userNames[message.uid]">{{ userController.userNames[message.uid] }}:</strong>
             <span>{{ message.message }}</span>
         </div>
-    </div>
+    </section>
 
     <button class="btn btn-logout" v-on:click="logout">
         EXIT
     </button>
-    <button v-if="userController && userController.myUser" v-on:click="onSignalClick" :class="geoService.signal">
-
+    <button
+        :class="`btn btn-geo ${geoService.signal}`"
+        v-if="userController && userController.myUser"
+        v-on:click="onSignalClick">
+        <span></span>
     </button>
 
-    <div class="section-pan">
+    <section class="section-pan">
         <button v-if="userController && userController.myUser" v-bind:style="{ backgroundImage: 'url(' + assets.knight + ')' }" v-on:click="onPanUserClick" class="btn btn-user">
             User
         </button>
@@ -27,15 +30,12 @@
         <button v-if="lootController && lootController.myWards.length" v-bind:style="{ backgroundImage: 'url(' + assets.ward + ')' }" v-on:click="onPanWardClick" class="btn btn-ward">
             Ward
         </button>
-    </div>
+    </section>
 
-    <button v-if="itemController && itemController.inventory" v-bind:style="{ backgroundImage: 'url(' + ( (ui.dialogs.inventory) ? assets.inventoryOpen : assets.inventory )+ ')' }" v-on:click="onInventoryClick" class="btn btn-inventory">
-        Inventory
-    </button>
     <button class="btn btn-stop" v-on:click="onStopClick" v-if="scoutController && scoutController.isWalking">
         Stop
     </button>
-    <div class="dialog dialog--store" v-if="storeController && storeController.store">
+    <section class="dialog dialog--store" v-if="storeController && storeController.store">
         <header>
             <h2>{{ storeController.stores[storeController.store].name }}</h2>
             <div>
@@ -46,14 +46,8 @@
         </header>
 
         <ul>
-            <li :key="item.slug"
-                v-if="(item.amount > 0)"
-                v-for="item in storeController.stores[storeController.store].items">
-                <button
-                    v-bind:style="{ backgroundImage: `url(${assets[item.slug]})` }"
-                    v-bind:class="`btn btn-${item.slug}`"
-                    v-on:click="onGetItemFromStore(storeController.store, item)
-                    ">
+            <li :key="item.slug" v-if="(item.amount > 0)" v-for="item in storeController.stores[storeController.store].items">
+                <button v-bind:style="{ backgroundImage: `url(${assets[item.slug]})` }" v-bind:class="`btn btn-${item.slug}`" v-on:click="onGetItemFromStore(storeController.store, item)">
                     {{ item.name }}
                     <small>
                         {{ item.amount }}
@@ -61,25 +55,11 @@
                 </button>
             </li>
         </ul>
-    </div>
+    </section>
 
-    <div class="dialog dialog--inventory" v-if="itemController && itemController.inventoryOpen">
-        <ul>
-            <li :key="item.slug"
-                v-if="(item.amount > 0)"
-                v-for="item in itemController.inventory">
-                <button
-                    v-bind:style="{ backgroundImage: `url(${assets[item.slug]})` }"
-                    v-bind:class="`btn btn-${item.slug}`"
-                    v-on:click="onItemClick(item)">
-                    {{ item.name }}
-                    <small v-if="(item.amount > 1)">
-                        {{ item.amount }}
-                    </small>
-                </button>
-            </li>
-        </ul>
-    </div>
+    <Equipment ref="equipment" />
+    <Inventory ref="inventory" />
+
 </section>
 </template>
 
@@ -87,9 +67,12 @@
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/database';
-import 'firebase/functions';
 
 import config from './config.js'
+
+// Components
+import Equipment from './components/Equipment.vue'
+import Inventory from './components/Inventory.vue'
 
 // Import services
 import MapService from './services/MapService'
@@ -99,17 +82,19 @@ import GeoService from './services/GeoService'
 import UserController from './controllers/UserController'
 import ScoutController from './controllers/ScoutController'
 import StoreController from './controllers/StoreController'
-import ItemController from './controllers/ItemController'
 import MessageController from './controllers/MessageController'
 import LootController from './controllers/LootController'
 
 export default {
     name: 'home',
+    components: {
+        Equipment,
+        Inventory
+    },
     data() {
         return {
             ui: {
                 dialogs: {
-                    inventory: false,
                     store: true
                 }
             },
@@ -121,8 +106,6 @@ export default {
                 gold: require('./assets/img/coin.png'),
                 potion: require('./assets/img/potion.png'),
                 sword: require('./assets/img/woodSword.png'),
-                inventory: require('./assets/img/backpack.png'),
-                inventoryOpen: require('./assets/img/backpack_open.png'),
                 discover: require('./assets/img/discover.png')
             },
             userClass: null,
@@ -130,6 +113,7 @@ export default {
             users: [],
             scouts: [],
             messages: [],
+            selectedItem: {},
             selectedStore: {},
             uid: firebase.auth().currentUser.uid,
             watcher: null,
@@ -138,7 +122,6 @@ export default {
             userController: null,
             scoutController: null,
             storeController: null,
-            itemController: null,
             lootController: null,
             messageController: null
         }
@@ -156,7 +139,6 @@ export default {
             this.scoutController = new ScoutController(uid)
             this.lootController = new LootController(uid)
             this.storeController = new StoreController()
-            this.itemController = new ItemController()
 
             this.scoutController.userNames = this.userController.userNames
 
@@ -168,13 +150,13 @@ export default {
                 this.cursorMode = e.detail.type
             })
 
-            scoutsRef.on('child_added', (snap) => this.discover() )
-            scoutsRef.on('child_changed', (snap) => this.discover() )
-            scoutsRef.on('child_removed', (snap) => this.discover() )
-            usersRef.on('child_changed', (snap) => this.discover() )
-            lootRef.on('child_added', (snap) => this.discover() )
-            lootRef.on('child_changed', (snap) => this.discover() )
-            lootRef.on('child_removed', (snap) => this.discover() )
+            scoutsRef.on('child_added', (snap) => this.discover())
+            scoutsRef.on('child_changed', (snap) => this.discover())
+            scoutsRef.on('child_removed', (snap) => this.discover())
+            usersRef.on('child_changed', (snap) => this.discover())
+            lootRef.on('child_added', (snap) => this.discover())
+            lootRef.on('child_changed', (snap) => this.discover())
+            lootRef.on('child_removed', (snap) => this.discover())
 
             window.addEventListener('user.click', (data) => {
                 this.onUserClick(data.detail)
@@ -187,7 +169,7 @@ export default {
         })
     },
     methods: {
-    	discover() {
+        discover() {
             const visibility = {
                 user: this.userController.myUser,
                 scout: this.scoutController.myScout,
@@ -207,12 +189,12 @@ export default {
             this.scoutController.scouts = discovered.scouts
             this.storeController.goblins = discovered.goblins
             this.lootController.loot = discovered.loot
-    	},
+        },
         onUserClick(uid) {
             switch (this.cursorMode) {
                 case 'potion':
                     if (this.selectedItem) {
-                        this.itemController.substract(this.selectedItem, 1)
+                        this.$refs.inventory.itemController.substract(this.selectedItem, 1)
                         this.userController.updateUser(uid, {
                             mode: "HEALING",
                             hitPoints: 100,
@@ -228,13 +210,14 @@ export default {
 
                         this.userController.updateUser(uid, {
                             mode: 'FIGHTING',
-            				hitDmg: damage,
-            				attacker: this.uid,
-            				hitPoints: this.userController.users[uid].hitPoints - damage
+                            hitDmg: damage,
+                            attacker: this.uid,
+                            hitPoints: this.userController.users[uid].hitPoints - damage
                         })
                     }
                     break
                 default:
+                    this.$refs.equipment.active = false
                     if (this.uid != uid) {
                         this.setMessage(`Hi ${this.userController.userNames[uid]}!`)
                     }
@@ -243,7 +226,6 @@ export default {
             }
         },
         onMapClick(e) {
-            let item
             const visibility = {
                 user: this.userController.myUser,
                 scout: this.scoutController.myScout,
@@ -254,7 +236,7 @@ export default {
                 lat: e.latLng.lat(),
                 lng: e.latLng.lng(),
             }
-
+            let item
             if (this.selectedItem) {
                 item = {
                     uid: this.uid,
@@ -270,6 +252,7 @@ export default {
             if (e.placeId) {
                 if (!isHidden) {
                     this.storeController.getPlaceDetails(e)
+                    this.$refs.equipment.active = false
                     this.cursorMode = null
                 }
                 e.stop()
@@ -281,33 +264,35 @@ export default {
                     break
                 case "ward":
                     if (!isHidden && this.selectedItem) {
-                        this.itemController.substract(this.selectedItem, 1)
+                        this.$refs.inventory.itemController.substract(this.selectedItem, 1)
                         this.lootController.drop(item, 1)
                         this.selectedItem = null
                         this.cursorMode = null
+                        this.$refs.equipment.equipment.hand = null
                     }
                     break
-                default :
+                case "drop":
                     if (!isHidden && this.selectedItem) {
-                        this.itemController.substractAll(this.selectedItem)
+                        this.$refs.inventory.itemController.substractAll(this.selectedItem)
                         this.lootController.dropAll(item)
                         this.selectedItem = null
                         this.cursorMode = null
+                        this.$refs.equipment.equipment.hand = null
                     }
                     break
 
             }
         },
         onInventoryClick() {
-            this.itemController.inventoryOpen = !this.itemController.inventoryOpen
+            this.$refs.inventory.itemController.inventoryOpen = !this.$refs.inventory.itemController.inventoryOpen
 
-            if (!this.itemController.inventoryOpen) {
+            if (!this.$refs.inventory.itemController.inventoryOpen) {
                 this.cursorMode = null
             }
         },
         onGetItemFromStore(id, item) {
-            this.itemController.inventoryOpen = true
-            this.itemController.add(item)
+            this.$refs.inventory.itemController.inventoryOpen = true
+            this.$refs.inventory.itemController.add(item)
             this.storeController.storesRef.child(id).child('items').child(item.slug).remove()
             this.setMessage(`Picked up ${item.amount} ${item.name} from store`)
         },
@@ -344,7 +329,11 @@ export default {
 
                 this.userController.updateUser(this.uid, data)
 
-            }, this.onWatchError.bind(this), { enableHighAccuracy: true, maximumAge: 1000, timeout: 30000 })
+            }, this.onWatchError.bind(this), {
+                enableHighAccuracy: true,
+                maximumAge: 1000,
+                timeout: 30000
+            })
         },
         onWatchError(err) {
             if (typeof err != 'undefined') {
@@ -401,5 +390,5 @@ export default {
 </script>
 
 <style scoped lang="scss">
-@import './app.scss'
+@import './app.scss';
 </style>
