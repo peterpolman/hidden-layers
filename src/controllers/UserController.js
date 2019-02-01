@@ -32,7 +32,6 @@ export default class ScoutController {
 				this.onMyUserAdded(snap.key, snap.val())
 				this.setMessage(this.uid, `Entered the world.`)
 			}
-
 			this.userNames[snap.key] = snap.val().username
 		})
 
@@ -76,7 +75,7 @@ export default class ScoutController {
 	onMyUserAdded(uid, data) {
 		this.userInfoWindow = new google.maps.InfoWindow({isHidden: false})
 
-		this.myUser = new User(uid, data.position, data.userClass, data.username, data.email, data.hitPoints)
+		this.myUser = new User(uid, data.position, data.userClass, data.username, data.email, data.hitPoints, data.exp)
 		this.myUser.marker.addListener('click', (e) => {
 			window.dispatchEvent(new CustomEvent('user.click', {
 				detail: uid
@@ -92,6 +91,7 @@ export default class ScoutController {
 
 	onMyUserChanged(uid, data) {
 		this.myUser.setPosition(data.position)
+		this.myUser.setExp(data.exp)
 
 		if (data.mode == "FIGHTING") {
 			if (data.hitPoints > 0) {
@@ -112,7 +112,7 @@ export default class ScoutController {
 	}
 
 	onUserAdded(uid, data) {
-		this.users[uid] = new User(uid, data.position, data.userClass, data.username, data.email, data.hitPoints)
+		this.users[uid] = new User(uid, data.position, data.userClass, data.username, data.email, data.hitPoints, data.exp)
 		this.users[uid].marker.addListener('click', (e) => {
 
 			window.dispatchEvent(new CustomEvent('user.click', {

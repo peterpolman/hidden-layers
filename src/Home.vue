@@ -14,6 +14,11 @@
             v-on:click="onSignalClick">
             <span></span>
         </button>
+        <button
+            v-on:click="onExpClick"
+            class="btn btn-score" v-if="userController && userController.myUser">
+            {{ userController.myUser.exp }}
+        </button>
     </section>
 
     <section class="section-pan">
@@ -158,6 +163,9 @@ export default {
         })
     },
     methods: {
+        onExpClick() {
+            alert(`You killed ${this.userController.myUser.exp} Goblins so far. ${(this.userController.myUser.exp > 0) ? 'Keep up the good work!' : ''} `)
+        },
         discover() {
             const visibility = {
                 user: this.userController.myUser,
@@ -239,6 +247,12 @@ export default {
                             delete this.storeController.goblins[uid]
 
                             this.setMessage(null, `${this.userController.userNames[this.uid]} killed a goblin...`)
+                            const user = this.userController.myUser
+                            const exp = this.userController.myUser.exp + 1
+
+                            this.userController.updateUser(this.uid, {
+                                exp: exp
+                            })
                         }
                         else {
                             this.setMessage(null, `${this.userController.userNames[this.uid]} failed to hit a Goblin...`)
@@ -443,4 +457,11 @@ export default {
 
 <style scoped lang="scss">
 @import './app.scss';
+
+.btn-score {
+    background: white;
+    color: black;
+    font-size: 16px;
+    font-weight: bold;
+}
 </style>

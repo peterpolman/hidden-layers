@@ -4,7 +4,7 @@ import 'firebase/database';
 import Character from './Character.js'
 
 export default class User extends Character {
-    constructor(uid, position, userClass, username, email, hitPoints) {
+    constructor(uid, position, userClass, username, email, hitPoints, exp) {
         super(position, hitPoints)
         const iconSize = 50
         const avatars = {
@@ -12,6 +12,7 @@ export default class User extends Character {
             archer: require('../assets/img/archer-1.png')
         }
         this.uid = uid
+        this.exp = parseInt(exp)
         this.username = username
         this.email = email
         this.marker = new google.maps.Marker({
@@ -25,5 +26,9 @@ export default class User extends Character {
                 anchor: new google.maps.Point(iconSize / 2, iconSize / 2)
             }
         })
+    }
+
+    setExp(exp) {
+        this.exp = exp
     }
 }
