@@ -144,7 +144,6 @@ export default class ScoutController {
 			if (healAmount > 0) {
 				this.users[uid].setLabel(healAmount, true)
 				this.users[uid].setHitPoints(100)
-				this.users[uid].setMessage(null, `${this.userNames[data.healer]} heals ${this.userNames[uid]} for ${healAmount} hit points!`)
 			}
 		}
 	}

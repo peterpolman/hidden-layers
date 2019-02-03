@@ -198,11 +198,16 @@ export default {
                         this.$refs.inventory.itemController.substract(this.selectedItem, 1)
 
                         if (typeof this.userController.users[uid] != 'undefined') {
-                            this.userController.updateUser(uid, {
+                            const heal = 100
+                            const healAmount = 100 - this.userController.users[uid].hitPoints
+                            const data = {
                                 mode: "HEALING",
-                                hitPoints: 100,
+                                hitPoints: heal,
                                 healer: this.uid
-                            })
+                            }
+
+                            this.userController.updateUser(uid, data)
+                            this.userController.users[uid].setMessage(null, `${this.userController.userNames[data.healer]} heals ${this.userController.userNames[uid]} for ${healAmount} hit points!`)
                         }
                         if (typeof this.storeController.goblins[uid] != 'undefined') {
                             const hitPoints = 100
