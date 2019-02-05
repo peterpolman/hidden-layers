@@ -198,22 +198,37 @@ export default {
             this.lootController.loot = discovered.loot
             this.$refs.construction.buildingController.buildings = discovered.buildings
         },
-        onBuildingClick(id) {
-            if (this.cursorMode == 'sword') {
+        onBuildingClick(data) {
+            const buildingController = this.$refs.construction.buildingController
 
-                this.$refs.construction.buildingController.update(id, {
-                    hitPoints: this.$refs.construction.buildingController.buildings[id].hitPoints - 10
-                })
-            }
-            else {
-                if (this.$refs.construction.buildingController.buildings[id].hitPoints >= 300) {
-                    alert('Building is fully constructed')
-                }
-                else {
-                    this.$refs.construction.buildingController.update(id, {
-                        hitPoints: this.$refs.construction.buildingController.buildings[id].hitPoints + 10
+            switch (this.cursorMode) {
+                case 'sword':
+                    const damage = Math.floor(Math.random() * 10)
+
+                    setMessage(null, `Building is hit for ${damage} damage.`)
+
+                    buildingController.buildings[data.id].setLabel(damage, false)
+
+                    buildingController.update(data.id, {
+                        hitPoints: buildingController.buildings[data.id].hitPoints - damage
                     })
-                }
+                    break
+                case 'build':
+                    if (buildingController.buildings[data.id].hitPoints >= buildingController.buildings[data.id].hitPointsMax) {
+                        setMessage(null, `This building is fully constructed!`)
+                    }
+                    else {
+                        buildingController.buildings[data.id].setLabel(10, true)
+
+                        setMessage(null, `Building construction + 10`)
+                        buildingController.update(data.id, {
+                            hitPoints: buildingController.buildings[data.id].hitPoints + 10
+                        })
+                    }
+                    break
+                default:
+                    setMessage(this.uid, `Knock, knock. Hi ${this.userController.userNames[data.uid]}!`)
+                    break
             }
 
         },
@@ -274,14 +289,14 @@ export default {
 
                             this.storeController.goblins[uid] = goblin
 
-                            this.setMessage(null, `${this.userController.userNames[this.uid]} hits a Goblin for ${damage} damage.`)
+                            setMessage(null, `${this.userController.userNames[this.uid]} hits a Goblin for ${damage} damage.`)
                         }
                         else if (goblin.hitPoints <= 0) {
                             goblin.setMap(null)
 
                             delete this.storeController.goblins[uid]
 
-                            this.setMessage(null, `${this.userController.userNames[this.uid]} killed a goblin...`)
+                            setMessage(null, `${this.userController.userNames[this.uid]} killed a goblin...`)
                             const user = this.userController.myUser
                             const exp = this.userController.myUser.exp + 1
 
@@ -290,7 +305,7 @@ export default {
                             })
                         }
                         else {
-                            this.setMessage(null, `${this.userController.userNames[this.uid]} failed to hit a Goblin...`)
+                            setMessage(null, `${this.userController.userNames[this.uid]} failed to hit a Goblin...`)
                         }
 
                     }
@@ -305,24 +320,24 @@ export default {
                         }
 
                         if ((data.hitDmg > 0) && (this.userController.users[uid].hitPoints > 0)) {
-                            this.setMessage(null, `${this.userController.userNames[data.attacker]} hits ${this.userController.userNames[uid]} for ${data.hitDmg} damage.`)
+                            setMessage(null, `${this.userController.userNames[data.attacker]} hits ${this.userController.userNames[uid]} for ${data.hitDmg} damage.`)
                             this.userController.updateUser(uid, data)
                         }
                         else if (this.userController.users[uid].hitPoints <= 0) {
-                            this.setMessage(null, `${this.userController.userNames[data.attacker]} hits ${this.userController.userNames[uid]}'s dead corpse...`)
+                            setMessage(null, `${this.userController.userNames[data.attacker]} hits ${this.userController.userNames[uid]}'s dead corpse...`)
                         }
                         else {
-                            this.setMessage(null, `${this.userController.userNames[data.attacker]} failed to hit ${this.userController.userNames[uid]}...`)
+                            setMessage(null, `${this.userController.userNames[data.attacker]} failed to hit ${this.userController.userNames[uid]}...`)
                         }
                     }
                     break
                 default:
                     this.$refs.equipment.active = false
                     if (this.uid != uid && (typeof this.userController.users[uid] != 'undefined')) {
-                        this.setMessage(this.uid, `Hi ${this.userController.userNames[uid]}!`)
+                        setMessage(this.uid, `Hi ${this.userController.userNames[uid]}!`)
                     }
                     if (typeof this.storeController.goblins[uid] != 'undefined') {
-                        this.setMessage(this.uid, `Hi Goblin!`)
+                        setMessage(this.uid, `Hi Goblin!`)
                     }
             }
         },
@@ -373,19 +388,21 @@ export default {
                     }
                     break
                 case "build":
-                    if (!isHidden && this.selectedBuilding) {
+                    if (!isHidden && this.selectedItem) {
                         const id = this.createMarkerId(position)
                         const data = {
                             position: position,
+                            uid: this.uid,
                             id: id,
-                            name: this.selectedBuilding.name,
-                            slug: this.selectedBuilding.slug,
+                            name: this.selectedItem.name,
+                            slug: this.selectedItem.slug,
                             stage: 1,
                             size: 100,
-                            hitPoints: 500,
+                            hitPoints: 10,
+                            hitPointsMax: 500,
                         }
                         this.$refs.construction.buildingController.set(id, data)
-                        this.selectedBuilding = null
+                        this.selectedItem = null
                     }
                     break
                 case "drop":
@@ -411,7 +428,7 @@ export default {
             this.$refs.inventory.itemController.inventoryOpen = true
             this.$refs.inventory.itemController.add(item)
             this.storeController.storesRef.child(id).child('items').child(item.slug).remove()
-            this.setMessage(this.uid, `Picked up ${item.amount} ${item.name} from store`)
+            setMessage(this.uid, `Picked up ${item.amount} ${item.name} from store`)
         },
         onCloseStore() {
             this.storeController.store = null

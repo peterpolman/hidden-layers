@@ -29,7 +29,8 @@ export default {
                 sword: require('../assets/img/woodSword.png'),
                 inventory: require('../assets/img/backpack.png'),
                 inventoryOpen: require('../assets/img/backpack_open.png'),
-                discover: require('../assets/img/discover.png')
+                discover: require('../assets/img/discover.png'),
+                house: require('../assets/img/house-4.png'),
             }
         }
     },

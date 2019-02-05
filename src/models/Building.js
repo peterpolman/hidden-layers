@@ -1,11 +1,12 @@
 export default class Building {
-    constructor(uid, id, slug, name, position, size, stage, hitPoints) {
+    constructor(uid, id, slug, name, position, size, stage, hitPoints, hitPointsMax) {
         this.uid = uid
         this.name = name
         this.slug = slug
         this.size = size
         this.stage = stage
         this.hitPoints = hitPoints
+        this.hitPointsMax = hitPointsMax
         this.icons = {
             house1: require('../assets/img/house-1.png'),
             house2: require('../assets/img/house-2.png'),
@@ -50,11 +51,12 @@ export default class Building {
 
     setHitPoints(hitPoints) {
         this.hitPoints = (hitPoints < 0) ? 0 : hitPoints
-        this.hitPoints = (hitPoints > 300) ? 300 : hitPoints
+        this.hitPoints = (hitPoints > this.hitPointsMax) ? this.hitPointsMax : hitPoints
 
-        let stage = (this.hitPoints >= 300) ? 4 : (this.hitPoints > 200) ? 3 : (this.hitPoints > 100) ? 2 : (this.hitPoints > 0) ? 1 : 1
+        let stage = (this.hitPoints >= this.hitPointsMax) ? 4 : (this.hitPoints > (this.hitPointsMax / 3)*2) ? 3 : (this.hitPoints > (this.hitPointsMax / 3)*1) ? 2 : (this.hitPoints > 0) ? 1 : 1
 
         this.marker.setIcon({
+            labelOrigin: new google.maps.Point(this.size / 2, -10),
             url: this.icons[`${this.slug}${stage}`],
             size: new google.maps.Size(this.size, this.size),
             scaledSize: new google.maps.Size(this.size, this.size),
@@ -62,7 +64,7 @@ export default class Building {
             anchor: new google.maps.Point((this.size / 2), (this.size / 2))
         })
 
-        const perct = (this.hitPoints/ 300) * 100
+        const perct = (this.hitPoints / this.hitPointsMax) * 100
 
         this.indicator.setIcon({
             path: `M0,0v17h100V0H0z M101,15H${ (perct <= 0)? 2 : perct }l0-13H98V15z`,
@@ -70,7 +72,7 @@ export default class Building {
             fillOpacity: 1,
             scale: .5,
             strokeWeight: 0,
-            anchor: new google.maps.Point(50,-85),
+            anchor: new google.maps.Point(50, -85),
         })
     }
 

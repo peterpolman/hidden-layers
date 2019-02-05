@@ -30,7 +30,7 @@ export default class ScoutController {
 				this.onUserAdded(snap.key, snap.val())
 			} else {
 				this.onMyUserAdded(snap.key, snap.val())
-				this.setMessage(this.uid, `Entered the world.`)
+				setMessage(this.uid, `Entered the world.`)
 			}
 			this.userNames[snap.key] = snap.val().username
 		})
@@ -62,16 +62,6 @@ export default class ScoutController {
 		usersRef.child(uid).remove()
 	}
 
-	setMessage(uid, message) {
-		window.dispatchEvent(new CustomEvent('message_add', {
-			detail: {
-				uid: uid,
-				message: message,
-				timestamp: firebase.database.ServerValue.TIMESTAMP
-			}
-		}))
-	}
-
 	onMyUserAdded(uid, data) {
 		this.userInfoWindow = new google.maps.InfoWindow({isHidden: false})
 
@@ -80,7 +70,7 @@ export default class ScoutController {
 			window.dispatchEvent(new CustomEvent('user.click', {
 				detail: uid
 			}))
-			this.setMessage(uid, `Hi!`)
+			setMessage(uid, `Hi!`)
 
 			MAP.panTo(e.latLng)
 		})
@@ -106,7 +96,7 @@ export default class ScoutController {
 			if (healAmount > 0) {
 				this.myUser.setLabel(healAmount, true)
 				this.myUser.setHitPoints(100)
-				this.setMessage(this.uid, `Healed for ${healAmount} hit points!`)
+				setMessage(this.uid, `Healed for ${healAmount} hit points!`)
 			}
 		}
 	}

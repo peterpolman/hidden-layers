@@ -55,6 +55,16 @@ const router = new VueRouter({
   routes: routes
 });
 
+window.setMessage = (uid, message) => {
+    window.dispatchEvent(new CustomEvent('message_add', {
+        detail: {
+            uid: uid,
+            message: message,
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        }
+    }))
+}
+
 router.beforeEach((to, from, next) => {
   let currentUser = firebase.auth().currentUser;
   let requiresAuth = to.matched.some(record => record.meta.requiresAuth);

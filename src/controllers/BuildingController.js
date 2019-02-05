@@ -31,12 +31,15 @@ export default class BuildingController {
     }
 
     onBuildingAdded(id, data) {
-        this.buildings[id] = new Building(this.uid, id, data.slug, data.name, data.position, data.size, data.stage, data.hitPoints)
+        this.buildings[id] = new Building(this.uid, id, data.slug, data.name, data.position, data.size, data.stage, data.hitPoints, data.hitPointsMax)
         this.buildings[id].setMap(MAP)
         this.buildings[id].marker.addListener('click', (e) => {
 
             window.dispatchEvent(new CustomEvent('building.click', {
-				detail: id
+				detail: {
+                    id: id,
+                    uid: data.uid
+                }
 			}))
 
         })

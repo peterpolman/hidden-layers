@@ -43,7 +43,9 @@ export default {
     methods: {
         onItemClick(item) {
             this.$parent.cursorMode = 'build'
-            this.$parent.selectedBuilding = item
+            this.$parent.selectedItem = item
+            this.$parent.$refs.equipment.equipment.hand = item
+            this.$parent.$refs.equipment.active = true
         },
         onToolsClick() {
             this.buildingController.open = !this.buildingController.open

@@ -59,12 +59,12 @@ export default class LootController {
 	drop(item, amount) {
 		item.amount = amount
 		this.lootRef.child(item.id).set(item)
-		this.setMessage(this.uid, `Deployed ${amount} ${item.name}`)
+		setMessage(this.uid, `Deployed ${amount} ${item.name}`)
 	}
 
 	dropAll(item) {
 		this.lootRef.child(item.id).set(item)
-		this.setMessage(this.uid, `Dropped ${item.amount} ${item.name}`)
+		setMessage(this.uid, `Dropped ${item.amount} ${item.name}`)
 	}
 
 	pickup(item) {
@@ -74,17 +74,6 @@ export default class LootController {
 			detail: item
 		}))
 
-		this.setMessage(this.uid, `Picked up ${item.amount} ${item.name}`)
+		setMessage(this.uid, `Picked up ${item.amount} ${item.name}`)
 	}
-
-	setMessage(uid, message) {
-		window.dispatchEvent(new CustomEvent('message_add', {
-			detail: {
-				uid: uid,
-				message: message,
-				timestamp: firebase.database.ServerValue.TIMESTAMP
-			}
-		}))
-	}
-
 }
