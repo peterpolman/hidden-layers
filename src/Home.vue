@@ -59,6 +59,8 @@
         </ul>
     </section>
 
+    <Construction ref="construction" />
+
     <Equipment ref="equipment" />
 
     <Inventory ref="inventory" />
@@ -77,6 +79,7 @@ import config from './config.js'
 import Messages from './components/Messages.vue'
 import Equipment from './components/Equipment.vue'
 import Inventory from './components/Inventory.vue'
+import Construction from './components/Construction.vue'
 
 // Import services
 import MapService from './services/MapService'
@@ -94,6 +97,7 @@ export default {
         Messages,
         Equipment,
         Inventory,
+        Construction,
     },
     data() {
         return {
@@ -158,6 +162,11 @@ export default {
             window.addEventListener('user.click', (data) => {
                 this.onUserClick(data.detail)
             })
+
+
+            window.addEventListener('building.click', (data) => {
+                this.onBuildingClick(data.detail)
+            })
         }).catch((err) => {
             console.log(err)
         })
@@ -170,14 +179,15 @@ export default {
             const visibility = {
                 user: this.userController.myUser,
                 scout: this.scoutController.myScout,
-                wards: this.lootController.myWards
+                wards: this.lootController.myWards,
             }
 
             const positions = {
                 users: this.userController.users,
                 scouts: this.scoutController.scouts,
                 goblins: this.storeController.goblins,
-                loot: this.lootController.loot
+                loot: this.lootController.loot,
+                buildings: this.$refs.construction.buildingController.buildings,
             }
 
             const discovered = this.mapService.getVisibleObjects(visibility, positions)
@@ -186,6 +196,26 @@ export default {
             this.scoutController.scouts = discovered.scouts
             this.storeController.goblins = discovered.goblins
             this.lootController.loot = discovered.loot
+            this.$refs.construction.buildingController.buildings = discovered.buildings
+        },
+        onBuildingClick(id) {
+            if (this.cursorMode == 'sword') {
+
+                this.$refs.construction.buildingController.update(id, {
+                    hitPoints: this.$refs.construction.buildingController.buildings[id].hitPoints - 10
+                })
+            }
+            else {
+                if (this.$refs.construction.buildingController.buildings[id].hitPoints >= 300) {
+                    alert('Building is fully constructed')
+                }
+                else {
+                    this.$refs.construction.buildingController.update(id, {
+                        hitPoints: this.$refs.construction.buildingController.buildings[id].hitPoints + 10
+                    })
+                }
+            }
+
         },
         onUserClick(uid) {
             switch (this.cursorMode) {
@@ -340,6 +370,22 @@ export default {
                         this.selectedItem = null
                         this.cursorMode = null
                         this.$refs.equipment.equipment.hand = null
+                    }
+                    break
+                case "build":
+                    if (!isHidden && this.selectedBuilding) {
+                        const id = this.createMarkerId(position)
+                        const data = {
+                            position: position,
+                            id: id,
+                            name: this.selectedBuilding.name,
+                            slug: this.selectedBuilding.slug,
+                            stage: 1,
+                            size: 100,
+                            hitPoints: 500,
+                        }
+                        this.$refs.construction.buildingController.set(id, data)
+                        this.selectedBuilding = null
                     }
                     break
                 case "drop":

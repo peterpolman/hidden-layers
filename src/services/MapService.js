@@ -31,6 +31,7 @@ export default class MapController {
             scouts: this.setMarkerVisibility(positions.scouts, visibilityPath),
             goblins: this.setMarkerVisibility(positions.goblins, visibilityPath),
             loot: this.setMarkerVisibility(positions.loot, visibilityPath),
+            buildings: this.setMarkerVisibility(positions.buildings, visibilityPath),
         }
 
     }
