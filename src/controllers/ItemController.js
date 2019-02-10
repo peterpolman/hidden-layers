@@ -7,7 +7,6 @@ export default class ItemController {
     constructor() {
         this.uid = firebase.auth().currentUser.uid
         this.inventory = {}
-        this.inventoryOpen = false
         this.itemsRef = firebase.database().ref('items').child(this.uid)
 
         this.itemsRef.on('child_added', (snap) => {

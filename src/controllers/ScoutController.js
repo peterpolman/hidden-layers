@@ -63,7 +63,7 @@ export default class ScoutController {
 	}
 
     onMyScoutAdded(uid, data) {
-		this.myScout = new Scout(uid, data.mode, data.position, data.hp)
+		this.myScout = new Scout(data)
 		this.myScout.setMap(MAP)
 
 		this.myScout.marker.addListener('click', (e) => {
@@ -88,9 +88,9 @@ export default class ScoutController {
 		clearTimeout(this.myScout.pathTimer)
 
 		if (data.mode == "FIGHTING") {
-			if (data.hp > 0) {
+			if (data.hitPoints > 0) {
 				this.myScout.setLabel(data.hitDmg)
-				this.myScout.setHitPoints(data.hp)
+				this.myScout.setHitPoints(data.hitPoints)
 			}
 		}
 
@@ -123,7 +123,7 @@ export default class ScoutController {
 	}
 
 	onScoutAdded(uid, data) {
-		this.scouts[uid] = new Scout(uid, data.mode, data.position, data.hp)
+		this.scouts[uid] = new Scout(data)
 		this.scouts[uid].marker.addListener('click', (e) => {
 			const damage = Math.floor(Math.random() * 10)
 
@@ -149,9 +149,9 @@ export default class ScoutController {
 		this.scouts[uid].set('mode', data.mode)
 
 		if (data.mode == 'FIGHTING') {
-			if (data.hp > 0) {
+			if (data.hitPoints > 0) {
 				this.scouts[uid].setLabel( data.hitDmg )
-				this.scouts[uid].setHitPoints( data.hp )
+				this.scouts[uid].setHitPoints( data.hitPoints )
 			}
 			else {
 				this.scouts[uid].setMessage(null, `${this.userNames[data.attacker]} kills ${this.userNames[uid]}'s like it's nothing..`)

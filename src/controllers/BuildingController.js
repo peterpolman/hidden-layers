@@ -6,7 +6,6 @@ import Building from '../models/Building'
 export default class BuildingController {
     constructor() {
         this.uid = firebase.auth().currentUser.uid
-        this.open = false
         this.construction = {
             house: {
                 slug: 'house',

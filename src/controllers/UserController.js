@@ -51,7 +51,7 @@ export default class ScoutController {
 	}
 
 	onMyUserAdded(uid, data) {
-		this.myUser = new User(uid, data.position, data.userClass, data.username, data.email, data.hitPoints, data.exp)
+		this.myUser = new User(data)
 		this.myUser.marker.addListener('click', (e) => {
 			window.dispatchEvent(new CustomEvent('user.click', {
 				detail: uid
@@ -89,7 +89,7 @@ export default class ScoutController {
 	}
 
 	onUserAdded(uid, data) {
-		this.users[uid] = new User(uid, data.position, data.userClass, data.username, data.email, data.hitPoints, data.exp)
+		this.users[uid] = new User(data)
 		this.users[uid].marker.addListener('click', (e) => {
 
 			window.dispatchEvent(new CustomEvent('user.click', {

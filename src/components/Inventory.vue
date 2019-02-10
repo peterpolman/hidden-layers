@@ -3,13 +3,13 @@
 
     <button
         v-if="(itemController && itemController.inventory)"
-        v-bind:style="{ backgroundImage: 'url(' + ( (itemController.inventoryOpen) ? assets.inventoryOpen : assets.inventory )+ ')' }"
+        v-bind:style="{ backgroundImage: 'url(' + ( (open) ? assets.inventoryOpen : assets.inventory )+ ')' }"
         v-on:click="onInventoryClick"
         class="btn btn-inventory">
         Inventory
     </button>
 
-    <ul class="dialog dialog--inventory" v-if="itemController && itemController.inventoryOpen">
+    <ul class="dialog dialog--inventory" v-if="itemController && open">
         <li :key="item.slug" v-if="(item.amount > 0)" v-for="item in itemController.inventory">
             <button v-bind:style="{ backgroundImage: `url(${assets[item.slug]})` }" v-bind:class="`btn btn-${item.slug}`" v-on:click="onItemClick(item)">
                 {{ item.name }}
@@ -30,6 +30,7 @@ export default {
     name: 'inventory',
     data() {
         return {
+            open: false,
             itemController: null,
             selectedItem: null,
             assets: {
@@ -64,7 +65,8 @@ export default {
             }
         },
         onInventoryClick() {
-            this.itemController.inventoryOpen = !this.itemController.inventoryOpen
+            this.$parent.$refs.construction.open = false
+            this.open = !this.open
         },
     }
 }
@@ -83,22 +85,19 @@ export default {
 .dialog--inventory {
     width: auto;
     bottom: 95px;
-    height: 40px;
+    min-height: 50px;
     right: 60px;
     flex-direction: column;
     flex-wrap: nowrap;
-    padding: 10px 0;
+    padding: 5px;
+    overflow: auto;
 
     li {
-        margin: 0 10px 0 0;
+        margin: 5px;
         border-radius: 2px;
         width: 40px;
         height: 40px;
         display: inline-flex;
-
-        &:first-child {
-            margin-left: 10px;
-        }
 
         .btn {
             margin: 0;

@@ -37,32 +37,9 @@
         Stop
     </button>
 
-    <section class="dialog dialog--store" v-if="storeController && storeController.store">
-        <header>
-            <h2>{{ storeController.stores[storeController.store].name }}</h2>
-            <div>
-                Category: {{ storeController.stores[storeController.store].category }}<br>
-                Owner: {{ userController.userNames[storeController.stores[storeController.store].owner]  }}
-            </div>
-            <button v-on:click="onCloseStore">Close</button>
-        </header>
-
-        <ul>
-            <li :key="item.slug" v-if="(item.amount > 0)" v-for="item in storeController.stores[storeController.store].items">
-                <button v-bind:style="{ backgroundImage: `url(${assets[item.slug]})` }" v-bind:class="`btn btn-${item.slug}`" v-on:click="onGetItemFromStore(storeController.store, item)">
-                    {{ item.name }}
-                    <small>
-                        {{ item.amount }}
-                    </small>
-                </button>
-            </li>
-        </ul>
-    </section>
-
+    <Store ref="store" />
     <Construction ref="construction" />
-
     <Equipment ref="equipment" />
-
     <Inventory ref="inventory" />
 
 </section>
@@ -80,6 +57,7 @@ import Messages from './components/Messages.vue'
 import Equipment from './components/Equipment.vue'
 import Inventory from './components/Inventory.vue'
 import Construction from './components/Construction.vue'
+import Store from './components/Store.vue'
 
 // Import services
 import MapService from './services/MapService'
@@ -88,7 +66,6 @@ import GeoService from './services/GeoService'
 // Import controllers
 import UserController from './controllers/UserController'
 import ScoutController from './controllers/ScoutController'
-import StoreController from './controllers/StoreController'
 import LootController from './controllers/LootController'
 
 export default {
@@ -98,6 +75,7 @@ export default {
         Equipment,
         Inventory,
         Construction,
+        Store,
     },
     data() {
         return {
@@ -125,7 +103,6 @@ export default {
             geoService: new GeoService(),
             userController: null,
             scoutController: null,
-            storeController: null,
             lootController: null,
         }
     },
@@ -136,16 +113,15 @@ export default {
             const scoutsRef = firebase.database().ref('scouts')
             const lootRef = firebase.database().ref('loot')
 
-            // These controllers should be created when the map is loaded.
             this.userController = new UserController(uid)
             this.scoutController = new ScoutController(uid)
             this.lootController = new LootController(uid)
-            this.storeController = new StoreController()
 
             this.scoutController.userNames = this.userController.userNames
 
             MAP.addListener('click', (e) => {
                 this.onMapClick(e);
+                this.discover()
             })
 
             window.addEventListener('cursor_changed', (e) => {
@@ -164,10 +140,10 @@ export default {
                 this.onUserClick(data.detail)
             })
 
-
             window.addEventListener('building.click', (data) => {
                 this.onBuildingClick(data.detail)
             })
+
         }).catch((err) => {
             console.log(err)
         })
@@ -186,8 +162,8 @@ export default {
             const positions = {
                 users: this.userController.users,
                 scouts: this.scoutController.scouts,
-                goblins: this.storeController.goblins,
                 loot: this.lootController.loot,
+                goblins: this.$refs.store.storeController.goblins,
                 buildings: this.$refs.construction.buildingController.buildings,
             }
 
@@ -195,8 +171,8 @@ export default {
 
             this.userController.users = discovered.users
             this.scoutController.scouts = discovered.scouts
-            this.storeController.goblins = discovered.goblins
             this.lootController.loot = discovered.loot
+            this.$refs.store.storeController.goblins = discovered.goblins
             this.$refs.construction.buildingController.buildings = discovered.buildings
         },
         onBuildingClick(data) {
@@ -222,7 +198,7 @@ export default {
                     else {
                         building.setLabel(10, true)
 
-                        setMessage(null, `Building construction + 10`)
+                        setMessage(this.uid, `Building construction + 10`)
                         buildingController.update(data.id, {
                             hitPoints: building.hitPoints + 10
                         })
@@ -235,14 +211,17 @@ export default {
 
         },
         onUserClick(uid) {
+            const itemController = this.$refs.inventory.itemController
+            const storeController = this.$refs.store.storeController
+
             switch (this.cursorMode) {
                 // case 'gold':
-                //     this.$refs.inventory.itemController.substract(this.selectedItem, 1)
-                //     this.$refs.inventory.itemController.give(uid, this.selectedItem, 1)
+                //     itemController.substract(this.selectedItem, 1)
+                //     itemController.give(uid, this.selectedItem, 1)
                 //     break;
                 case 'potion':
                     if (this.selectedItem) {
-                        this.$refs.inventory.itemController.substract(this.selectedItem, 1)
+                        itemController.substract(this.selectedItem, 1)
 
                         if (typeof this.userController.users[uid] != 'undefined') {
                             const heal = 100
@@ -256,16 +235,16 @@ export default {
                             this.userController.updateUser(uid, data)
                             this.userController.users[uid].setMessage(null, `${this.userController.userNames[data.healer]} heals ${this.userController.userNames[uid]} for ${healAmount} hit points!`)
                         }
-                        if (typeof this.storeController.goblins[uid] != 'undefined') {
+                        if (typeof storeController.goblins[uid] != 'undefined') {
                             const hitPoints = 100
-                            const goblin = this.storeController.goblins[uid]
+                            const goblin = storeController.goblins[uid]
 
                             goblin.indicator.setMap(MAP)
 
                             goblin.setHitPoints(hitPoints)
                             goblin.setMessage(null, `${this.userController.userNames[this.uid]} heals an injured Goblin.`)
 
-                            this.storeController.goblins[uid] = goblin
+                            storeController.goblins[uid] = goblin
                         }
 
                         this.selectedItem = null
@@ -273,9 +252,8 @@ export default {
                     }
                     break
                 case 'sword':
-
-                    if (typeof this.storeController.goblins[uid] != 'undefined') {
-                        const goblin = this.storeController.goblins[uid]
+                    if (typeof storeController.goblins[uid] != 'undefined') {
+                        const goblin = storeController.goblins[uid]
                         const damage = Math.floor(Math.random() * 10)
                         const hitPoints = (goblin.hitPoints - damage)
 
@@ -289,14 +267,14 @@ export default {
                             goblin.setLabel( damage )
                             goblin.setHitPoints( hitPoints )
 
-                            this.storeController.goblins[uid] = goblin
+                            storeController.goblins[uid] = goblin
 
                             setMessage(null, `${this.userController.userNames[this.uid]} hits a Goblin for ${damage} damage.`)
                         }
                         else if (goblin.hitPoints <= 0) {
                             goblin.setMap(null)
 
-                            delete this.storeController.goblins[uid]
+                            delete storeController.goblins[uid]
 
                             setMessage(null, `${this.userController.userNames[this.uid]} killed a goblin...`)
                             const user = this.userController.myUser
@@ -338,12 +316,14 @@ export default {
                     if (this.uid != uid && (typeof this.userController.users[uid] != 'undefined')) {
                         setMessage(this.uid, `Hi ${this.userController.userNames[uid]}!`)
                     }
-                    if (typeof this.storeController.goblins[uid] != 'undefined') {
+                    if (typeof storeController.goblins[uid] != 'undefined') {
                         setMessage(this.uid, `Hi Goblin!`)
                     }
             }
         },
         onMapClick(e) {
+            const storeController = this.$refs.store.storeController
+            const itemController = this.$refs.inventory.itemController
             const visibility = {
                 user: this.userController.myUser,
                 scout: this.scoutController.myScout,
@@ -369,7 +349,7 @@ export default {
 
             if (e.placeId) {
                 if (!isHidden) {
-                    this.storeController.getPlaceDetails(e)
+                    storeController.getPlaceDetails(e)
                     this.$refs.equipment.active = false
                     this.cursorMode = null
                 }
@@ -382,7 +362,7 @@ export default {
                     break
                 case "ward":
                     if (!isHidden && this.selectedItem) {
-                        this.$refs.inventory.itemController.substract(this.selectedItem, 1)
+                        itemController.substract(this.selectedItem, 1)
                         this.lootController.drop(item, 1)
                         this.selectedItem = null
                         this.cursorMode = null
@@ -407,9 +387,16 @@ export default {
                         this.selectedItem = null
                     }
                     break
+                case "discover":
+                    window.MAP.setZoom(10)
+                    itemController.substract(this.selectedItem, 1)
+
+                    setTimeout(() => { window.MAP.setZoom(18) }, 5000)
+
+                    break
                 case "drop":
                     if (!isHidden && this.selectedItem) {
-                        this.$refs.inventory.itemController.substractAll(this.selectedItem)
+                        itemController.substractAll(this.selectedItem)
                         this.lootController.dropAll(item)
                         this.selectedItem = null
                         this.cursorMode = null
@@ -418,26 +405,6 @@ export default {
                     break
 
             }
-        },
-        onInventoryClick() {
-            this.$refs.inventory.itemController.inventoryOpen = !this.$refs.inventory.itemController.inventoryOpen
-
-            if (!this.$refs.inventory.itemController.inventoryOpen) {
-                this.cursorMode = null
-            }
-        },
-        onGetItemFromStore(id, item) {
-            this.$refs.inventory.itemController.inventoryOpen = true
-            this.$refs.inventory.itemController.add(item)
-            this.storeController.storesRef.child(id).child('items').child(item.slug).remove()
-            setMessage(this.uid, `Picked up ${item.amount} ${item.name} from store`)
-        },
-        onCloseStore() {
-            this.storeController.store = null
-        },
-        onItemClick(item) {
-            this.selectedItem = item
-            this.cursorMode = item.slug
         },
         onStopClick() {
             this.scoutController.myScout.setMode("STANDING")
@@ -503,15 +470,6 @@ export default {
                 this.scoutController.createScout(this.uid, data)
             }
         },
-        setMessage(uid, message) {
-            window.dispatchEvent(new CustomEvent('message_add', {
-                detail: {
-                    uid: uid,
-                    message: message,
-                    timestamp: firebase.database.ServerValue.TIMESTAMP
-                }
-            }))
-        },
         createMarkerId(latLng) {
             const id = (latLng.lat + "_" + latLng.lng)
             return id.replace(/\./g, '')
@@ -527,11 +485,4 @@ export default {
 
 <style scoped lang="scss">
 @import './app.scss';
-
-.btn-score {
-    background: white;
-    color: black;
-    font-size: 16px;
-    font-weight: bold;
-}
 </style>

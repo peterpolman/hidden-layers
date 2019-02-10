@@ -4,30 +4,31 @@ import 'firebase/database';
 import Character from './Character.js'
 
 export default class User extends Character {
-    constructor(uid, position, userClass, username, email, hitPoints, exp) {
-        super(position, hitPoints)
+    constructor(data) {
+        super(data.position, data.hitPoints)
         const iconSize = {
-            w: (userClass == 'wizard') ? 60 : 50,
-            h: (userClass == 'wizard') ? 75 : 50
+            w: (data.userClass == 'wizard') ? 60 : 50,
+            h: (data.userClass == 'wizard') ? 75 : 50
         }
         const avatars = {
             knight: require('../assets/img/knight-1.png'),
             archer: require('../assets/img/archer-1.png'),
             wizard: require('../assets/img/wizard-1.png')
         }
-        this.uid = uid
-        this.exp = parseInt(exp)
-        this.username = username
-        this.email = email
+        this.uid = data.uid
+        this.exp = parseInt(data.exp)
+        this.username = data.username
+        this.userClass = data.userClass
+        this.email = data.email
         this.marker = new google.maps.Marker({
-            position: new google.maps.LatLng(position.lat, position.lng),
+            position: new google.maps.LatLng(data.position.lat, data.position.lng),
             icon: {
                 labelOrigin: new google.maps.Point(iconSize.w / 2, -10),
-                url: avatars[userClass],
+                url: avatars[data.userClass],
                 size: new google.maps.Size(iconSize.w, iconSize.h),
                 scaledSize: new google.maps.Size(iconSize.w, iconSize.h),
                 origin: new google.maps.Point(0, 0),
-                anchor: new google.maps.Point(iconSize.w / 2, ((userClass == 'wizard') ? iconSize.h / 2 + 12: iconSize.h / 2))
+                anchor: new google.maps.Point(iconSize.w / 2, ((data.userClass == 'wizard') ? iconSize.h / 2 + 12: iconSize.h / 2))
             }
         })
     }

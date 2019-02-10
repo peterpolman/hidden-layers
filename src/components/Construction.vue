@@ -8,7 +8,7 @@
         Tools
     </button>
 
-    <ul class="dialog dialog--construction" v-if="buildingController && buildingController.open">
+    <ul class="dialog dialog--construction" v-if="buildingController && open">
         <li :key="item.slug" v-for="item in buildingController.construction">
             <button v-bind:style="{ backgroundImage: `url(${assets[item.slug]})` }" v-bind:class="`btn btn-${item.slug}`" v-on:click="onItemClick(item)">
                 {{ item.name }}
@@ -29,6 +29,7 @@ export default {
     name: 'construction',
     data() {
         return {
+            open: false,
             buildingController: null,
             selectedBuilding: null,
             assets: {
@@ -48,7 +49,8 @@ export default {
             this.$parent.$refs.equipment.active = true
         },
         onToolsClick() {
-            this.buildingController.open = !this.buildingController.open
+            this.$parent.$refs.inventory.open = false
+            this.open = !this.open
         },
     }
 }
@@ -66,7 +68,7 @@ export default {
 
 .dialog--construction {
     width: auto;
-    bottom: 150px;
+    bottom: 145px;
     height: 40px;
     right: 60px;
     flex-direction: column;
@@ -140,7 +142,7 @@ export default {
 }
 
 .btn-tools {
-    bottom: 150px;
+    bottom: 145px;
     right: 0;
     background-size: 90% 90%;
 }

@@ -5,19 +5,18 @@ import 'firebase/database';
 import config from '../config.js'
 
 export default class Scout extends Character {
-	constructor(uid, mode, position, hitPoints) {
-		super(position, hitPoints)
+	constructor(data) {
+		super(data.hitPoints, data.position)
 		const iconSize = 40
-
-		this.uid = uid
-		this.scoutRef = firebase.database().ref('scouts').child(uid)
+		console.log(data.position)
+		this.uid = data.uid
+		this.scoutRef = firebase.database().ref('scouts').child(data.uid)
         this.path = null
         this.pathTimer = null
         this.mode = 'STANDING'
-        this.isWalking = (mode == "WALKING")
+        this.isWalking = (data.mode == "WALKING")
         this.marker = new google.maps.Marker({
-            uid: uid,
-            position: new google.maps.LatLng(position.lat, position.lng),
+            uid: data.uid,
             zIndex: 1,
             label: null,
             icon: {

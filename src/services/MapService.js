@@ -100,12 +100,13 @@ export default class MapController {
                     center: new google.maps.LatLng(52.366, 4.844),
                     zoom: 18,
                     minZoom: 10,
-                    zoomControl: true,
+                    zoomControl: false,
                     disableDoubleClickZoom: true,
-                    mapTypeControl: false,
                     scrollwheel: false,
+                    mapTypeControl: false,
                     streetViewControl: false,
                     fullscreenControl: false,
+                    scaleControl: false,
                     styles: mapStyle
                 }
                 const map = new google.maps.Map(element, options)

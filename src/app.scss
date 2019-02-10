@@ -104,7 +104,14 @@ body {
 
 .btn-stop {
     bottom: 0;
-    right: 50px;
+    right: 0;
+}
+
+.btn-score {
+    background: white;
+    color: black;
+    font-size: 16px;
+    font-weight: bold;
 }
 
 .btn-stop:before {
@@ -114,16 +121,6 @@ body {
     width: 14px;
     height: 14px;
     position: relative;
-}
-
-.dialog {
-    border-radius: 2px;
-    position: fixed;
-    margin: auto;
-    display: block;
-    background: rgba(0,0,0,0.4);
-    box-shadow: rgba(0, 0, 0, 0.3) 0 1px 4px -1px;
-    padding: 5px;
 }
 
 .dialog ul {
@@ -144,61 +141,6 @@ body {
     height: 40px;
     background-color: rgba(0,0,0,0.5);
     display: block;
-}
-
-.dialog--store {
-    bottom: 165px;
-    right: 50%;
-    margin-right: -100px;
-    width: 200px;
-    min-height: 50px;
-}
-
-.dialog--store header {
-    position: absolute;
-    background: black;
-    top: -61px;
-    box-sizing: border-box;
-    left: 0;
-    color: white;
-    padding: 10px;
-    padding-right: 20px;
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
-    font-size: 10px;
-    width: 100%;
-    margin: 0;
-}
-
-.dialog--store header button {
-    background: transparent;
-    position: absolute;
-    right: 10px;
-    top: 5px;
-    height: 20px;
-    width: 20px;
-    font-size: 0;
-    border: 0;
-    padding: 0;
-}
-
-.dialog--store header button:before {
-    content: "";
-    display: block;
-    width: 100%;
-    height: 3px;
-    background: #EFEFEF;
-}
-
-.dialog--store h2 {
-    text-transform: uppercase;
-    font-size: 12px;
-    width: 160px;
-    margin: 0 0 5px 0;
-    display: block;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    overflow: hidden;
 }
 
 .dialog .btn {

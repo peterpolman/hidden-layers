@@ -13,7 +13,6 @@ export default class Character {
         this.indicator = new google.maps.Marker({
             zIndex: -99,
         });
-
         this.setPosition(position)
         this.setHitPoints(hitPoints)
     }
