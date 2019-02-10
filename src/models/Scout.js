@@ -6,28 +6,23 @@ import config from '../config.js'
 
 export default class Scout extends Character {
 	constructor(data) {
-		super(data.hitPoints, data.position)
+		super(data.position, data.hitPoints)
 		const iconSize = 40
-		console.log(data.position)
+
 		this.uid = data.uid
 		this.scoutRef = firebase.database().ref('scouts').child(data.uid)
         this.path = null
         this.pathTimer = null
         this.mode = 'STANDING'
         this.isWalking = (data.mode == "WALKING")
-        this.marker = new google.maps.Marker({
-            uid: data.uid,
-            zIndex: 1,
-            label: null,
-            icon: {
-				url: require('../assets/img/wolf-0.png'),
-				labelOrigin: new google.maps.Point(iconSize / 2, (iconSize / 2) - 5),
-                size: new google.maps.Size(iconSize, iconSize),
-                scaledSize: new google.maps.Size(iconSize, iconSize),
-                origin: new google.maps.Point(0, 0),
-                anchor: new google.maps.Point(iconSize / 2, (iconSize / 2) - 5)
-            }
-        });
+        this.marker.setIcon({
+			url: require('../assets/img/wolf-0.png'),
+			labelOrigin: new google.maps.Point(iconSize / 2, (iconSize / 2) - 5),
+			size: new google.maps.Size(iconSize, iconSize),
+			scaledSize: new google.maps.Size(iconSize, iconSize),
+			origin: new google.maps.Point(0, 0),
+			anchor: new google.maps.Point(iconSize / 2, (iconSize / 2) - 5)
+		})
 	}
 
 	nextStep(data) {

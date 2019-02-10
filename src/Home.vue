@@ -121,7 +121,6 @@ export default {
 
             MAP.addListener('click', (e) => {
                 this.onMapClick(e);
-                this.discover()
             })
 
             window.addEventListener('cursor_changed', (e) => {
@@ -152,7 +151,7 @@ export default {
         onExpClick() {
             alert(`You killed ${this.userController.myUser.exp} Goblins so far. ${(this.userController.myUser.exp > 0) ? 'Keep up the good work!' : ''} `)
         },
-        discover() {
+        discover(radius) {
             const visibility = {
                 user: this.userController.myUser,
                 scout: this.scoutController.myScout,
@@ -388,10 +387,22 @@ export default {
                     }
                     break
                 case "discover":
-                    window.MAP.setZoom(10)
+                    window.MAP.set('minZoom', 16)
+                    window.MAP.setZoom(16)
                     itemController.substract(this.selectedItem, 1)
 
-                    setTimeout(() => { window.MAP.setZoom(18) }, 5000)
+                    for (let i in this.userController.users) {
+                        this.userController.users[i].setVisible(true)
+                    }
+                    for (let i in storeController.goblins) {
+                        storeController.goblins[i].setVisible(false)
+                    }
+
+                    setTimeout(() => {
+                        window.MAP.setZoom(18)
+                        window.MAP.set('minZoom', 18)
+                        this.discover(500)
+                    }, 10000)
 
                     break
                 case "drop":

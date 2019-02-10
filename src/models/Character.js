@@ -8,7 +8,7 @@ export default class Character {
         this.hitPoints = 0
         this.position = null
         this.marker = new google.maps.Marker({
-            position: position
+            position: new google.maps.LatLng(position)
         })
         this.indicator = new google.maps.Marker({
             zIndex: -99,

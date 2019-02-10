@@ -99,8 +99,8 @@ export default class MapController {
                 const options = {
                     center: new google.maps.LatLng(52.366, 4.844),
                     zoom: 18,
-                    minZoom: 10,
-                    zoomControl: false,
+                    minZoom: 18,
+                    zoomControl: true,
                     disableDoubleClickZoom: true,
                     scrollwheel: false,
                     mapTypeControl: false,
