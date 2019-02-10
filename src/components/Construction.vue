@@ -42,7 +42,7 @@ export default {
     },
     methods: {
         onItemClick(item) {
-            this.$parent.cursorMode = item.name
+            this.$parent.cursorMode = item.slug
             this.$parent.selectedItem = item
             this.$parent.$refs.equipment.equipment.hand = item
             this.$parent.$refs.equipment.active = true
@@ -66,7 +66,7 @@ export default {
 
 .dialog--construction {
     width: auto;
-    bottom: 160px;
+    bottom: 150px;
     height: 40px;
     right: 60px;
     flex-direction: column;
@@ -140,7 +140,7 @@ export default {
 }
 
 .btn-tools {
-    bottom: 160px;
+    bottom: 150px;
     right: 0;
     background-size: 90% 90%;
 }

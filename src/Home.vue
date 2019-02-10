@@ -389,7 +389,7 @@ export default {
                         this.$refs.equipment.equipment.hand = null
                     }
                     break
-                case "build":
+                case "house":
                     if (!isHidden && this.selectedItem) {
                         const id = this.createMarkerId(position)
                         const data = {
