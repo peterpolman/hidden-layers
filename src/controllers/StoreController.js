@@ -73,6 +73,12 @@ export default class StoreController {
                 name: 'Potion',
                 size: 25,
                 amount: (Math.floor(Math.random() * 100) > 90) ? 1 : 0,
+            },
+            potion: {
+                slug: 'tools',
+                name: 'Tools',
+                size: 30,
+                amount: (Math.floor(Math.random() * 100) > 90) ? 1 : 0,
             }
         }
 

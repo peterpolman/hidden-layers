@@ -1,7 +1,7 @@
 <template>
-  <div class="container">
+<div class="container">
     <router-view></router-view>
-  </div>
+</div>
 </template>
 
 <script>
@@ -9,20 +9,20 @@ import firebase from 'firebase/app';
 import 'firebase/auth';
 
 export default {
-  data () {
-    return {
-      currentUser: firebase.auth().currentUser
+    data() {
+        return {
+            currentUser: firebase.auth().currentUser
+        }
     }
-  }
 }
 </script>
 
 <style lang="scss">
-html,
-body {
+body,
+html {
     width: 100%;
     height: 100%;
-    background: #EFEFEF;
+    background: #EAE3CF;
     font-family: 'Roboto', Helvetica, Arial, sans-serif;
     margin: 0;
     -webkit-font-smoothing: antialiased;
@@ -31,100 +31,106 @@ body {
 }
 
 .container {
-  width: 100%;
-  height: 100%;
+    width: 100%;
+    height: 100%;
 }
 
 .section {
-  width: 100%;
-  height: 100%;
+    width: 100%;
+    height: 100%;
 }
 
 h1 {
-  font-size: 1.5rem;
-  font-weight: bold;
-  text-align: left;
+    color: #3A3477;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: left;
+    margin: 2rem 0;
 }
 
 h2 {
-  font-weight: normal;
-  font-weight: bold;
-  font-size: 1.2rem;
+    color: #3A3477;
+    font-weight: normal;
+    font-weight: bold;
+    font-size: 1.2rem;
 }
 
 ul {
-  list-style-type: none;
-  padding: 0;
+    list-style-type: none;
+    padding: 0;
 }
 
 li {
-  display: inline-block;
-  margin: 0 10px;
+    display: inline-block;
+    margin: 0 10px;
 }
 
 a {
-  color: #42b983;
-  text-decoration: none;
+    color: #3A3477;
+    font-weight: bold;
 
-  &:hover {
-    text-decoration: underline;
-  }
+    &:hover {
+        text-decoration: none;
+    }
 }
 
 .section-login h1,
 .section-register h1 {
-  text-align: center;
+    text-align: center;
 }
 
 form {
-  width: 220px;
-  margin: 0 auto;
-  box-sizing: content-box;
+    width: 220px;
+    margin: 0 auto;
+    box-sizing: content-box;
 }
 
 input[type="text"],
 input[type="password"] {
-  display: block;
-  box-sizing: border-box;
-  padding: 1rem;
-  border: 0;
-  width: 100%;
-  margin: 0 auto 1rem;
-  font-size: 14px;
+    display: block;
+    box-sizing: border-box;
+    padding: 1rem;
+    border: 0;
+    width: 100%;
+    margin: 0 auto 1rem;
+    font-size: 14px;
+    border-radius: 5px;
 
-  & ~ p {
-    text-align: center;
-    margin: 1rem auto
-  }
+    & ~ p {
+        text-align: center;
+        margin: 1rem auto;
+    }
 }
 
 #home-map iframe + div {
-  display: none;
+    display: none;
 }
 
 .gm-style-cc {
-  display:none;
+    display: none;
 }
 
 .btn {
-  box-sizing: border-box;
-  background: #42b983;
-  width: 100%;
-  display: block;
-  padding: 1rem;
-  color: white;
-  text-transform: uppercase;
-  font-weight: bold;
-  border: 0;
-  margin: auto;
+    box-sizing: border-box;
+    background: #3A3477;
+    width: 100%;
+    display: block;
+    padding: 1rem;
+    color: white;
+    text-transform: uppercase;
+    font-weight: bold;
+    border: 0;
+    margin: auto;
+    border-radius: 5px;
+    cursor: pointer;
 }
 
 .google-map {
-  width: 100vw;
-  height: 25vh;
-  margin: 0 auto;
-  background: gray;
-  background-size: cover;
+    width: 100vw;
+    height: 25vh;
+    margin: 0 auto;
+    background: gray;
+    background-size: cover;
 }
 
 .form-item {
@@ -133,72 +139,74 @@ input[type="password"] {
 }
 
 .form-radio + label {
-  min-height: 20px;
-  padding-left: calc(20px + .5rem);
-  margin-bottom: 0;
-  font-weight: normal;
-  cursor: pointer;
-  position: relative;
-  margin-right: 1rem;
-
-  &:before {
-    position: absolute;
-    content: '';
+    padding-left: calc(20px + .5rem);
+    margin-bottom: 0.5rem;
+    font-weight: normal;
+    cursor: pointer;
+    position: relative;
+    margin-right: 1rem;
     display: block;
-    width: 18px;
-    height: 18px;
-    left: 0;
-    top: 0;
-    border-radius: 3px;
-    border: 2px solid #2c3e50;
-    background-color: transparent;
-    transition: .2s background-color ease;
-  }
+    font-size: 14px;
+    line-height: 22px;
+    color: #3A3477;
 
-  &:after {
-    box-sizing: content-box;
-    position: absolute;
-    content: '';
-    display: block;
-    opacity: 0;
-    transition: .2s opacity ease;
-  }
+    &:before {
+        position: absolute;
+        content: '';
+        display: block;
+        width: 18px;
+        height: 18px;
+        left: 0;
+        top: 0;
+        border-radius: 3px;
+        border: 2px solid #3A3477;
+        background-color: transparent;
+        transition: 0.2s background-color ease;
+    }
+
+    &:after {
+        box-sizing: content-box;
+        position: absolute;
+        content: '';
+        display: block;
+        opacity: 0;
+        transition: 0.2s opacity ease;
+    }
 }
 
 .form-radio {
-  position: absolute;
-  opacity: 0;
+    position: absolute;
+    opacity: 0;
 
-  &:focus + label:before {
-    border: 2px solid #2c3e50;
-  }
+    &:focus + label:before {
+        border: 2px solid #3A3477;
+    }
 
-  &:checked + label:before,
-  &:checked:focus + label:before{
-    border-color: #2c3e50;
-    background-color: white;
-  }
+    &:checked + label:before,
+    &:checked:focus + label:before {
+        border-color: #3A3477;
+        background-color: #EAE3CF;
+    }
 
-  &:checked + label:after {
-    opacity: 1;
-    transform: scale(1);
-  }
+    &:checked + label:after {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 .form-radio + label {
-  &:before {
-    border-radius: 50%;
-  }
+    &:before {
+        border-radius: 50%;
+    }
 
-  &:after {
-    background-color: #2c3e50;
-    border-radius: 50%;
-    width: 14px;
-    height: 14px;
-    top: 4px;
-    left: 4px;
-    border: 0;
-  }
+    &:after {
+        background-color: #3A3477;
+        border-radius: 50%;
+        width: 14px;
+        height: 14px;
+        top: 4px;
+        left: 4px;
+        border: 0;
+    }
 }
-
 </style>

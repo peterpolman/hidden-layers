@@ -42,7 +42,7 @@ export default {
     },
     methods: {
         onItemClick(item) {
-            this.$parent.cursorMode = 'build'
+            this.$parent.cursorMode = item.name
             this.$parent.selectedItem = item
             this.$parent.$refs.equipment.equipment.hand = item
             this.$parent.$refs.equipment.active = true

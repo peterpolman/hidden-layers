@@ -6,6 +6,7 @@ export default class Item {
         this.amount = amount
         this.size = size
         this.icons = {
+            tools: require('../assets/img/tools.png'),
             gold: require('../assets/img/coinstack.png'),
             ward: require('../assets/img/ward-1.png'),
             discover: require('../assets/img/discover.png'),

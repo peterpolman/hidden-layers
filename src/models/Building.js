@@ -1,12 +1,13 @@
 export default class Building {
-    constructor(uid, id, slug, name, position, size, stage, hitPoints, hitPointsMax) {
-        this.uid = uid
-        this.name = name
-        this.slug = slug
-        this.size = size
-        this.stage = stage
-        this.hitPoints = hitPoints
-        this.hitPointsMax = hitPointsMax
+    constructor(data) {
+        this.id = data.id
+        this.uid = data.uid
+        this.name = data.name
+        this.slug = data.slug
+        this.size = data.size
+        this.stage = data.stage
+        this.hitPoints = data.hitPoints
+        this.hitPointsMax = data.hitPointsMax
         this.icons = {
             house1: require('../assets/img/house-1.png'),
             house2: require('../assets/img/house-2.png'),
@@ -17,13 +18,13 @@ export default class Building {
             zIndex: 200,
         })
         this.marker = new google.maps.Marker({
-            id: id,
-            position: position
+            id: data.id,
+            position: data.position
         })
 
         this.setHitPoints(this.hitPoints)
         this.setVisible(true)
-        this.setPosition(position)
+        this.setPosition(data.position)
     }
 
     set(key, value) {

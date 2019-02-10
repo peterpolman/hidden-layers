@@ -17,6 +17,8 @@
             <label for="class-knight">Knight</label>
             <input name="class" class="form-radio" id="class-archer" type="radio" value="archer" v-model="userClass">
             <label for="class-archer">Archer</label>
+            <input name="class" class="form-radio" id="class-wizard" type="radio" value="wizard" v-model="userClass">
+            <label for="class-wizard">Wizard</label>
         </div>
         <div class="form-item" v-if="alert">
             {{ alert }}
@@ -70,6 +72,7 @@ export default {
                     const data = {
                         uid: r.user.uid,
                         email: r.user.email,
+                        hitPoints: 100,
                         position: {
                             lat: position.coords.latitude,
                             lng: position.coords.longitude

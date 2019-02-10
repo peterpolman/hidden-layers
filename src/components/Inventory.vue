@@ -33,6 +33,7 @@ export default {
             itemController: null,
             selectedItem: null,
             assets: {
+                tools: require('../assets/img/tools.png'),
                 ward: require('../assets/img/ward-1.png'),
                 knight: require('../assets/img/knight-1.png'),
                 archer: require('../assets/img/archer-1.png'),

@@ -102,6 +102,7 @@ export default {
     data() {
         return {
             assets: {
+                tools: require('./assets/img/tools.png'),
                 ward: require('./assets/img/ward-1.png'),
                 knight: require('./assets/img/knight-1.png'),
                 archer: require('./assets/img/archer-1.png'),
@@ -200,6 +201,7 @@ export default {
         },
         onBuildingClick(data) {
             const buildingController = this.$refs.construction.buildingController
+            const building = buildingController.buildings[data.id]
 
             switch (this.cursorMode) {
                 case 'sword':
@@ -207,27 +209,27 @@ export default {
 
                     setMessage(null, `Building is hit for ${damage} damage.`)
 
-                    buildingController.buildings[data.id].setLabel(damage, false)
+                    building.setLabel(damage, false)
 
                     buildingController.update(data.id, {
-                        hitPoints: buildingController.buildings[data.id].hitPoints - damage
+                        hitPoints: building.hitPoints - damage
                     })
                     break
-                case 'build':
-                    if (buildingController.buildings[data.id].hitPoints >= buildingController.buildings[data.id].hitPointsMax) {
+                case 'tools':
+                    if (building.hitPoints >= building.hitPointsMax) {
                         setMessage(null, `This building is fully constructed!`)
                     }
                     else {
-                        buildingController.buildings[data.id].setLabel(10, true)
+                        building.setLabel(10, true)
 
                         setMessage(null, `Building construction + 10`)
                         buildingController.update(data.id, {
-                            hitPoints: buildingController.buildings[data.id].hitPoints + 10
+                            hitPoints: building.hitPoints + 10
                         })
                     }
                     break
                 default:
-                    setMessage(this.uid, `Knock, knock. Hi ${this.userController.userNames[data.uid]}!`)
+                    setMessage(this.uid, `Knock, knock. Hi ${this.userController.userNames[building.uid]}!`)
                     break
             }
 

@@ -6,30 +6,18 @@ import User from '../models/User'
 export default class ScoutController {
 	constructor(uid) {
         const usersRef = firebase.database().ref('users')
-        const userConnectionsRef = usersRef.child(uid).child('connections')
-        const lastOnlineRef = usersRef.child(uid).child('lastOnline')
-        const connectedRef = firebase.database().ref('.info/connected')
 
 		this.uid = uid
         this.myUser = null
 		this.users = {}
 		this.userNames = []
 
-        connectedRef.on('value', (snap) => {
-            if (snap.val() === true) {
-                const connection = userConnectionsRef.push()
-
-                connection.onDisconnect().remove()
-                connection.set(true)
-                lastOnlineRef.onDisconnect().set(firebase.database.ServerValue.TIMESTAMP)
-            }
-        })
-
 		usersRef.on('child_added', (snap) => {
 			if (snap.key != this.uid) {
 				this.onUserAdded(snap.key, snap.val())
 			} else {
 				this.onMyUserAdded(snap.key, snap.val())
+
 				setMessage(this.uid, `Entered the world.`)
 			}
 			this.userNames[snap.key] = snap.val().username
@@ -63,13 +51,12 @@ export default class ScoutController {
 	}
 
 	onMyUserAdded(uid, data) {
-		this.userInfoWindow = new google.maps.InfoWindow({isHidden: false})
-
 		this.myUser = new User(uid, data.position, data.userClass, data.username, data.email, data.hitPoints, data.exp)
 		this.myUser.marker.addListener('click', (e) => {
 			window.dispatchEvent(new CustomEvent('user.click', {
 				detail: uid
 			}))
+
 			setMessage(uid, `Hi!`)
 
 			MAP.panTo(e.latLng)
