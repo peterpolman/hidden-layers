@@ -54,8 +54,8 @@
             </div>
 
             <div class="dialog dialog--inventory">
-                <ul v-if="inventoryController && inventoryController.loaded">
-                    <li :key="item.slug" v-if="(item.amount > 0)" v-for="item in inventoryController.inventory">
+                <ul v-if="inventory">
+                    <li :key="item.slug" v-if="(item.amount > 0)" v-for="item in inventory">
                         <button v-bind:style="{ backgroundImage: `url(${assets[item.slug]})` }" v-bind:class="`btn btn-${item.slug}`" v-on:click="onItemClick(item)">
                             {{ item.name }}
                             <small v-if="(item.amount > 1)">
@@ -75,7 +75,7 @@ import firebase from 'firebase/app';
 import 'firebase/auth';
 
 import StoreController from './controllers/StoreController'
-import InventoryController from './controllers/InventoryController'
+// import InventoryController from './controllers/InventoryController'
 import EquipmentController from './controllers/EquipmentController'
 
 export default {
@@ -85,9 +85,10 @@ export default {
             open: false,
             uid: firebase.auth().currentUser.uid,
             storeController: new StoreController(),
-            inventoryController: new InventoryController(),
             equipmentController: new EquipmentController(),
             selectedItem: null,
+            inventory: {},
+
             myUser: null,
             assets: {
                 tools: require('./assets/img/tools.png'),
@@ -106,7 +107,6 @@ export default {
         }
     },
     mounted() {
-        // this.items = this.inventoryController.inventory
     },
     methods: {
         back() {
