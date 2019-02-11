@@ -10,7 +10,7 @@
     </header>
 
     <ul>
-        <li :key="item.slug" v-if="(item.amount > 0)" v-for="item in storeController.stores[storeController.store].items">
+        <li :key="item.slug"  v-for="item in storeController.stores[storeController.store].items">
             <button v-bind:style="{ backgroundImage: `url(${assets[item.slug]})` }" v-bind:class="`btn btn-${item.slug}`" v-on:click="onGetItemFromStore(storeController.store, item)">
                 {{ item.name }}
                 <small>
@@ -67,15 +67,8 @@ export default {
 
 <style scoped lang="scss">
 
-.dialog {
-    border-radius: 2px;
-    position: fixed;
-    margin: auto;
-    display: block;
-    background: rgba(0,0,0,0.4);
-    box-shadow: rgba(0, 0, 0, 0.3) 0 1px 4px -1px;
-    padding: 5px;
-}
+@import url('../dialog.scss');
+@import url('../button.scss');
 
 .dialog--store {
     bottom: 165px;

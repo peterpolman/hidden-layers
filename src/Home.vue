@@ -402,7 +402,7 @@ export default {
                         window.MAP.setZoom(18)
                         window.MAP.set('minZoom', 18)
                         this.discover(500)
-                    }, 10000)
+                    }, 30000)
 
                     break
                 case "drop":
@@ -495,5 +495,45 @@ export default {
 </script>
 
 <style scoped lang="scss">
-@import './app.scss';
+@import url('./button.scss');
+
+body {
+    background: black;
+}
+
+.google-map {
+    width: 100%;
+    height: 100%;
+    margin: 0 auto;
+    background: black;
+    display: block;
+    font-family: 'Roboto', Helvetica, Arial, sans-serif;
+}
+
+.section-settings {
+    top: 0;
+    right: 0;
+    position: fixed;
+
+    .btn {
+        position: relative;
+    }
+}
+
+.section-pan {
+    top: 65px;
+    left: 0;
+    position: fixed;
+
+    .btn {
+        position: relative;
+    }
+}
+
+.label-dmg {
+    color: red;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
 </style>

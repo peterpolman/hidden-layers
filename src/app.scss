@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css?family=Roboto');
+@import url('./button.scss');
 
 body {
     background: black;
@@ -11,75 +11,6 @@ body {
     background: black;
     display: block;
     font-family: 'Roboto', Helvetica, Arial, sans-serif;
-}
-
-.btn {
-    cursor: pointer;
-    background: white;
-    border: 0;
-    margin: 10px;
-    padding: 0;
-    position: absolute;
-    user-select: none;
-    border-radius: 2px;
-    height: 40px;
-    width: 40px;
-    box-shadow: rgba(0, 0, 0, 0.3) 0 1px 4px -1px;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1;
-    font-size: 0;
-    color: #666;
-    width: 40px;
-    height: 40px;
-    z-index: 1;
-    background-size: 80% 80%;
-    background-repeat: no-repeat;
-    background-position: center center;
-}
-
-.btn:focus,
-.btn:hover {
-    outline: none;
-    box-shadow: 0 0 5px 3px #3D91CB;
-}
-
-.btn:active {
-    opacity: 0.8;
-}
-
-.btn small {
-    position: absolute;
-    z-index: 1;
-    right: 0;
-    bottom: 0;
-    background: rgba(0,0,0,0.75);
-    color: white;
-    font-size: 7px;
-    padding: 2px 3px;
-    border-top-left-radius: 2px;
-}
-
-.btn-gold {
-    background-size: 50% 50%;
-}
-
-.btn-logout {
-    font-size: 10px;
-    color: white;
-    background-color: #333;
-}
-
-.btn-bell {
-    top: 105px;
-    left: 0;
-    bottom: auto;
-    right: auto;
-    z-index: 1;
-    background-size: 60% 60%;
-    background-color: #333;
 }
 
 .section-settings {
@@ -102,94 +33,8 @@ body {
     }
 }
 
-.btn-stop {
-    bottom: 0;
-    right: 0;
-}
-
-.btn-score {
-    background: white;
-    color: black;
-    font-size: 16px;
-    font-weight: bold;
-}
-
-.btn-stop:before {
-    content: "";
-    display: inline-block;
-    background: #666;
-    width: 14px;
-    height: 14px;
-    position: relative;
-}
-
-.dialog ul {
-    margin: 0;
-    list-style: none;
-    padding: 0;
-    display: flex;
-    width: 100%;
-    flex-wrap: wrap;
-    display: flex;
-    flex-wrap: wrap;
-}
-
-.dialog li {
-    margin: 5px;
-    border-radius: 2px;
-    width: 40px;
-    height: 40px;
-    background-color: rgba(0,0,0,0.5);
-    display: block;
-}
-
-.dialog .btn {
-    flex: 0 auto;
-    position: relative;
-    margin: 0;
-}
-
 .label-dmg {
     color: red;
     font-weight: bold;
     font-size: 1rem;
-}
-
-.btn-geo {
-    font-size: 10px;
-    color: white;
-    background-color: #333;
-    overflow: visible;
-}
-
-.btn-geo.geo-off:after {
-    content: "Tap to enable GPS";
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    position: absolute;
-    right: 50px;
-    background-color: rgba(0,0,0,0.5);
-    color: white;
-    font-weight: bold;
-    font-size: 8px;
-    width: 95px;
-    border-radius: 5px;
-    height: 20px;
-    padding: 0 5px;
-}
-
-.geo-off span,
-.geo-on span {
-    content: "";
-    display: inline-flex;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: #f65858;
-    position: relative;
-}
-
-.geo-on span {
-    background: #4df04d;
 }

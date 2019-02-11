@@ -47,51 +47,7 @@ export default {
 
 <style scoped lang="scss">
 
-.btn {
-  background: white;
-  border: 0px;
-  margin: 20px;
-  padding: 0px;
-  position: absolute;
-  cursor: pointer;
-  user-select: none;
-  border-radius: 50%;
-  height: 45px;
-  width: 45px;
-  box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px;
-  overflow: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1;
-  font-size: 0;
-  color: #666;
-  z-index: 1;
-  background-repeat: no-repeat;
-  background-position: center center;
-}
-
-.btn:hover,
-.btn:focus {
-  outline: none;
-  box-shadow: 0 0 5px 3px #3D91CB;
-}
-
-.btn:active {
-  opacity: 0.8;
-}
-
-.btn small {
-  position: absolute;
-  z-index: 1;
-  right: 0;
-  bottom: 0;
-  background: rgba(0,0,0,0.75);
-  color: white;
-  font-size: 7px;
-  padding: 2px 3px;
-  border-top-left-radius: 2px;
-}
+@import url('../button.scss');
 
 .btn-hand {
   background-size: 60% 60%;
