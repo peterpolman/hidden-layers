@@ -10,7 +10,7 @@ export default class MessageController {
         this.messagesRef.on('child_added', (snap) => this.onMessageAdded(snap.key, snap.val()))
         this.messagesRef.on('child_removed', (snap) => this.onMessageRemoved(snap.key, snap.val()))
 
-        this.listener = window.addEventListener('message_add', (data) => {
+        this.listener = window.addEventListener('message.add', (data) => {
             this.add(data.detail)
         })
 

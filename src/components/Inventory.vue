@@ -18,6 +18,9 @@
                 </small>
             </button>
         </li>
+        <!-- <li>
+            <button v-on:click="openInventory()" class="btn">more</button>
+        </li> -->
     </ul>
 
 </section>
@@ -52,9 +55,12 @@ export default {
         this.itemController = new ItemController()
     },
     methods: {
+        openInventory() {
+            this.$router.replace('/inventory')
+        },
         onItemClick(item) {
             this.$parent.cursorMode = 'drop'
-            this.$parent.$refs.equipment.equipment.hand = item
+            this.$parent.$refs.equipment.hand = item
 
             if (this.$parent.selectedItem == item) {
                 this.$parent.$refs.equipment.active = true

@@ -31,3 +31,10 @@ export default {
     }
 }
 </script>
+
+<style scoped lang="scss">
+.section-character {
+    background: black;
+    height: 100%;
+}
+</style>

@@ -5,6 +5,7 @@ import 'firebase/auth';
 
 import App from './App.vue';
 import Home from './Home.vue';
+import Inventory from './Inventory.vue';
 import Login from './Login.vue';
 import Register from './Register.vue';
 
@@ -40,6 +41,11 @@ const routes = [
     }
   },
   {
+    name: 'inventory',
+    path: '/inventory',
+    component: Inventory
+  },
+  {
     name: 'login',
     path: '/login',
     component: Login
@@ -56,7 +62,7 @@ const router = new VueRouter({
 });
 
 window.setMessage = (uid, message) => {
-    window.dispatchEvent(new CustomEvent('message_add', {
+    window.dispatchEvent(new CustomEvent('message.add', {
         detail: {
             uid: uid,
             message: message,

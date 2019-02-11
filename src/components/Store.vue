@@ -10,7 +10,7 @@
     </header>
 
     <ul>
-        <li :key="item.slug"  v-for="item in storeController.stores[storeController.store].items">
+        <li :key="item.slug" v-if="item.amount > 0" v-for="item in storeController.stores[storeController.store].items">
             <button v-bind:style="{ backgroundImage: `url(${assets[item.slug]})` }" v-bind:class="`btn btn-${item.slug}`" v-on:click="onGetItemFromStore(storeController.store, item)">
                 {{ item.name }}
                 <small>
@@ -24,11 +24,14 @@
 
 <script>
 import StoreController from '../controllers/StoreController'
+import firebase from 'firebase/app';
+import 'firebase/auth';
 
 export default {
     name: 'inventory',
     data() {
         return {
+            uid: firebase.auth().currentUser.uid,
             storeController: null,
             selectedItem: null,
             assets: {
@@ -50,10 +53,10 @@ export default {
         this.storeController = new StoreController()
     },
     methods: {
-
         onGetItemFromStore(id, item) {
-            this.$parent.$refs.itemController.inventoryOpen = true
+            this.$parent.$refs.inventory.open = true
             this.$parent.$refs.inventory.itemController.add(item)
+
             this.storeController.storesRef.child(id).child('items').child(item.slug).remove()
 
             setMessage(this.uid, `Picked up ${item.amount} ${item.name} from store`)

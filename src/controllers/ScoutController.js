@@ -111,7 +111,7 @@ export default class ScoutController {
 				this.myScout.path.setMap(null)
 				this.myScout.path = null
 
-				this.myScout.setMessage(null, `${this.userNames[uid]}'s scout has arrived`)
+				setMessage(null, `${this.userNames[uid]}'s scout has arrived`)
 			}
 		}
 	}
@@ -129,7 +129,7 @@ export default class ScoutController {
 
 			this.scouts[uid].setMode("STANDING")
 
-			this.scouts[uid].setMessage(null, `${this.userNames[data.attacker]} hits ${this.userNames[uid]}'s scout for ${damage} damage.`)
+			setMessage(null, `${this.userNames[data.attacker]} hits ${this.userNames[uid]}'s scout for ${damage} damage.`)
 			this.scouts[uid].indicator.setMap(MAP)
 			this.scouts[uid].update({
 				mode: 'FIGHTING',
@@ -154,7 +154,7 @@ export default class ScoutController {
 				this.scouts[uid].setHitPoints( data.hitPoints )
 			}
 			else {
-				this.scouts[uid].setMessage(null, `${this.userNames[data.attacker]} kills ${this.userNames[uid]}'s like it's nothing..`)
+				setMessage(null, `${this.userNames[data.attacker]} kills ${this.userNames[uid]}'s like it's nothing..`)
 				this.scouts[uid].kill()
 			}
 		}

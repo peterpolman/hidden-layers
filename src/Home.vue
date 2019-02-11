@@ -232,7 +232,7 @@ export default {
                             }
 
                             this.userController.updateUser(uid, data)
-                            this.userController.users[uid].setMessage(null, `${this.userController.userNames[data.healer]} heals ${this.userController.userNames[uid]} for ${healAmount} hit points!`)
+                            setMessage(null, `${this.userController.userNames[data.healer]} heals ${this.userController.userNames[uid]} for ${healAmount} hit points!`)
                         }
                         if (typeof storeController.goblins[uid] != 'undefined') {
                             const hitPoints = 100
@@ -241,7 +241,7 @@ export default {
                             goblin.indicator.setMap(MAP)
 
                             goblin.setHitPoints(hitPoints)
-                            goblin.setMessage(null, `${this.userController.userNames[this.uid]} heals an injured Goblin.`)
+                            setMessage(null, `${this.userController.userNames[this.uid]} heals an injured Goblin.`)
 
                             storeController.goblins[uid] = goblin
                         }
