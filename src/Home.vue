@@ -16,11 +16,6 @@
             v-on:click="onSignalClick">
             <span></span>
         </button>
-        <button
-            v-on:click="onExpClick"
-            class="btn btn-score" v-if="userController && userController.myUser">
-            {{ userController.myUser.exp }}
-        </button>
     </section>
 
     <section class="section-pan">
@@ -162,9 +157,6 @@ export default {
         openCharacterInfo() {
             this.$refs.character.myUser = this.userController.myUser
             this.$refs.character.open = true
-        },
-        onExpClick() {
-            alert(`You killed ${this.userController.myUser.exp} Goblins so far. ${(this.userController.myUser.exp > 0) ? 'Keep up the good work!' : ''} `)
         },
         discover(radius) {
             const visibility = {

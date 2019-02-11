@@ -19,6 +19,7 @@ export default class User extends Character {
         this.exp = parseInt(data.exp)
         this.username = data.username
         this.userClass = data.userClass
+        this.stats = data.stats
         this.email = data.email
         this.marker = new google.maps.Marker({
             position: new google.maps.LatLng(data.position.lat, data.position.lng),

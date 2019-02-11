@@ -21,7 +21,13 @@
                         Level {{myUser.exp}}
                     </p>
                 </h1>
-                <p>{{myUser.userClass}}</p>
+                <p><span>Class:</span> {{myUser.userClass}}</p>
+                <div class="stats">
+                    <span>ATK:</span> <strong>{{myUser.stats.atk}}</strong><br>
+                    <span>DEF:</span> <strong>{{myUser.stats.def}}</strong><br>
+                    <span>INT:</span> <strong>{{myUser.stats.int}}</strong><br>
+                    <span>DEX:</span> <strong>{{myUser.stats.dex}}</strong><br>
+                </div>
             </div>
             <ul class="dialog dialog--equipment">
                 <li :key="key" v-for="slot, key in itemController.equipment">
@@ -38,8 +44,10 @@
                     <button v-bind:style="{ backgroundImage: `url(${assets[selectedItem.slug]})` }" v-bind:class="`btn btn-${selectedItem.slug}`">
                         {{ selectedItem.name }}
                     </button>
-                    <h2>{{ selectedItem.name }}</h2>
-                    <p>{{ selectedItem.description }}</p>
+                    <div class="info">
+                        <h2>{{ selectedItem.name }}</h2>
+                        <p>{{ selectedItem.description }}</p>
+                    </div>
                 </div>
             </div>
             <ul class="dialog dialog--inventory" v-if="itemController && itemController.loaded">
@@ -166,6 +174,7 @@ $blue-dark: #2c3e50;
 
     .item-info {
         display: flex;
+        flex-direction: row;
 
         .btn {
             flex: 0 60px;
@@ -174,10 +183,21 @@ $blue-dark: #2c3e50;
             margin-right: 1rem;
         }
 
-        h2 {
-            color: white;
-            font-size: 12px;
-            margin: 0;
+        .info {
+            flex: 1;
+            flex-direction: column;
+
+            h2 {
+                color: white;
+                font-size: 12px;
+                margin: 0;
+            }
+
+            p {
+                font-size: 10px;
+                color: gray;
+                display: block;
+            }
         }
     }
 }
@@ -227,9 +247,34 @@ $blue-dark: #2c3e50;
     padding: 1rem;
     margin-right: .5rem;
     flex-direction: column;
+    font-size: 12px;
 
     p {
-        margin: 0;
+        margin: 1rem 0;
+
+        span {
+            color: gray;
+            width: 50px;
+            display: inline-block;
+        }
+    }
+
+    .stats {
+        span {
+            display: inline-block;
+            width: 50px;
+            margin-bottom: .5rem;
+            color: gray;
+        }
+
+        strong {
+            margin-bottom: 1rem;
+        }
+    }
+
+    .xp {
+        font-size: 14px;
+        font-weight: bold;
     }
 }
 

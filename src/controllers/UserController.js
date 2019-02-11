@@ -26,6 +26,16 @@ export default class UserController {
 				if (s.numChildren() === ++count) {
 					this.loaded = true
 				}
+
+				// this.updateUser(snap.key, {
+				// 	exp: 0,
+				// 	stats: {
+				// 		atk: ((snap.val().userClass == 'knight') || snap.val().userClass == 'archer') ? 3 : 0 ,
+				// 		def: (snap.val().userClass == 'knight') ? 3 : 0,
+				// 		int: (snap.val().userClass == 'wizard') ? 3 : 0,
+				// 		dex: (snap.val().userClass == 'archer') ? 3 : 0,
+				// 	}
+				// })
 			})
 
 		})
