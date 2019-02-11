@@ -5,7 +5,6 @@ import 'firebase/auth';
 
 import App from './App.vue';
 import Home from './Home.vue';
-import Character from './Character.vue';
 import Login from './Login.vue';
 import Register from './Register.vue';
 
@@ -39,11 +38,6 @@ const routes = [
     meta: {
       requiresAuth: true
     }
-  },
-  {
-    name: 'character',
-    path: '/character',
-    component: Character
   },
   {
     name: 'login',

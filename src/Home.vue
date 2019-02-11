@@ -4,6 +4,8 @@
 
     <Messages ref="messages" />
 
+    <Character ref="character" />
+
     <section class="section-settings">
         <button class="btn btn-logout" v-on:click="logout">
             EXIT
@@ -22,7 +24,13 @@
     </section>
 
     <section class="section-pan">
-        <button v-if="userController && userController.myUser" v-bind:style="{ backgroundImage: 'url(' + assets.knight + ')' }" v-on:click="onPanUserClick" class="btn">
+        <button v-if="userController && userController.myUser"
+            v-bind:style="{ backgroundImage: 'url(' + assets[userController.myUser.userClass] + ')' }"
+            v-on:click="openCharacterInfo()"
+            class="btn btn-more">
+            XP
+        </button>
+        <button v-if="userController && userController.myUser" v-bind:style="{ backgroundImage: 'url(' + assets[userController.myUser.userClass] + ')' }" v-on:click="onPanUserClick" class="btn">
             User
         </button>
         <button v-if="scoutController" v-bind:style="{ backgroundImage: 'url(' + assets.scout + ')' }" v-on:click="onPanScoutClick" class="btn">
@@ -41,7 +49,6 @@
     <Construction ref="construction" />
     <Equipment ref="equipment" />
     <Inventory ref="inventory" />
-
 </section>
 </template>
 
@@ -58,6 +65,7 @@ import Equipment from './components/Equipment.vue'
 import Inventory from './components/Inventory.vue'
 import Construction from './components/Construction.vue'
 import Store from './components/Store.vue'
+import Character from './Character.vue'
 
 // Import services
 import MapService from './services/MapService'
@@ -77,6 +85,7 @@ export default {
         Inventory,
         Construction,
         Store,
+        Character,
     },
     data() {
         return {
@@ -85,6 +94,7 @@ export default {
                 ward: require('./assets/img/ward-1.png'),
                 knight: require('./assets/img/knight-1.png'),
                 archer: require('./assets/img/archer-1.png'),
+                wizard: require('./assets/img/wizard-1.png'),
                 scout: require('./assets/img/wolf-0.png'),
                 gold: require('./assets/img/coin.png'),
                 potion: require('./assets/img/potion.png'),
@@ -109,50 +119,50 @@ export default {
         }
     },
     mounted() {
-        this.mapService.init().then((map) => {
-            const uid = firebase.auth().currentUser.uid
-            const usersRef = firebase.database().ref('users')
-            const scoutsRef = firebase.database().ref('scouts')
-            const lootRef = firebase.database().ref('loot')
-            const enemiesRef = firebase.database().ref('enemies')
+        this.$nextTick(() => {
+            this.mapService.init().then((map) => {
+                const uid = firebase.auth().currentUser.uid
+                const usersRef = firebase.database().ref('users')
+                const scoutsRef = firebase.database().ref('scouts')
+                const lootRef = firebase.database().ref('loot')
+                const enemiesRef = firebase.database().ref('enemies')
 
-            this.userController = new UserController(uid)
-            this.scoutController = new ScoutController(uid)
-            this.lootController = new LootController(uid)
+                this.userController = new UserController(uid)
+                this.scoutController = new ScoutController(uid)
+                this.lootController = new LootController(uid)
 
-            this.scoutController.userNames = this.userController.userNames
+                this.scoutController.userNames = this.userController.userNames
 
-            MAP.addListener('click', (e) => {
-                this.onMapClick(e);
+                MAP.addListener('click', (e) => {
+                    this.onMapClick(e);
+                })
+
+                window.addEventListener('user.click', (data) => {
+                    this.onUserClick(data.detail)
+                })
+
+                window.addEventListener('building.click', (data) => {
+                    this.onBuildingClick(data.detail)
+                })
+
+                scoutsRef.on('child_added', (snap) => this.discover())
+                scoutsRef.on('child_changed', (snap) => this.discover())
+                scoutsRef.on('child_removed', (snap) => this.discover())
+                usersRef.on('child_changed', (snap) => this.discover())
+                lootRef.on('child_added', (snap) => this.discover())
+                lootRef.on('child_changed', (snap) => this.discover())
+                lootRef.on('child_removed', (snap) => this.discover())
+                enemiesRef.on('child_added', (snap) => this.discover())
+            }).catch((err) => {
+                console.log(err)
             })
-
-            window.addEventListener('cursor_changed', (e) => {
-                this.cursorMode = e.detail.type
-            })
-
-            scoutsRef.on('child_added', (snap) => this.discover())
-            scoutsRef.on('child_changed', (snap) => this.discover())
-            scoutsRef.on('child_removed', (snap) => this.discover())
-            usersRef.on('child_changed', (snap) => this.discover())
-            lootRef.on('child_added', (snap) => this.discover())
-            lootRef.on('child_changed', (snap) => this.discover())
-            lootRef.on('child_removed', (snap) => this.discover())
-
-            window.addEventListener('user.click', (data) => {
-                this.onUserClick(data.detail)
-            })
-
-            window.addEventListener('building.click', (data) => {
-                this.onBuildingClick(data.detail)
-            })
-
-            this.discover()
-
-        }).catch((err) => {
-            console.log(err)
         })
     },
     methods: {
+        openCharacterInfo() {
+            this.$refs.character.myUser = this.userController.myUser
+            this.$refs.character.open = true
+        },
         onExpClick() {
             alert(`You killed ${this.userController.myUser.exp} Goblins so far. ${(this.userController.myUser.exp > 0) ? 'Keep up the good work!' : ''} `)
         },
@@ -531,6 +541,7 @@ body {
 
     .btn {
         position: relative;
+        background-size: 70% auto;
     }
 }
 
@@ -538,6 +549,17 @@ body {
     color: red;
     font-weight: bold;
     font-size: 1rem;
+}
+
+.section-pan .btn-more {
+    font-size: 10px;
+    width: 60px;
+    height: 60px;
+    background-color: #333;
+    font-size: 0;
+    color: white;
+    border-radius: 50%;
+    background-size: 60% auto;
 }
 
 </style>

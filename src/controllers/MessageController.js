@@ -7,6 +7,7 @@ export default class MessageController {
         this.messagesOpen = false
 
         this.messagesRef = firebase.database().ref('messages')
+
         this.messagesRef.on('child_added', (snap) => this.onMessageAdded(snap.key, snap.val()))
         this.messagesRef.on('child_removed', (snap) => this.onMessageRemoved(snap.key, snap.val()))
 

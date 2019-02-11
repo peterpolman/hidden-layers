@@ -3,27 +3,34 @@ import 'firebase/database'
 
 import User from '../models/User'
 
-export default class ScoutController {
+export default class UserController {
 	constructor(uid) {
-        const usersRef = firebase.database().ref('users')
-
 		this.uid = uid
+		this.loaded = false
         this.myUser = null
 		this.users = {}
 		this.userNames = []
+		this.usersRef = firebase.database().ref('users')
+		this.usersRef.once("value", (s) => {
+			let count = 0
 
-		usersRef.on('child_added', (snap) => {
-			if (snap.key != this.uid) {
-				this.onUserAdded(snap.key, snap.val())
-			} else {
-				this.onMyUserAdded(snap.key, snap.val())
+			this.usersRef.on('child_added', (snap) => {
+				this.userNames[snap.key] = snap.val().username
 
-				setMessage(this.uid, `Entered the world.`)
-			}
-			this.userNames[snap.key] = snap.val().username
+				if (snap.key != this.uid) {
+					this.onUserAdded(snap.key, snap.val())
+				} else {
+					this.onMyUserAdded(snap.key, snap.val())
+				}
+
+				if (s.numChildren() === ++count) {
+					this.loaded = true
+				}
+			})
+
 		})
 
-		usersRef.on('child_changed', (snap) => {
+		this.usersRef.on('child_changed', (snap) => {
 			if (snap.key != this.uid) {
 				this.onUserChanged(snap.key, snap.val())
 			} else {
@@ -33,24 +40,20 @@ export default class ScoutController {
     }
 
 	createUser(uid, data) {
-		const usersRef = firebase.database().ref('users')
-
-		usersRef.child(uid).set(data)
+		this.usersRef.child(uid).set(data)
 	}
 
 	updateUser(uid, data) {
-		const usersRef = firebase.database().ref('users')
-
-		usersRef.child(uid).update(data)
+		this.usersRef.child(uid).update(data)
 	}
 
 	removeUser(uid) {
-		const usersRef = firebase.database().ref('users')
-
-		usersRef.child(uid).remove()
+		this.usersRef.child(uid).remove()
 	}
 
 	onMyUserAdded(uid, data) {
+		setMessage(uid, `Entered the world.`)
+
 		this.myUser = new User(data)
 		this.myUser.marker.addListener('click', (e) => {
 			window.dispatchEvent(new CustomEvent('user.click', {

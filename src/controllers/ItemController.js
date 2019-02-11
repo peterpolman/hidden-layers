@@ -6,11 +6,52 @@ import Item from '../models/Item'
 export default class ItemController {
     constructor() {
         this.uid = firebase.auth().currentUser.uid
+        this.loaded = false
         this.inventory = {}
+        this.equipment = {
+            head: {
+                slug: 'HEAD',
+                item: null
+            },
+            bag: {
+                slug: 'BAG',
+                item: {
+                    name: 'Backpack',
+                    slug: 'inventory',
+                    amount: 1,
+                    description: "Can hold up to an x amount of slots for items found in the world."
+                }
+            },
+            mainHand: {
+                slug: 'HAND',
+                item: null
+            },
+            body: {
+                slug: 'BODY',
+                item: null
+            },
+            offHand: {
+                slug: 'HAND',
+                item: null
+            },
+            feet: {
+                slug: 'FEET',
+                item: null
+            },
+        }
+
         this.itemsRef = firebase.database().ref('items').child(this.uid)
 
-        this.itemsRef.on('child_added', (snap) => {
-            this.onItemAdded(snap.key, snap.val())
+        this.itemsRef.once("value", (s) => {
+            let count = 0
+
+            this.itemsRef.on('child_added', (snap) => {
+                this.onItemAdded(snap.key, snap.val())
+
+                if (s.numChildren() === ++count) {
+                    this.loaded = true
+                }
+            })
         })
 
         this.itemsRef.on('child_changed', (snap) => {

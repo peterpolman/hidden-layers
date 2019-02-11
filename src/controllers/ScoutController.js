@@ -8,24 +8,30 @@ import Path from '../models/Path'
 
 export default class ScoutController {
 	constructor(uid) {
-        const scoutsRef = firebase.database().ref('scouts')
-
         this.uid = uid
+		this.loaded = false
         this.myScout = null
         this.scouts = []
-        this.pathService = new PathService
-        this.scoutInfoWindow = new google.maps.InfoWindow({isHidden: false})
+		this.scoutsRef = firebase.database().ref('scouts')
+		this.pathService = new PathService
 		this.isWalking = false
+		this.scoutsRef.once("value", (s) => {
+			let count = 0
 
-        scoutsRef.on('child_added', (snap) => {
-			if (snap.key != this.uid) {
-				this.onScoutAdded(snap.key, snap.val())
-			} else {
-				this.onMyScoutAdded(snap.key, snap.val())
-			}
+	        this.scoutsRef.on('child_added', (snap) => {
+				if (snap.key != this.uid) {
+					this.onScoutAdded(snap.key, snap.val())
+				} else {
+					this.onMyScoutAdded(snap.key, snap.val())
+				}
+
+				if (s.numChildren() === ++count) {
+					this.loaded = true
+				}
+			})
 		})
 
-		scoutsRef.on('child_changed', (snap) => {
+		this.scoutsRef.on('child_changed', (snap) => {
 			if (snap.key != this.uid) {
 				this.onScoutChanged(snap.key, snap.val())
 			} else {
@@ -33,7 +39,7 @@ export default class ScoutController {
 			}
 		})
 
-		scoutsRef.on('child_removed', (snap) => {
+		this.scoutsRef.on('child_removed', (snap) => {
 			if (snap.key != this.uid) {
 				this.onScoutRemoved(snap.key, snap.val())
 			} else {
