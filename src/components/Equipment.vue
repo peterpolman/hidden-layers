@@ -9,7 +9,7 @@
 </template>
 
 <script>
-import ItemController from '../controllers/ItemController'
+import InventoryController from '../controllers/InventoryController'
 
 export default {
     name: 'equipment',
@@ -50,16 +50,15 @@ export default {
 @import url('../button.scss');
 
 .btn-hand {
-  background-size: 60% 60%;
-  bottom: 0px;
-}
-
-.btn-active {
-    border-radius: 50%;
-    bottom: .5rem;
+    background-size: 60% 60%;
+    bottom: 95px;
     left: .5rem;
     width: 50px;
     height: 50px;
+    border-radius: 50%;
+}
+
+.btn-active {
     background-color: #333;
     box-shadow: 0 0 5px 3px #3D91CB;
 }

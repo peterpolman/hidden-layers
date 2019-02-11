@@ -23,7 +23,7 @@
             v-bind:style="{ backgroundImage: 'url(' + assets[userController.myUser.userClass] + ')' }"
             v-on:click="openCharacterInfo()"
             class="btn btn-more">
-            XP
+            Character
         </button>
         <button v-if="userController && userController.myUser" v-bind:style="{ backgroundImage: 'url(' + assets[userController.myUser.userClass] + ')' }" v-on:click="onPanUserClick" class="btn">
             User
@@ -97,7 +97,7 @@ export default {
                 discover: require('./assets/img/discover.png')
             },
             userClass: null,
-            wardId: 0,
+            wardIndex: 0,
             users: [],
             scouts: [],
             messages: [],
@@ -217,16 +217,16 @@ export default {
 
         },
         onUserClick(uid) {
-            const itemController = this.$refs.inventory.itemController
+            const inventoryController = this.$refs.inventory.inventoryController
 
             switch (this.cursorMode) {
                 // case 'gold':
-                //     itemController.substract(this.selectedItem, 1)
-                //     itemController.give(uid, this.selectedItem, 1)
+                //     inventoryController.substract(this.selectedItem, 1)
+                //     inventoryController.give(uid, this.selectedItem, 1)
                 //     break;
                 case 'potion':
                     if (this.selectedItem) {
-                        itemController.substract(this.selectedItem, 1)
+                        inventoryController.substract(this.selectedItem, 1)
 
                         if (typeof this.userController.users[uid] != 'undefined') {
                             const heal = 100
@@ -328,7 +328,7 @@ export default {
         },
         onMapClick(e) {
             const storeController = this.$refs.store.storeController
-            const itemController = this.$refs.inventory.itemController
+            const inventoryController = this.$refs.inventory.inventoryController
             const visibility = {
                 user: this.userController.myUser,
                 scout: this.scoutController.myScout,
@@ -367,7 +367,7 @@ export default {
                     break
                 case "ward":
                     if (!isHidden && this.selectedItem) {
-                        itemController.substract(this.selectedItem, 1)
+                        inventoryController.substract(this.selectedItem, 1)
                         this.lootController.drop(item, 1)
                         this.selectedItem = null
                         this.cursorMode = null
@@ -395,7 +395,7 @@ export default {
                 case "discover":
                     window.MAP.set('minZoom', 16)
                     window.MAP.setZoom(16)
-                    itemController.substract(this.selectedItem, 1)
+                    inventoryController.substract(this.selectedItem, 1)
 
                     for (let i in this.userController.users) {
                         this.userController.users[i].setVisible(true)
@@ -413,7 +413,7 @@ export default {
                     break
                 case "drop":
                     if (!isHidden && this.selectedItem) {
-                        itemController.substractAll(this.selectedItem)
+                        inventoryController.substractAll(this.selectedItem)
                         this.lootController.dropAll(item)
                         this.selectedItem = null
                         this.cursorMode = null
@@ -462,9 +462,15 @@ export default {
         },
         onPanWardClick() {
             const wards = this.lootController.myWards
+            const index = Object.keys(wards)[this.wardIndex]
 
-            if (wards.length > 0) {
-                MAP.panTo(wards[Object.keys(wards)[0]].marker.position);
+            MAP.panTo(wards[index].marker.position)
+
+            if (this.wardIndex == (wards.length - 1)) {
+                this.wardIndex = 0
+            }
+            else {
+                this.wardIndex++
             }
         },
         onPanUserClick() {
@@ -527,13 +533,15 @@ body {
 }
 
 .section-pan {
-    top: 65px;
-    left: 0;
+    top: 5px;
+    left: 15px;
     position: fixed;
 
     .btn {
         position: relative;
-        background-size: 70% auto;
+        background-size: 60% auto;
+        margin: 10px auto;
+        border-radius: 50%;
     }
 }
 
@@ -545,6 +553,7 @@ body {
 
 .section-pan .btn-more {
     font-size: 10px;
+    margin-bottom: 15px;
     width: 60px;
     height: 60px;
     background-color: #333;
@@ -552,6 +561,7 @@ body {
     color: white;
     border-radius: 50%;
     background-size: 60% auto;
+    box-shadow: 0 0 5px 3px #3D91CB;
 }
 
 </style>

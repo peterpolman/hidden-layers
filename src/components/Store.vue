@@ -55,7 +55,7 @@ export default {
     methods: {
         onGetItemFromStore(id, item) {
             this.$parent.$refs.inventory.open = true
-            this.$parent.$refs.inventory.itemController.add(item)
+            this.$parent.$refs.inventory.inventoryController.add(item)
 
             this.storeController.storesRef.child(id).child('items').child(item.slug).remove()
 
@@ -74,7 +74,7 @@ export default {
 @import url('../button.scss');
 
 .dialog--store {
-    bottom: 165px;
+    bottom: 210px;
     right: 50%;
     margin-right: -100px;
     width: 200px;

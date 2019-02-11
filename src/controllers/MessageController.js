@@ -17,18 +17,6 @@ export default class MessageController {
 
     }
 
-    sortTimestampDesc(array) {
-        let sortable = []
-
-        for (let key in array) {
-            sortable.push(array[key])
-        }
-
-        return sortable.sort((a, b) => {
-            return a.timestamp - b.timestamp
-        }).reverse()
-    }
-
     onMessageAdded(key, data) {
         data['key'] = key
 

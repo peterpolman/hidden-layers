@@ -3,50 +3,19 @@ import firebase from 'firebase/app';
 import 'firebase/database';
 import Item from '../models/Item'
 
-export default class ItemController {
+export default class InventoryController {
     constructor() {
         this.uid = firebase.auth().currentUser.uid
         this.loaded = false
         this.inventory = {}
-        this.equipment = {
-            head: {
-                slug: 'HEAD',
-                item: null
-            },
-            bag: {
-                slug: 'BAG',
-                item: {
-                    name: 'Backpack',
-                    slug: 'inventory',
-                    amount: 1,
-                    description: "Can hold up to an x amount of slots for items found in the world."
-                }
-            },
-            mainHand: {
-                slug: 'HAND',
-                item: null
-            },
-            body: {
-                slug: 'BODY',
-                item: null
-            },
-            offHand: {
-                slug: 'HAND',
-                item: null
-            },
-            feet: {
-                slug: 'FEET',
-                item: null
-            },
-        }
 
-        this.itemsRef = firebase.database().ref('items').child(this.uid)
+        this.inventoryRef = firebase.database().ref('items').child(this.uid)
 
-        this.itemsRef.once("value", (s) => {
+        this.inventoryRef.once("value", (s) => {
             let count = 0
 
-            this.itemsRef.on('child_added', (snap) => {
-                this.onItemAdded(snap.key, snap.val())
+            this.inventoryRef.on('child_added', (snap) => {
+                this.onInventoryAdded(snap.key, snap.val())
 
                 if (s.numChildren() === ++count) {
                     this.loaded = true
@@ -54,12 +23,12 @@ export default class ItemController {
             })
         })
 
-        this.itemsRef.on('child_changed', (snap) => {
-            this.onItemChanged(snap.key, snap.val())
+        this.inventoryRef.on('child_changed', (snap) => {
+            this.onInventoryChanged(snap.key, snap.val())
         })
 
-        this.itemsRef.on('child_removed', (snap) => {
-            this.onItemRemoved(snap.key, snap.val())
+        this.inventoryRef.on('child_removed', (snap) => {
+            this.onInventoryRemoved(snap.key, snap.val())
         })
 
         window.addEventListener('item.add', (data) => {
@@ -67,17 +36,17 @@ export default class ItemController {
         })
     }
 
-    onItemAdded(key, data) {
+    onInventoryAdded(key, data) {
         Vue.delete(this.inventory, key)
         this.inventory[key] = data
     }
 
-    onItemChanged(key, data) {
+    onInventoryChanged(key, data) {
         Vue.delete(this.inventory, key)
         this.inventory[key] = data
     }
 
-    onItemRemoved(key) {
+    onInventoryRemoved(key) {
         Vue.delete(this.inventory, key)
     }
 
@@ -89,7 +58,7 @@ export default class ItemController {
             this.inventory[item.slug] = item
         }
 
-        this.itemsRef.child(item.slug).update(this.inventory[item.slug])
+        this.inventoryRef.child(item.slug).update(this.inventory[item.slug])
     }
 
     // give(uid, item, amount) {
@@ -108,7 +77,7 @@ export default class ItemController {
     //     //     this.inventory[item.slug] = item
     //     // }
     //     //
-    //     // this.itemsRef.child(item.slug).update(this.inventory[item.slug])
+    //     // this.inventoryRef.child(item.slug).update(this.inventory[item.slug])
     // }
 
     substractAll(item) {
@@ -125,10 +94,10 @@ export default class ItemController {
 
     update(item) {
         if (this.inventory[item.slug].amount <= 0) {
-            this.itemsRef.child(item.slug).remove()
+            this.inventoryRef.child(item.slug).remove()
         }
         else {
-            this.itemsRef.child(item.slug).update(item)
+            this.inventoryRef.child(item.slug).update(item)
         }
     }
 

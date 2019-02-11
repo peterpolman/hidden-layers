@@ -2,15 +2,15 @@
 <section>
 
     <button
-        v-if="(itemController && itemController.inventory)"
+        v-if="(inventoryController && inventoryController.inventory)"
         v-bind:style="{ backgroundImage: 'url(' + ( (open) ? assets.inventoryOpen : assets.inventory )+ ')' }"
         v-on:click="onInventoryClick"
         class="btn btn-inventory">
         Inventory
     </button>
 
-    <ul class="dialog dialog--inventory" v-if="itemController && open">
-        <li :key="item.slug" v-if="(item.amount > 0)" v-for="item in itemController.inventory">
+    <ul class="dialog dialog--inventory" v-if="inventoryController && open">
+        <li :key="item.slug" v-if="(item.amount > 0)" v-for="item in inventoryController.inventory">
             <button v-bind:style="{ backgroundImage: `url(${assets[item.slug]})` }" v-bind:class="`btn btn-${item.slug}`" v-on:click="onItemClick(item)">
                 {{ item.name }}
                 <small v-if="(item.amount > 1)">
@@ -24,14 +24,14 @@
 </template>
 
 <script>
-import ItemController from '../controllers/ItemController'
+import InventoryController from '../controllers/InventoryController'
 
 export default {
     name: 'inventory',
     data() {
         return {
             open: false,
-            itemController: null,
+            inventoryController: null,
             selectedItem: null,
             assets: {
                 tools: require('../assets/img/tools.png'),
@@ -49,7 +49,7 @@ export default {
         }
     },
     mounted() {
-        this.itemController = new ItemController()
+        this.inventoryController = new InventoryController()
     },
     methods: {
         onItemClick(item) {
@@ -86,6 +86,7 @@ export default {
     flex-wrap: nowrap;
     padding: 5px;
     overflow: auto;
+    max-width: 150px;
 
     li {
         margin: 5px;

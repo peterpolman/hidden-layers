@@ -29,19 +29,21 @@
                     <span>DEX:</span> <strong>{{myUser.stats.dex}}</strong><br>
                 </div>
             </div>
-            <ul class="dialog dialog--equipment">
-                <li :key="key" v-for="slot, key in itemController.equipment">
-                    <span v-if="!slot.item">{{slot.slug}}</span>
-                    <button v-if="slot.item" v-bind:style="{ backgroundImage: `url(${assets[slot.item.slug]})` }" v-bind:class="`btn btn-${slot.item.slug}`" v-on:click="onItemClick(slot.item)">
-                        {{ slot.item.name }}
-                    </button>
-                </li>
-            </ul>
+            <div class="dialog dialog--equipment">
+                <ul>
+                    <li :key="key" v-for="slot, key in equipmentController.equipment">
+                        <span v-if="!slot.item">{{slot.slug}}</span>
+                        <button v-if="slot.item" v-bind:style="{ backgroundImage: `url(${assets[slot.item.slug]})` }" v-bind:class="`btn btn-${slot.item.slug}`" v-on:click="onItemClick(slot.item)">
+                            {{ slot.item.name }}
+                        </button>
+                    </li>
+                </ul>
+            </div>
         </section>
         <section class="section-inventory">
             <div class="dialog dialog--item">
                 <div class="item-info" v-if="selectedItem">
-                    <button v-bind:style="{ backgroundImage: `url(${assets[selectedItem.slug]})` }" v-bind:class="`btn btn-${selectedItem.slug}`">
+                    <button v-if="selectedItem" v-bind:style="{ backgroundImage: `url(${assets[selectedItem.slug]})` }" v-bind:class="`btn btn-${selectedItem.slug}`">
                         {{ selectedItem.name }}
                     </button>
                     <div class="info">
@@ -50,16 +52,19 @@
                     </div>
                 </div>
             </div>
-            <ul class="dialog dialog--inventory" v-if="itemController && itemController.loaded">
-                <li :key="item.slug" v-if="(item.amount > 0)" v-for="item in itemController.inventory">
-                    <button v-bind:style="{ backgroundImage: `url(${assets[item.slug]})` }" v-bind:class="`btn btn-${item.slug}`" v-on:click="onItemClick(item)">
-                        {{ item.name }}
-                        <small v-if="(item.amount > 1)">
-                            {{ item.amount }}
-                        </small>
-                    </button>
-                </li>
-            </ul>
+
+            <div class="dialog dialog--inventory">
+                <ul v-if="inventoryController && inventoryController.loaded">
+                    <li :key="item.slug" v-if="(item.amount > 0)" v-for="item in inventoryController.inventory">
+                        <button v-bind:style="{ backgroundImage: `url(${assets[item.slug]})` }" v-bind:class="`btn btn-${item.slug}`" v-on:click="onItemClick(item)">
+                            {{ item.name }}
+                            <small v-if="(item.amount > 1)">
+                                {{ item.amount }}
+                            </small>
+                        </button>
+                    </li>
+                </ul>
+            </div>
             <button class="btn btn-back" v-on:click="back()">Back</button>
         </section>
     </main>
@@ -70,7 +75,8 @@ import firebase from 'firebase/app';
 import 'firebase/auth';
 
 import StoreController from './controllers/StoreController'
-import ItemController from './controllers/ItemController'
+import InventoryController from './controllers/InventoryController'
+import EquipmentController from './controllers/EquipmentController'
 
 export default {
     name: 'character',
@@ -79,7 +85,8 @@ export default {
             open: false,
             uid: firebase.auth().currentUser.uid,
             storeController: new StoreController(),
-            itemController: new ItemController(),
+            inventoryController: new InventoryController(),
+            equipmentController: new EquipmentController(),
             selectedItem: null,
             myUser: null,
             assets: {
@@ -99,7 +106,7 @@ export default {
         }
     },
     mounted() {
-        // this.items = this.itemController.inventory
+        // this.items = this.inventoryController.inventory
     },
     methods: {
         back() {
@@ -144,11 +151,12 @@ $blue-dark: #2c3e50;
         flex-direction: row;
 
         .section-equipment {
-            flex: 0 50%;
+            flex: 0 60%;
         }
 
         .section-inventory {
-            flex: 0 50%;
+            flex: 0 40%;
+            padding-left: 0;
         }
     }
 }
@@ -160,17 +168,21 @@ $blue-dark: #2c3e50;
 }
 .section-inventory {
     flex: 0 60%;
-    padding: 1rem;
+    padding: .5rem;
     display: flex;
     flex-direction: column;
+
+    ul {
+        display: block;
+    }
 }
 
 .dialog--item {
     width: 100%;
-    flex: 0 90px;
-    padding: 1rem;
-    margin-top: 0;
-    margin-bottom: 1rem;
+    flex: 0 75px;
+    height: auto;
+    padding: .5rem;
+    margin-bottom: .5rem;
 
     .item-info {
         display: flex;
@@ -203,7 +215,7 @@ $blue-dark: #2c3e50;
 }
 
 .dialog--inventory {
-    flex: 0 110px;
+    flex: 1 110px;
     width: 100%;
     flex-direction: row;
     overflow: auto;
@@ -220,7 +232,7 @@ $blue-dark: #2c3e50;
     background: white;
     color: black;
     font-size: 12px;
-    margin: 1rem 0 0;
+    margin: .5rem 0 0;
 }
 
 .dialog {
@@ -236,16 +248,16 @@ $blue-dark: #2c3e50;
 }
 
 .section-equipment {
-    flex: 0 40%;
-    padding: 1rem;
+    flex: 0 50%;
+    padding: .5rem;
     display: flex;
     flex-direction: row;
 }
 
 .dialog--stats {
-    flex: 1 50%;
+    flex: 1 auto;
     padding: 1rem;
-    margin-right: .5rem;
+    margin-right: .25rem;;
     flex-direction: column;
     font-size: 12px;
 
@@ -305,12 +317,9 @@ $blue-dark: #2c3e50;
 }
 
 .dialog--equipment {
-    flex: 1 50%;
-    margin-left: .5rem;
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    justify-content: center;
+    flex: 0 130px;
+    margin-left: .25rem;
+    align-items: flex-start;
     overflow: auto;
 
     li {
@@ -318,6 +327,8 @@ $blue-dark: #2c3e50;
         font-size: 8px;
         align-items: center;
         justify-content: center;
+        width: 50px;
+        height: 50px;
     }
 }
 

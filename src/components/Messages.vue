@@ -33,16 +33,18 @@ export default {
 
 .messages {
     position: fixed;
-    top: 0;
+    bottom: 10px;
     left: 0;
     width: calc(100% - 80px);
-    height: 55px;
+    height: 70px;
     overflow: auto;
     margin: 0;
     padding: 3px 10px;
     transition: 0.5s background-color ease;
+    opacity: .5;
 
     &:hover {
+        opacity: 1;
         background-color: rgba(0,0,0,0.5);
     }
 
