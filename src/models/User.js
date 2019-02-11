@@ -7,8 +7,8 @@ export default class User extends Character {
     constructor(data) {
         super(data.position, data.hitPoints)
         const iconSize = {
-            w: (data.userClass == 'wizard') ? 60 : 50,
-            h: (data.userClass == 'wizard') ? 75 : 50
+            w: (data.userClass == 'wizard') ? 55 : 50,
+            h: (data.userClass == 'wizard') ? 70 : 50
         }
         const avatars = {
             knight: require('../assets/img/knight-1.png'),
@@ -28,7 +28,7 @@ export default class User extends Character {
                 size: new google.maps.Size(iconSize.w, iconSize.h),
                 scaledSize: new google.maps.Size(iconSize.w, iconSize.h),
                 origin: new google.maps.Point(0, 0),
-                anchor: new google.maps.Point(iconSize.w / 2, ((data.userClass == 'wizard') ? iconSize.h / 2 + 12: iconSize.h / 2))
+                anchor: new google.maps.Point(iconSize.w / 2, ((data.userClass == 'wizard') ? iconSize.h / 2 + 10: iconSize.h / 2))
             }
         })
     }

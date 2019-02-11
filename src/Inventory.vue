@@ -36,5 +36,6 @@ export default {
 .section-character {
     background: black;
     height: 100%;
+    width: 100%;
 }
 </style>
