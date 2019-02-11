@@ -28,7 +28,7 @@ import firebase from 'firebase/app';
 import 'firebase/auth';
 
 export default {
-    name: 'inventory',
+    name: 'store',
     data() {
         return {
             uid: firebase.auth().currentUser.uid,

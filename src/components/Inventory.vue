@@ -60,7 +60,7 @@ export default {
         },
         onItemClick(item) {
             this.$parent.cursorMode = 'drop'
-            this.$parent.$refs.equipment.hand = item
+            this.$parent.$refs.equipment.equipment.hand = item
 
             if (this.$parent.selectedItem == item) {
                 this.$parent.$refs.equipment.active = true

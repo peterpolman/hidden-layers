@@ -2,15 +2,12 @@ import Vue from 'vue';
 import firebase from 'firebase/app'
 import 'firebase/database'
 
-import Goblin from '../models/Goblin'
-
 export default class StoreController {
     constructor() {
         this.uid = firebase.auth().currentUser.uid
         this.storesRef = firebase.database().ref('stores')
         this.store = null
         this.stores = []
-        this.goblins = []
 
         this.storesRef.on('child_added', (snap) => {
             this.onStoreAdded(snap.key, snap.val())
@@ -97,29 +94,8 @@ export default class StoreController {
         this.store = place.place_id
     }
 
-    updateGoblin(id, ) {
-
-    }
-
     onStoreAdded(id, data) {
-		const randInt = Math.floor(Math.random() * 100)
-
 		this.stores[id] = data
-
-		if ( randInt > 85 ) {
-			this.goblins[id] = new Goblin(data.position, 40)
-
-			this.goblins[id].marker.addListener('click', (e) => {
-
-                window.dispatchEvent(new CustomEvent('user.click', {
-    				detail: id
-    			}))
-
-			})
-
-			this.goblins[id].setMap(MAP)
-			this.goblins[id].setVisible(false)
-		}
 	}
 
 	onStoreChanged(id, data) {

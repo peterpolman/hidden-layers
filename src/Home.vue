@@ -67,6 +67,7 @@ import GeoService from './services/GeoService'
 import UserController from './controllers/UserController'
 import ScoutController from './controllers/ScoutController'
 import LootController from './controllers/LootController'
+import EnemyController from './controllers/EnemyController'
 
 export default {
     name: 'home',
@@ -104,6 +105,7 @@ export default {
             userController: null,
             scoutController: null,
             lootController: null,
+            enemyController: new EnemyController()
         }
     },
     mounted() {
@@ -112,6 +114,7 @@ export default {
             const usersRef = firebase.database().ref('users')
             const scoutsRef = firebase.database().ref('scouts')
             const lootRef = firebase.database().ref('loot')
+            const enemiesRef = firebase.database().ref('enemies')
 
             this.userController = new UserController(uid)
             this.scoutController = new ScoutController(uid)
@@ -143,6 +146,8 @@ export default {
                 this.onBuildingClick(data.detail)
             })
 
+            this.discover()
+
         }).catch((err) => {
             console.log(err)
         })
@@ -162,7 +167,7 @@ export default {
                 users: this.userController.users,
                 scouts: this.scoutController.scouts,
                 loot: this.lootController.loot,
-                goblins: this.$refs.store.storeController.goblins,
+                goblins: this.enemyController.goblins,
                 buildings: this.$refs.construction.buildingController.buildings,
             }
 
@@ -171,7 +176,7 @@ export default {
             this.userController.users = discovered.users
             this.scoutController.scouts = discovered.scouts
             this.lootController.loot = discovered.loot
-            this.$refs.store.storeController.goblins = discovered.goblins
+            this.enemyController.goblins = discovered.goblins
             this.$refs.construction.buildingController.buildings = discovered.buildings
         },
         onBuildingClick(data) {
@@ -196,11 +201,11 @@ export default {
                     }
                     else {
                         building.setLabel(10, true)
-
-                        setMessage(this.uid, `Building construction + 10`)
                         buildingController.update(data.id, {
                             hitPoints: building.hitPoints + 10
                         })
+
+                        setMessage(this.uid, `Building construction + 10`)
                     }
                     break
                 default:
@@ -211,7 +216,6 @@ export default {
         },
         onUserClick(uid) {
             const itemController = this.$refs.inventory.itemController
-            const storeController = this.$refs.store.storeController
 
             switch (this.cursorMode) {
                 // case 'gold':
@@ -234,16 +238,16 @@ export default {
                             this.userController.updateUser(uid, data)
                             setMessage(null, `${this.userController.userNames[data.healer]} heals ${this.userController.userNames[uid]} for ${healAmount} hit points!`)
                         }
-                        if (typeof storeController.goblins[uid] != 'undefined') {
+                        if (typeof this.enemyController.goblins[uid] != 'undefined') {
                             const hitPoints = 100
-                            const goblin = storeController.goblins[uid]
+                            const goblin = this.enemyController.goblins[uid]
 
                             goblin.indicator.setMap(MAP)
 
                             goblin.setHitPoints(hitPoints)
                             setMessage(null, `${this.userController.userNames[this.uid]} heals an injured Goblin.`)
 
-                            storeController.goblins[uid] = goblin
+                            this.enemyController.goblins[uid] = goblin
                         }
 
                         this.selectedItem = null
@@ -251,8 +255,8 @@ export default {
                     }
                     break
                 case 'sword':
-                    if (typeof storeController.goblins[uid] != 'undefined') {
-                        const goblin = storeController.goblins[uid]
+                    if (typeof this.enemyController.goblins[uid] != 'undefined') {
+                        const goblin = this.enemyController.goblins[uid]
                         const damage = Math.floor(Math.random() * 10)
                         const hitPoints = (goblin.hitPoints - damage)
 
@@ -266,14 +270,14 @@ export default {
                             goblin.setLabel( damage )
                             goblin.setHitPoints( hitPoints )
 
-                            storeController.goblins[uid] = goblin
+                            this.enemyController.goblins[uid] = goblin
 
                             setMessage(null, `${this.userController.userNames[this.uid]} hits a Goblin for ${damage} damage.`)
                         }
                         else if (goblin.hitPoints <= 0) {
                             goblin.setMap(null)
 
-                            delete storeController.goblins[uid]
+                            delete this.enemyController.goblins[uid]
 
                             setMessage(null, `${this.userController.userNames[this.uid]} killed a goblin...`)
                             const user = this.userController.myUser
@@ -315,7 +319,7 @@ export default {
                     if (this.uid != uid && (typeof this.userController.users[uid] != 'undefined')) {
                         setMessage(this.uid, `Hi ${this.userController.userNames[uid]}!`)
                     }
-                    if (typeof storeController.goblins[uid] != 'undefined') {
+                    if (typeof this.enemyController.goblins[uid] != 'undefined') {
                         setMessage(this.uid, `Hi Goblin!`)
                     }
             }
@@ -394,8 +398,8 @@ export default {
                     for (let i in this.userController.users) {
                         this.userController.users[i].setVisible(true)
                     }
-                    for (let i in storeController.goblins) {
-                        storeController.goblins[i].setVisible(false)
+                    for (let i in this.enemyController.goblins) {
+                        this.enemyController.goblins[i].setVisible(false)
                     }
 
                     setTimeout(() => {

@@ -5,7 +5,7 @@ import 'firebase/auth';
 
 import App from './App.vue';
 import Home from './Home.vue';
-import Inventory from './Inventory.vue';
+import Character from './Character.vue';
 import Login from './Login.vue';
 import Register from './Register.vue';
 
@@ -41,9 +41,9 @@ const routes = [
     }
   },
   {
-    name: 'inventory',
-    path: '/inventory',
-    component: Inventory
+    name: 'character',
+    path: '/character',
+    component: Character
   },
   {
     name: 'login',

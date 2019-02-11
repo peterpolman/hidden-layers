@@ -42,19 +42,14 @@ export default class Goblin extends Character {
             "Make sense!"
         ]
 
-        this.marker = new google.maps.Marker({
-            position: new google.maps.LatLng(position.lat, position.lng),
-            label: null,
-            icon: {
-                labelOrigin: new google.maps.Point(iconSize / 2, -10),
-                url: require('../assets/img/goblin-1.png'),
-                size: new google.maps.Size(iconSize, iconSize),
-                scaledSize: new google.maps.Size(iconSize, iconSize),
-                origin: new google.maps.Point(0, 0),
-                anchor: new google.maps.Point(iconSize / 2, (iconSize / 2) - 5)
-            }
+        this.marker.setIcon({
+            labelOrigin: new google.maps.Point(iconSize / 2, -10),
+            url: require('../assets/img/goblin-1.png'),
+            size: new google.maps.Size(iconSize, iconSize),
+            scaledSize: new google.maps.Size(iconSize, iconSize),
+            origin: new google.maps.Point(0, 0),
+            anchor: new google.maps.Point(iconSize / 2, (iconSize / 2) - 5)
         })
-
     }
 
     talk() {
