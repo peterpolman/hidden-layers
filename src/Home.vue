@@ -40,6 +40,13 @@
         Stop
     </button>
 
+    <button
+    v-bind:style="{ backgroundImage: 'url(' + assets.x + ')' }"
+    v-on:click="onFarmClick"
+    class="btn btn-farm">
+        Farm
+    </button>
+
     <Store ref="store" />
     <Construction ref="construction" />
     <Equipment ref="equipment" />
@@ -71,6 +78,7 @@ import UserController from './controllers/UserController'
 import ScoutController from './controllers/ScoutController'
 import LootController from './controllers/LootController'
 import EnemyController from './controllers/EnemyController'
+import FarmController from './controllers/FarmController'
 
 export default {
     name: 'home',
@@ -85,6 +93,7 @@ export default {
     data() {
         return {
             assets: {
+                x: require('./assets/img/x.png'),
                 tools: require('./assets/img/tools.png'),
                 ward: require('./assets/img/ward-1.png'),
                 knight: require('./assets/img/knight-1.png'),
@@ -107,6 +116,7 @@ export default {
             watcher: null,
             mapService: new MapService(),
             geoService: new GeoService(),
+            farmController: null,
             userController: null,
             scoutController: null,
             lootController: null,
@@ -125,6 +135,7 @@ export default {
                 this.userController = new UserController(uid)
                 this.scoutController = new ScoutController(uid)
                 this.lootController = new LootController(uid)
+                this.farmController = new FarmController()
 
                 this.scoutController.userNames = this.userController.userNames
 
@@ -148,12 +159,16 @@ export default {
                 lootRef.on('child_changed', (snap) => this.discover())
                 lootRef.on('child_removed', (snap) => this.discover())
                 enemiesRef.on('child_added', (snap) => this.discover())
+
             }).catch((err) => {
                 console.log(err)
             })
         })
     },
     methods: {
+        onFarmClick() {
+            this.cursorMode = 'farm'
+        },
         openCharacterInfo() {
             this.$refs.character.inventory = this.$refs.inventory.inventoryController.inventory
             this.$refs.character.myUser = this.userController.myUser
@@ -330,17 +345,12 @@ export default {
         onMapClick(e) {
             const storeController = this.$refs.store.storeController
             const inventoryController = this.$refs.inventory.inventoryController
-            const visibility = {
-                user: this.userController.myUser,
-                scout: this.scoutController.myScout,
-                wards: this.lootController.myWards
-            }
+            const visibility = { user: this.userController.myUser, scout: this.scoutController.myScout, wards: this.lootController.myWards }
             const isHidden = this.mapService.isPositionHidden(e.latLng, visibility)
-            const position = {
-                lat: e.latLng.lat(),
-                lng: e.latLng.lng(),
-            }
+            const position = { lat: e.latLng.lat(), lng: e.latLng.lng(), }
+
             let item
+
             if (this.selectedItem) {
                 item = {
                     uid: this.uid,
@@ -421,37 +431,8 @@ export default {
                         this.$refs.equipment.equipment.hand = null
                     }
                     break
-                default:
-                    const url = `https://maps.googleapis.com/maps/api/staticmap?center=${position.lat},${position.lng}&zoom=${MAP.getZoom()}&size=1x1&maptype=roadmap&key=AIzaSyA3DMnRBjiSp-mkxw9vnXoT4b6RQjTlcjE`
-
-                    let img = new Image()
-
-                    img.crossOrigin = "Anonymous";
-                    img.onload = function () {
-                        let canvas = document.createElement('canvas');
-                        canvas.width = 1;
-                        canvas.height = 1;
-                        canvas.getContext('2d').drawImage(img, 0, 0, img.width, img.height);
-
-                        let px = canvas.getContext('2d').getImageData(0, 0, 1, 1).data;
-
-                        const forest = new Uint8ClampedArray([192, 236, 174, 255])
-                        const road = new Uint8ClampedArray([255, 255, 255, 255])
-                        const water = new Uint8ClampedArray([171, 219, 255, 255])
-
-                        if ((px[0] == water[0]) && (px[1] == water[1]) && (px[2] == water[2])) {
-                            alert('This is blue water')
-                        }
-
-                        if ((px[0] == road[0]) && (px[1] == road[1]) && (px[2] == road[2])) {
-                            alert('This is a white road')
-                        }
-
-                        if ((px[0] == forest[0]) && (px[1] == forest[1]) && (px[2] == forest[2])) {
-                            alert('This is green forest')
-                        }
-                    }
-                    img.src = url
+                case "farm":
+                    this.farmController.gatherResources(position)
                     break;
             }
         },
