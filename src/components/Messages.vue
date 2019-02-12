@@ -33,10 +33,10 @@ export default {
 
 .messages {
     position: fixed;
-    bottom: 10px;
+    bottom: 0;
     left: 0;
     width: calc(100% - 80px);
-    height: 70px;
+    height: 80px;
     overflow: auto;
     margin: 0;
     padding: 3px 10px;

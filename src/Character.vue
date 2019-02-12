@@ -164,8 +164,13 @@ $blue-dark: #2c3e50;
 @media (orientation: portrait) {
     .section-character {
         flex-direction: column;
+
+        .section-inventory {
+            padding-top: 0;
+        }
     }
 }
+
 .section-inventory {
     flex: 0 60%;
     padding: .5rem;

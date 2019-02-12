@@ -421,7 +421,38 @@ export default {
                         this.$refs.equipment.equipment.hand = null
                     }
                     break
+                default:
+                    const url = `https://maps.googleapis.com/maps/api/staticmap?center=${position.lat},${position.lng}&zoom=${MAP.getZoom()}&size=1x1&maptype=roadmap&key=AIzaSyA3DMnRBjiSp-mkxw9vnXoT4b6RQjTlcjE`
 
+                    let img = new Image()
+
+                    img.crossOrigin = "Anonymous";
+                    img.onload = function () {
+                        let canvas = document.createElement('canvas');
+                        canvas.width = 1;
+                        canvas.height = 1;
+                        canvas.getContext('2d').drawImage(img, 0, 0, img.width, img.height);
+
+                        let px = canvas.getContext('2d').getImageData(0, 0, 1, 1).data;
+
+                        const forest = new Uint8ClampedArray([192, 236, 174, 255])
+                        const road = new Uint8ClampedArray([255, 255, 255, 255])
+                        const water = new Uint8ClampedArray([171, 219, 255, 255])
+
+                        if ((px[0] == water[0]) && (px[1] == water[1]) && (px[2] == water[2])) {
+                            alert('This is blue water')
+                        }
+
+                        if ((px[0] == road[0]) && (px[1] == road[1]) && (px[2] == road[2])) {
+                            alert('This is a white road')
+                        }
+
+                        if ((px[0] == forest[0]) && (px[1] == forest[1]) && (px[2] == forest[2])) {
+                            alert('This is green forest')
+                        }
+                    }
+                    img.src = url
+                    break;
             }
         },
         onStopClick() {
