@@ -155,6 +155,7 @@ export default {
     },
     methods: {
         openCharacterInfo() {
+            this.$refs.character.inventory = this.$refs.inventory.inventoryController.inventory
             this.$refs.character.myUser = this.userController.myUser
             this.$refs.character.open = true
         },
