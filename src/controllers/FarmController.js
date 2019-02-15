@@ -37,6 +37,7 @@ export default class FarmController {
                 id: data.id,
                 position: data.position,
                 icon: {
+                    labelOrigin: new google.maps.Point(25 / 2, -10),
                     url: require('../assets/img/x.png'),
                     size: new google.maps.Size(25, 25),
                     scaledSize: new google.maps.Size(25, 25),
@@ -47,14 +48,39 @@ export default class FarmController {
         }
 
         this.farms[key].marker.addListener('click', () => {
-            alert(this.farms[key].water, this.farms[key].lumber, this.farms[key].stone)
+            const type = this.farms[key].resource
+            const labelTimer = setTimeout(() => {
+                this.farms[key].marker.setLabel(null)
+                clearTimeout(labelTimer)
+            }, 1000)
+
+            this.farms[key][type] = this.farms[key][type] + 10
+            this.farms[key].marker.setLabel({
+                text: '+ 10',
+                color: (type == 'water') ? '#3D91CB' : (type == 'stone') ? '#333333' : (type == 'lumber') ? '#00FF00' : 'red',
+                fontWeight: 'bold',
+                fontSize: '14px',
+                fontFamily: 'Roboto'
+            })
+
+            this.farmsRef.child(key).update({
+                water: this.farms[key].water,
+                stone: this.farms[key].stone,
+                lumber: this.farms[key].lumber,
+            })
+
+            setMessage(key, `+ 10 ${this.farms[key].resource}!`)
         })
+
         this.farms[key].marker.setMap(MAP)
     }
 
     onFarmChanged(key, data) {
         this.farms[key].marker.setPosition(data.position)
         this.farms[key].resource = data.resource
+        this.farms[key].water = data.water
+        this.farms[key].stone = data.stone
+        this.farms[key].lumber = data.lumber
     }
 
     onFarmRemoved(key, data) {
@@ -99,16 +125,24 @@ export default class FarmController {
             resource = 'lumber'
         }
 
-        if (resource != '') {
+        if (typeof this.farms[this.uid] == 'undefined' && resource != '') {
             this.create(position, resource)
         }
-
-        alert(`You are farming ${resource} now.`)
+        else if (resource != '') {
+            this.update({
+                position: position,
+                resource: resource,
+            })
+        }
     }
 
     createMarkerId(latLng) {
         const id = (latLng.lat + "_" + latLng.lng)
         return id.replace(/\./g, '')
+    }
+
+    update(data) {
+        this.farmsRef.child(this.uid).update(data)
     }
 
     create(position, resource) {

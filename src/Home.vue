@@ -170,8 +170,10 @@ export default {
             this.cursorMode = 'farm'
         },
         openCharacterInfo() {
+            this.$refs.character.selectedItem = this.selectedItem
             this.$refs.character.inventory = this.$refs.inventory.inventoryController.inventory
             this.$refs.character.myUser = this.userController.myUser
+            this.$refs.character.myFarm = this.farmController.farms[this.uid]
             this.$refs.character.open = true
         },
         discover(radius) {

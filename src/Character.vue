@@ -26,7 +26,10 @@
                     <span>ATK:</span> <strong>{{myUser.stats.atk}}</strong><br>
                     <span>DEF:</span> <strong>{{myUser.stats.def}}</strong><br>
                     <span>INT:</span> <strong>{{myUser.stats.int}}</strong><br>
-                    <span>DEX:</span> <strong>{{myUser.stats.dex}}</strong><br>
+                    <span>DEX:</span> <strong>{{myUser.stats.dex}}</strong><br><br>
+                    <span>Lumber:</span> <strong>{{myFarm.lumber}}</strong><br>
+                    <span>Stone:</span> <strong>{{myFarm.stone}}</strong><br>
+                    <span>Water:</span> <strong>{{myFarm.water}}</strong><br>
                 </div>
             </div>
             <div class="dialog dialog--equipment">
@@ -88,7 +91,7 @@ export default {
             equipmentController: new EquipmentController(),
             selectedItem: null,
             inventory: {},
-
+            myFarm: null,
             myUser: null,
             assets: {
                 tools: require('./assets/img/tools.png'),
