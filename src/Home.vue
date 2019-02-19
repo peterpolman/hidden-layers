@@ -325,7 +325,7 @@ export default {
 
                     }
 
-                    if (target === 'user') {
+                    if (uid !== this.uid && target === 'user') {
                         const damage = Math.floor(Math.random() * 10)
                         const data = {
                             mode: 'FIGHTING',
@@ -339,6 +339,16 @@ export default {
                             this.userController.updateUser(uid, data)
                         }
                         else if (this.userController.users[uid].hitPoints <= 0) {
+                            // const position = this.userController.users[uid].position
+                            // const item = {
+                            //     id: this.createMarkerId(position),
+                            //     slug: 'gold',
+                            //     name: 'Gold',
+                            //     position: position,
+                            //     uid: uid,
+                            // }
+                            // this.lootController.dropAll(item)
+
                             setMessage(null, `${this.userController.userNames[data.attacker]} hits ${this.userController.userNames[uid]}'s dead corpse...`)
                         }
                         else {
@@ -346,7 +356,7 @@ export default {
                         }
                     }
 
-                    if (target === 'scout') {
+                    if (uid !== this.uid && target === 'scout') {
                         const damage = Math.floor(Math.random() * 10)
                         const data = {
                             mode: 'FIGHTING',

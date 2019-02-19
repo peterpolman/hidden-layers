@@ -73,6 +73,7 @@ export default class ScoutController {
 		this.myScout.setMap(MAP)
 
 		this.myScout.marker.addListener('click', (e) => {
+			window.dispatchEvent(new CustomEvent('user.click', { detail: { id: uid, target: 'scout' } }))
 			MAP.panTo(e.latLng)
 		})
 
@@ -116,8 +117,6 @@ export default class ScoutController {
 			if (this.myScout.path != null) {
 				this.myScout.path.setMap(null)
 				this.myScout.path = null
-
-				setMessage(null, `${this.userNames[uid]}'s scout has arrived`)
 			}
 		}
 	}
