@@ -92,12 +92,22 @@ export default class ScoutController {
 	onMyScoutChanged(uid, data) {
 		this.myScout.set('mode', data.mode)
 		this.isWalking = false
+		
 		clearTimeout(this.myScout.pathTimer)
 
 		if (data.mode == "FIGHTING") {
 			if (data.hitPoints > 0) {
 				this.myScout.setLabel(data.hitDmg)
 				this.myScout.setHitPoints(data.hitPoints)
+			}
+		}
+
+		if (data.mode == 'HEALING') {
+			const healAmount = data.hitPoints - this.myScout.hitPoints
+
+			if (healAmount > 0) {
+				this.myScout.setLabel(healAmount, true)
+				this.myScout.setHitPoints(100)
 			}
 		}
 
@@ -143,6 +153,15 @@ export default class ScoutController {
 
 	onScoutChanged(uid, data) {
 		this.scouts[uid].set('mode', data.mode)
+
+		if (data.mode == 'HEALING') {
+			const healAmount = data.hitPoints - this.scouts[uid].hitPoints
+
+			if (healAmount > 0) {
+				this.scouts[uid].setLabel(healAmount, true)
+				this.scouts[uid].setHitPoints(100)
+			}
+		}
 
 		if (data.mode == 'FIGHTING') {
 			this.scouts[uid].setLabel( data.hitDmg )
