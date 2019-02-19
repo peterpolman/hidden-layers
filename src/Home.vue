@@ -144,7 +144,7 @@ export default {
                 })
 
                 window.addEventListener('user.click', (data) => {
-                    this.onUserClick(data.detail)
+                    this.onUserClick(data.detail.id, data.detail.target)
                 })
 
                 window.addEventListener('building.click', (data) => {
@@ -234,7 +234,7 @@ export default {
             }
 
         },
-        onUserClick(uid) {
+        onUserClick(uid, target) {
             const inventoryController = this.$refs.inventory.inventoryController
 
             switch (this.cursorMode) {
@@ -246,7 +246,7 @@ export default {
                     if (this.selectedItem) {
                         inventoryController.substract(this.selectedItem, 1)
 
-                        if (typeof this.userController.users[uid] != 'undefined') {
+                        if (target === 'user') {
                             const heal = 100
                             const healAmount = 100 - this.userController.users[uid].hitPoints
                             const data = {
@@ -258,7 +258,19 @@ export default {
                             this.userController.updateUser(uid, data)
                             setMessage(null, `${this.userController.userNames[data.healer]} heals ${this.userController.userNames[uid]} for ${healAmount} hit points!`)
                         }
-                        if (typeof this.enemyController.goblins[uid] != 'undefined') {
+                        if (target === 'scout') {
+                            const heal = 100
+                            const healAmount = 100 - this.scoutController.scouts[uid].hitPoints
+                            const data = {
+                                mode: "HEALING",
+                                hitPoints: heal,
+                                healer: this.uid
+                            }
+
+                            this.scoutController.scouts[uid].update(data)
+                            setMessage(null, `${this.userController.userNames[data.healer]} heals ${this.userController.userNames[uid]}'s scout' for ${healAmount} hit points!`)
+                        }
+                        if (target === 'goblin') {
                             const hitPoints = 100
                             const goblin = this.enemyController.goblins[uid]
 
@@ -275,7 +287,7 @@ export default {
                     }
                     break
                 case 'sword':
-                    if (typeof this.enemyController.goblins[uid] != 'undefined') {
+                    if (target === 'goblin') {
                         const goblin = this.enemyController.goblins[uid]
                         const damage = Math.floor(Math.random() * 10)
                         const hitPoints = (goblin.hitPoints - damage)
@@ -313,7 +325,7 @@ export default {
 
                     }
 
-                    if (this.uid != uid && (typeof this.userController.users[uid] != 'undefined')) {
+                    if (target === 'user') {
                         const damage = Math.floor(Math.random() * 10)
                         const data = {
                             mode: 'FIGHTING',
@@ -333,13 +345,42 @@ export default {
                             setMessage(null, `${this.userController.userNames[data.attacker]} failed to hit ${this.userController.userNames[uid]}...`)
                         }
                     }
+
+                    if (target === 'scout') {
+                        const damage = Math.floor(Math.random() * 10)
+                        const data = {
+                            mode: 'FIGHTING',
+                            hitDmg: damage,
+                            attacker: this.uid,
+                            hitPoints: this.scoutController.scouts[uid].hitPoints - damage
+                        }
+
+                        if ((data.hitDmg > 0) && (this.scoutController.scouts[uid].hitPoints > 0)) {
+                            this.scoutController.scouts[uid].setMode("STANDING")
+                            this.scoutController.scouts[uid].update(data)
+                            this.scoutController.scouts[uid].indicator.setMap(MAP)
+
+                            setMessage(null, `${this.userController.userNames[data.attacker]} hits ${this.userController.userNames[uid]}'s scout for ${data.hitDmg} damage.`)
+                        }
+                        else if (this.scoutController.scouts[uid].hitPoints <= 0) {
+                            this.scoutController.scouts[uid].kill()
+
+                            setMessage(null, `${this.userController.userNames[data.attacker]} hits ${this.userController.userNames[uid]} his scout's dead corpse...`)
+                        }
+                        else {
+                            setMessage(null, `${this.userController.userNames[data.attacker]} failed to hit ${this.userController.userNames[uid]}'s scout'...`)
+                        }
+                    }
                     break
                 default:
                     this.$refs.equipment.active = false
-                    if (this.uid != uid && (typeof this.userController.users[uid] != 'undefined')) {
+                    if (target === 'user') {
                         setMessage(this.uid, `Hi ${this.userController.userNames[uid]}!`)
                     }
-                    if (typeof this.enemyController.goblins[uid] != 'undefined') {
+                    if (target === 'scout') {
+                        setMessage(this.uid, `Hi ${this.userController.userNames[uid]}' scout!`)
+                    }
+                    if (target === 'goblin') {
                         setMessage(this.uid, `Hi Goblin!`)
                     }
             }
@@ -377,6 +418,7 @@ export default {
             switch (this.cursorMode) {
                 case "scout":
                     this.scoutController.moveScout(e.latLng)
+                    this.handlePixelClick(e.pixel)
                     break
                 case "ward":
                     if (!isHidden && this.selectedItem) {
@@ -385,6 +427,8 @@ export default {
                         this.selectedItem = null
                         this.cursorMode = null
                         this.$refs.equipment.equipment.hand = null
+
+                        this.handlePixelClick(e.pixel)
                     }
                     break
                 case "house":
@@ -403,6 +447,8 @@ export default {
                         }
                         this.$refs.construction.buildingController.set(id, data)
                         this.selectedItem = null
+
+                        this.handlePixelClick(e.pixel)
                     }
                     break
                 case "discover":
@@ -413,6 +459,11 @@ export default {
                     for (let i in this.userController.users) {
                         this.userController.users[i].setVisible(true)
                     }
+
+                    for (let i in this.scoutController.scouts) {
+                        this.scoutController.scouts[i].setVisible(true)
+                    }
+
                     for (let i in this.enemyController.goblins) {
                         this.enemyController.goblins[i].setVisible(false)
                     }
@@ -423,6 +474,8 @@ export default {
                         this.discover(500)
                     }, 30000)
 
+                    this.handlePixelClick(e.pixel)
+
                     break
                 case "drop":
                     if (!isHidden && this.selectedItem) {
@@ -431,10 +484,15 @@ export default {
                         this.selectedItem = null
                         this.cursorMode = null
                         this.$refs.equipment.equipment.hand = null
+
+                        this.handlePixelClick(e.pixel)
                     }
                     break
                 case "farm":
                     this.farmController.gatherResources(position)
+                    break;
+                default:
+                    this.handlePixelClick(e.pixel)
                     break;
             }
         },
@@ -507,6 +565,16 @@ export default {
                 }
                 this.scoutController.createScout(this.uid, data)
             }
+        },
+        handlePixelClick(pixel) {
+            let d = document.createElement("div")
+            d.className = "click-effect"
+            d.style.top = pixel.y + "px"
+            d.style.left = pixel.x + "px"
+            document.getElementsByClassName('section-home')[0].appendChild(d)
+            d.addEventListener('animationend', function() {
+                d.parentElement.removeChild(d)
+            })
         },
         createMarkerId(latLng) {
             const id = (latLng.lat + "_" + latLng.lng)

@@ -131,38 +131,23 @@ export default class ScoutController {
 	onScoutAdded(uid, data) {
 		this.scouts[uid] = new Scout(data)
 		this.scouts[uid].marker.addListener('click', (e) => {
-			const damage = Math.floor(Math.random() * 10)
-
-			this.scouts[uid].setMode("STANDING")
-
-			setMessage(null, `${this.userNames[data.attacker]} hits ${this.userNames[uid]}'s scout for ${damage} damage.`)
-			this.scouts[uid].indicator.setMap(MAP)
-			this.scouts[uid].update({
-				mode: 'FIGHTING',
-				attacker: this.uid,
-				hitDmg: damage,
-				hp: this.scouts[uid].hitPoints - damage
-			})
-
-			MAP.panTo(e.latLng)
+			window.dispatchEvent(new CustomEvent('user.click', { detail: { id: uid, target: 'scout' } }))
 		})
 
 		this.scouts[uid].marker.setMap(MAP)
 		this.scouts[uid].marker.setVisible(false)
+		this.scouts[uid].update({
+			hp: null,
+			hitPoints: 100
+		})
 	}
 
 	onScoutChanged(uid, data) {
 		this.scouts[uid].set('mode', data.mode)
 
 		if (data.mode == 'FIGHTING') {
-			if (data.hitPoints > 0) {
-				this.scouts[uid].setLabel( data.hitDmg )
-				this.scouts[uid].setHitPoints( data.hitPoints )
-			}
-			else {
-				setMessage(null, `${this.userNames[data.attacker]} kills ${this.userNames[uid]}'s like it's nothing..`)
-				this.scouts[uid].kill()
-			}
+			this.scouts[uid].setLabel( data.hitDmg )
+			this.scouts[uid].setHitPoints( data.hitPoints )
 		}
 
 		if (data.mode == 'WALKING') {

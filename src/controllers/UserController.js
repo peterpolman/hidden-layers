@@ -66,9 +66,7 @@ export default class UserController {
 
 		this.myUser = new User(data)
 		this.myUser.marker.addListener('click', (e) => {
-			window.dispatchEvent(new CustomEvent('user.click', {
-				detail: uid
-			}))
+			window.dispatchEvent(new CustomEvent('user.click', { detail: { id: uid, target: 'user' } }))
 
 			setMessage(uid, `Hi!`)
 

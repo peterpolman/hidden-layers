@@ -16,7 +16,7 @@ export default class StoreController {
     onEnemyAdded(id, data) {
         this.goblins[id] = new Goblin(data.position, 40)
         this.goblins[id].marker.addListener('click', () => {
-            window.dispatchEvent(new CustomEvent('user.click', { detail: id }))
+            window.dispatchEvent(new CustomEvent('user.click', { detail: { id: id, target: 'goblin' } }))
         })
         this.goblins[id].setMap(MAP)
         this.goblins[id].setVisible(false)

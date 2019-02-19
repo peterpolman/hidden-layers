@@ -211,4 +211,30 @@ input[type="password"] {
         border: 0;
     }
 }
+
+.click-effect {
+    position: fixed;
+    border-style: solid;
+    border-color: #3D91CB;
+    border-radius: 50%;
+    animation: .4s clickEffect ease-out;
+    z-index: 99999;
+}
+
+@keyframes clickEffect {
+    0%{
+        opacity: 1;
+        width: 5px;
+        height: 5px;
+        margin: -2.5px;
+        border-width: 5px;
+    }
+    100% {
+        opacity: 0;
+        width: 60px;
+        height: 60px;
+        margin: -30px;
+        border-width: 2px;
+    }
+}
 </style>
