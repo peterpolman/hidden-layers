@@ -73,7 +73,7 @@ export default class ScoutController {
 		this.myScout.setMap(MAP)
 
 		this.myScout.marker.addListener('click', (e) => {
-			window.dispatchEvent(new CustomEvent('user.click', { detail: { id: uid, target: 'scout' } }))
+			window.dispatchEvent(new CustomEvent('character.click', { detail: { id: uid, target: 'scout' } }))
 			MAP.panTo(e.latLng)
 		})
 
@@ -140,7 +140,7 @@ export default class ScoutController {
 	onScoutAdded(uid, data) {
 		this.scouts[uid] = new Scout(data)
 		this.scouts[uid].marker.addListener('click', (e) => {
-			window.dispatchEvent(new CustomEvent('user.click', { detail: { id: uid, target: 'scout' } }))
+			window.dispatchEvent(new CustomEvent('character.click', { detail: { id: uid, target: 'scout' } }))
 		})
 
 		this.scouts[uid].marker.setMap(MAP)

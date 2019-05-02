@@ -66,7 +66,7 @@ export default class UserController {
 
 		this.myUser = new User(data)
 		this.myUser.marker.addListener('click', (e) => {
-			window.dispatchEvent(new CustomEvent('user.click', { detail: { id: uid, target: 'user' } }))
+			window.dispatchEvent(new CustomEvent('character.click', { detail: { id: uid, target: 'user' } }))
 			setMessage(uid, `Hi!`)
 			MAP.panTo(e.latLng)
 		})
@@ -100,7 +100,7 @@ export default class UserController {
 	onUserAdded(uid, data) {
 		this.users[uid] = new User(data)
 		this.users[uid].marker.addListener('click', (e) => {
-			window.dispatchEvent(new CustomEvent('user.click', { detail: { id: uid, target: 'user' } }))
+			window.dispatchEvent(new CustomEvent('character.click', { detail: { id: uid, target: 'user' } }))
 			this.users[uid].indicator.setMap(MAP)
 		})
 

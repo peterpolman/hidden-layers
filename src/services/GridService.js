@@ -33,25 +33,22 @@ export default class GridService {
         visibility.push(outerBounds)
 
         var geoms = {}
-
         if (myUser != null) {
-            var myUserMarkerPath = this.circlePath(myUser.marker.position, 100, 128)
+            var myUserMarkerPath = this.circlePath(myUser.marker.position, 100, 32)
             var myUserMarkerPoly = new google.maps.Polygon({paths: [myUserMarkerPath]})
             myUserMarkerPoly.path = myUserMarkerPath
             var userGeom = this.jstsPoly(myUserMarkerPoly);
             userGeom.id = this.createMarkerId({lat: myUserMarkerPath[0].lat(), lng: myUserMarkerPath[0].lng()})
             geoms[userGeom.id] = userGeom;
         }
-
         if (myScout != null) {
-            var myScoutMarkerPath = this.circlePath(myScout.marker.position, 50, 128)
+            var myScoutMarkerPath = this.circlePath(myScout.marker.position, 50, 32)
             var myScoutMarkerPoly = new google.maps.Polygon({paths: [myScoutMarkerPath]})
             myScoutMarkerPoly.path = myScoutMarkerPath
             var scoutGeom = this.jstsPoly(myScoutMarkerPoly);
             scoutGeom.id = this.createMarkerId({lat: myScoutMarkerPath[0].lat(), lng: myScoutMarkerPath[0].lng()})
             geoms[scoutGeom.id] = scoutGeom;
         }
-
         var myWardMarkersPath = []
 
         myWards.length = 0
@@ -59,7 +56,7 @@ export default class GridService {
             for (var id in myWards) {
                 myWards.length++
 
-                var wardPath = this.circlePath(myWards[id].marker.position, 50, 128)
+                var wardPath = this.circlePath(myWards[id].marker.position, 50, 32)
                 var wardPoly = new google.maps.Polygon({paths: [wardPath]})
                 wardPoly.path = wardPath
                 var wardGeom = this.jstsPoly(wardPoly);
@@ -67,13 +64,11 @@ export default class GridService {
                 geoms[wardGeom.id] = wardGeom;
             }
         }
-
         var allGeoms = geoms
 
         for (var i in geoms) {
             for (var j in geoms) {
                 if (geoms[i].intersects(geoms[j]) && (i != j)) {
-
                     geoms[i] = geoms[i].union(geoms[j])
 
                     delete geoms[j]
@@ -84,7 +79,6 @@ export default class GridService {
         for (var geomIndex in geoms) {
             visibility.push(this.jsts2googleMaps(geoms[geomIndex]))
         }
-
         return visibility
     }
 

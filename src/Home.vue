@@ -143,7 +143,7 @@ export default {
                     this.onMapClick(e);
                 })
 
-                window.addEventListener('user.click', (data) => {
+                window.addEventListener('character.click', (data) => {
                     this.onUserClick(data.detail.id, data.detail.target)
                 })
 

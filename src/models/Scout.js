@@ -26,7 +26,7 @@ export default class Scout extends Character {
 	}
 
 	nextStep(data) {
-		var interval = 60;
+		var interval = 100;
 		var meterPerSecond = .25
 		var offset = ((data.timestamp - data.startTimestamp) / interval) * meterPerSecond
 
