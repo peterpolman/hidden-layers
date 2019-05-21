@@ -7,8 +7,7 @@ import User from '../models/User.js';
 
 export default class MarkerService {
     constructor() {
-        // this.uid = firebase.auth().currentUser.uid
-        this.uid = "NM6UXPCKcug5XNvmfJYX7mOgcEs1";
+        this.uid = firebase.auth().currentUser.uid
         this.db = firebase.database()
 		this.listeners = [];
 
