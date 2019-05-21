@@ -9,8 +9,9 @@ export default class Scout extends Character {
 		super(data.position, data.hitPoints)
 		const iconSize = 40
 
+		this.id = data.id
 		this.uid = data.uid
-		this.scoutRef = firebase.database().ref('scouts').child(data.uid)
+		this.scoutRef = firebase.database().ref('scouts2').child(data.id)
         this.path = null
         this.pathTimer = null
         this.mode = 'STANDING'

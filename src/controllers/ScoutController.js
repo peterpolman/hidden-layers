@@ -1,3 +1,5 @@
+const Geohash = require('latlon-geohash');
+
 import firebase from 'firebase/app'
 import 'firebase/database'
 
@@ -11,41 +13,41 @@ export default class ScoutController {
         this.uid = uid
 		this.loaded = false
         this.myScout = null
-        this.scouts = []
-		this.scoutsRef = firebase.database().ref('scouts')
+		this.scouts = {}
+		this.scoutsRef = firebase.database().ref('scouts2')
 		this.pathService = new PathService
 		this.isWalking = false
-		this.scoutsRef.once("value", (s) => {
-			let count = 0
-
-	        this.scoutsRef.on('child_added', (snap) => {
-				if (snap.key != this.uid) {
-					this.onScoutAdded(snap.key, snap.val())
-				} else {
-					this.onMyScoutAdded(snap.key, snap.val())
-				}
-
-				if (s.numChildren() === ++count) {
-					this.loaded = true
-				}
-			})
-		})
-
-		this.scoutsRef.on('child_changed', (snap) => {
-			if (snap.key != this.uid) {
-				this.onScoutChanged(snap.key, snap.val())
-			} else {
-				this.onMyScoutChanged(snap.key, snap.val())
-			}
-		})
-
-		this.scoutsRef.on('child_removed', (snap) => {
-			if (snap.key != this.uid) {
-				this.onScoutRemoved(snap.key, snap.val())
-			} else {
-				this.onMyScoutRemoved(snap.key, snap.val())
-			}
-		})
+		// this.scoutsRef.once("value", (s) => {
+		// 	let count = 0
+		//
+	    //     this.scoutsRef.on('child_added', (snap) => {
+		// 		if (snap.key != this.uid) {
+		// 			this.onScoutAdded(snap.key, snap.val())
+		// 		} else {
+		// 			this.onMyScoutAdded(snap.key, snap.val())
+		// 		}
+		//
+		// 		if (s.numChildren() === ++count) {
+		// 			this.loaded = true
+		// 		}
+		// 	})
+		// })
+		//
+		// this.scoutsRef.on('child_changed', (snap) => {
+		// 	if (snap.key != this.uid) {
+		// 		this.onScoutChanged(snap.key, snap.val())
+		// 	} else {
+		// 		this.onMyScoutChanged(snap.key, snap.val())
+		// 	}
+		// })
+		//
+		// this.scoutsRef.on('child_removed', (snap) => {
+		// 	if (snap.key != this.uid) {
+		// 		this.onScoutRemoved(snap.key, snap.val())
+		// 	} else {
+		// 		this.onMyScoutRemoved(snap.key, snap.val())
+		// 	}
+		// })
     }
 
     get(uid) {
@@ -53,9 +55,7 @@ export default class ScoutController {
     }
 
 	createScout(uid, data) {
-        const scoutsRef = firebase.database().ref('scouts')
-
-		scoutsRef.child(uid).set(data)
+		this.scoutsRef.child(uid).set(data)
 	}
 
 	moveScout(toLatlng) {
@@ -69,6 +69,7 @@ export default class ScoutController {
 	}
 
     onMyScoutAdded(uid, data) {
+		data.id = uid
 		this.myScout = new Scout(data)
 		this.myScout.setMap(MAP)
 
@@ -89,10 +90,13 @@ export default class ScoutController {
 		}
 	}
 
-	onMyScoutChanged(uid, data) {
+	onMyScoutChanged(sid, data) {
+		var hash = Geohash.encode(this.myScout.marker.position.lat(), this.myScout.marker.position.lng(), 7)
+		this.markersRef.child(hash).child(sid).remove()
+
 		this.myScout.set('mode', data.mode)
 		this.isWalking = false
-		
+
 		clearTimeout(this.myScout.pathTimer)
 
 		if (data.mode == "FIGHTING") {
@@ -114,6 +118,9 @@ export default class ScoutController {
 		if (data.mode == "WALKING") {
 			this.isWalking = true
 			this.myScout.setPosition(data.position)
+
+			var hash = Geohash.encode(this.myScout.marker.position.lat(), this.myScout.marker.position.lng(), 7)
+			this.markersRef.child(hash).child(sid).set(data)
 
 			if (this.myScout.path == null) {
 				this.myScout.path = new Path(data.uid, data.path, '#3D91CB', '#3D91CB')
@@ -137,39 +144,40 @@ export default class ScoutController {
 		this.myScout = null
 	}
 
-	onScoutAdded(uid, data) {
-		this.scouts[uid] = new Scout(data)
-		this.scouts[uid].marker.addListener('click', (e) => {
-			window.dispatchEvent(new CustomEvent('character.click', { detail: { id: uid, target: 'scout' } }))
+	onScoutAdded(sid, data) {
+		data.id = sid
+		this.scouts[sid] = new Scout(data)
+		this.scouts[sid].marker.addListener('click', (e) => {
+			window.dispatchEvent(new CustomEvent('character.click', { detail: { id: sid, target: 'scout' } }))
 		})
 
-		this.scouts[uid].marker.setMap(MAP)
-		this.scouts[uid].marker.setVisible(false)
-		this.scouts[uid].update({
+		this.scouts[sid].marker.setMap(MAP)
+		this.scouts[sid].marker.setVisible(false)
+		this.scouts[sid].update({
 			hp: null,
 			hitPoints: 100
 		})
 	}
 
-	onScoutChanged(uid, data) {
-		this.scouts[uid].set('mode', data.mode)
+	onScoutChanged(sid, data) {
+		this.scouts[sid].set('mode', data.mode)
 
 		if (data.mode == 'HEALING') {
-			const healAmount = data.hitPoints - this.scouts[uid].hitPoints
+			const healAmount = data.hitPoints - this.scouts[sid].hitPoints
 
 			if (healAmount > 0) {
-				this.scouts[uid].setLabel(healAmount, true)
-				this.scouts[uid].setHitPoints(100)
+				this.scouts[sid].setLabel(healAmount, true)
+				this.scouts[sid].setHitPoints(100)
 			}
 		}
 
 		if (data.mode == 'FIGHTING') {
-			this.scouts[uid].setLabel( data.hitDmg )
-			this.scouts[uid].setHitPoints( data.hitPoints )
+			this.scouts[sid].setLabel( data.hitDmg )
+			this.scouts[sid].setHitPoints( data.hitPoints )
 		}
 
 		if (data.mode == 'WALKING') {
-			this.scouts[uid].setPosition(data.position)
+			this.scouts[sid].setPosition(data.position)
 		}
 	}
 

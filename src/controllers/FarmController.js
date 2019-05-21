@@ -10,7 +10,7 @@ export default class FarmController {
         this.farm = null
         this.farms = {}
         this.farmsRef = firebase.database().ref('farms')
-        this.usersRef = firebase.database().ref('users')
+        this.usersRef = firebase.database().ref('users2')
 
         this.farmsRef.on('child_added', (snap) => {
             this.onFarmAdded(snap.key, snap.val())

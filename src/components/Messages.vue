@@ -1,9 +1,9 @@
 <template>
-    <section v-if="messageController && $parent.userController">
+    <section v-if="messageController && $parent.markerController.userController">
         <ul class="messages">
             <li :key="message.key" v-for="message of messageController.messages">
                 <span>[{{ messageController.getDateTime(message.timestamp) }}]</span>
-                <strong v-if="$parent.userController.userNames[message.uid]">{{ $parent.userController.userNames[message.uid] }}:</strong>
+                <strong v-if="$parent.markerController.userController.userNames[message.uid]">{{ $parent.markerController.userController.userNames[message.uid] }}:</strong>
                 <span>{{ message.message }}</span>
             </li>
         </ul>

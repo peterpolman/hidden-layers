@@ -1,3 +1,5 @@
+const Geohash = require('latlon-geohash');
+
 import firebase from 'firebase/app'
 import 'firebase/database'
 
@@ -7,47 +9,12 @@ export default class UserController {
 	constructor(uid) {
 		this.uid = uid
 		this.loaded = false
-        this.myUser = null
+    	this.myUser = null
 		this.users = {}
 		this.userNames = []
-		this.usersRef = firebase.database().ref('users')
-		this.usersRef.once("value", (s) => {
-			let count = 0
-
-			this.usersRef.on('child_added', (snap) => {
-				this.userNames[snap.key] = snap.val().username
-
-				if (snap.key != this.uid) {
-					this.onUserAdded(snap.key, snap.val())
-				} else {
-					this.onMyUserAdded(snap.key, snap.val())
-				}
-
-				if (s.numChildren() === ++count) {
-					this.loaded = true
-				}
-
-				// this.updateUser(snap.key, {
-				// 	exp: 0,
-				// 	stats: {
-				// 		atk: ((snap.val().userClass == 'knight') || snap.val().userClass == 'archer') ? 3 : 0 ,
-				// 		def: (snap.val().userClass == 'knight') ? 3 : 0,
-				// 		int: (snap.val().userClass == 'wizard') ? 3 : 0,
-				// 		dex: (snap.val().userClass == 'archer') ? 3 : 0,
-				// 	}
-				// })
-			})
-
-		})
-
-		this.usersRef.on('child_changed', (snap) => {
-			if (snap.key != this.uid) {
-				this.onUserChanged(snap.key, snap.val())
-			} else {
-				this.onMyUserChanged(snap.key, snap.val())
-			}
-		})
-    }
+		this.usersRef = firebase.database().ref('users2')
+		this.markersRef = firebase.database().ref('markers')
+  	}
 
 	createUser(uid, data) {
 		this.usersRef.child(uid).set(data)
@@ -76,9 +43,17 @@ export default class UserController {
 	}
 
 	onMyUserChanged(uid, data) {
+		var hash = Geohash.encode(this.myUser.marker.position.lat(), this.myUser.marker.position.lng(), 7)
+		console.log(hash)
+		this.markersRef.child(hash).child(uid).remove()
+
 		this.myUser.setPosition(data.position)
 		this.myUser.setExp(data.exp)
 
+		var hash = Geohash.encode(this.myUser.marker.position.lat(), this.myUser.marker.position.lng(), 7)
+		console.log(hash)
+		this.markersRef.child(hash).child(uid).set(data)
+		debugger
 		if (data.mode == "FIGHTING") {
 			if (data.hitPoints > 0) {
 				this.myUser.setLabel(data.hitDmg)

@@ -12,23 +12,23 @@
         </button>
         <button
             :class="`btn btn-geo ${geoService.signal}`"
-            v-if="userController && userController.myUser"
+            v-if="markerController.userController && markerController.userController.myUser"
             v-on:click="onSignalClick">
             <span></span>
         </button>
     </section>
 
     <section class="section-pan">
-        <button v-if="userController && userController.myUser"
-            v-bind:style="{ backgroundImage: 'url(' + assets[userController.myUser.userClass] + ')' }"
+        <button v-if="markerController.userController && markerController.userController.myUser"
+            v-bind:style="{ backgroundImage: 'url(' + assets[markerController.userController.myUser.userClass] + ')' }"
             v-on:click="openCharacterInfo()"
             class="btn btn-more">
             Character
         </button>
-        <button v-if="userController && userController.myUser" v-bind:style="{ backgroundImage: 'url(' + assets[userController.myUser.userClass] + ')' }" v-on:click="onPanUserClick" class="btn">
+        <button v-if="markerController.userController && markerController.userController.myUser" v-bind:style="{ backgroundImage: 'url(' + assets[markerController.userController.myUser.userClass] + ')' }" v-on:click="onPanUserClick" class="btn">
             User
         </button>
-        <button v-if="scoutController" v-bind:style="{ backgroundImage: 'url(' + assets.scout + ')' }" v-on:click="onPanScoutClick" class="btn">
+        <button v-if="markerController.scoutController" v-bind:style="{ backgroundImage: 'url(' + assets.scout + ')' }" v-on:click="onPanScoutClick" class="btn">
             Scout
         </button>
         <button v-if="lootController && lootController.myWards.length" v-bind:style="{ backgroundImage: 'url(' + assets.ward + ')' }" v-on:click="onPanWardClick" class="btn">
@@ -36,7 +36,7 @@
         </button>
     </section>
 
-    <button class="btn btn-stop" v-on:click="onStopClick" v-if="scoutController && scoutController.isWalking">
+    <button class="btn btn-stop" v-on:click="onStopClick" v-if="markerController.scoutController && markerController.scoutController.isWalking">
         Stop
     </button>
 
@@ -74,8 +74,7 @@ import MapService from './services/MapService'
 import GeoService from './services/GeoService'
 
 // Import controllers
-import UserController from './controllers/UserController'
-import ScoutController from './controllers/ScoutController'
+import MarkerController from './controllers/MarkerController'
 import LootController from './controllers/LootController'
 import EnemyController from './controllers/EnemyController'
 import FarmController from './controllers/FarmController'
@@ -117,9 +116,8 @@ export default {
             mapService: new MapService(),
             geoService: new GeoService(),
             farmController: null,
-            userController: null,
-            scoutController: null,
             lootController: null,
+            markerController: new MarkerController(),
             enemyController: new EnemyController()
         }
     },
@@ -127,23 +125,24 @@ export default {
         this.$nextTick(() => {
             this.mapService.init().then((map) => {
                 const uid = firebase.auth().currentUser.uid
-                const usersRef = firebase.database().ref('users')
-                const scoutsRef = firebase.database().ref('scouts')
+
                 const lootRef = firebase.database().ref('loot')
                 const enemiesRef = firebase.database().ref('enemies')
 
-                this.userController = new UserController(uid)
-                this.scoutController = new ScoutController(uid)
                 this.lootController = new LootController(uid)
                 this.farmController = new FarmController()
 
-                this.scoutController.userNames = this.userController.userNames
-
                 MAP.addListener('click', (e) => {
                     this.onMapClick(e);
+                    this.discover()
                 })
 
                 window.addEventListener('character.click', (data) => {
+                    console.log(data.detail)
+
+                    console.log(this.markerController.userController.users)
+            		console.log(this.markerController.scoutController.scouts)
+
                     this.onUserClick(data.detail.id, data.detail.target)
                 })
 
@@ -151,10 +150,6 @@ export default {
                     this.onBuildingClick(data.detail)
                 })
 
-                scoutsRef.on('child_added', (snap) => this.discover())
-                scoutsRef.on('child_changed', (snap) => this.discover())
-                scoutsRef.on('child_removed', (snap) => this.discover())
-                usersRef.on('child_changed', (snap) => this.discover())
                 lootRef.on('child_added', (snap) => this.discover())
                 lootRef.on('child_changed', (snap) => this.discover())
                 lootRef.on('child_removed', (snap) => this.discover())
@@ -172,20 +167,20 @@ export default {
         openCharacterInfo() {
             this.$refs.character.selectedItem = this.selectedItem
             this.$refs.character.inventory = this.$refs.inventory.inventoryController.inventory
-            this.$refs.character.myUser = this.userController.myUser
+            this.$refs.character.myUser = this.markerController.userController.myUser
             this.$refs.character.myFarm = this.farmController.farms[this.uid]
             this.$refs.character.open = true
         },
         discover(radius) {
             const visibility = {
-                user: this.userController.myUser,
-                scout: this.scoutController.myScout,
+                user: this.markerController.userController.myUser,
+                scout: this.markerController.scoutController.myScout,
                 wards: this.lootController.myWards,
             }
 
             const positions = {
-                users: this.userController.users,
-                scouts: this.scoutController.scouts,
+                users: this.markerController.userController.users,
+                scouts: this.markerController.scoutController.scouts,
                 loot: this.lootController.loot,
                 goblins: this.enemyController.goblins,
                 buildings: this.$refs.construction.buildingController.buildings,
@@ -193,8 +188,8 @@ export default {
 
             const discovered = this.mapService.getVisibleObjects(visibility, positions)
 
-            this.userController.users = discovered.users
-            this.scoutController.scouts = discovered.scouts
+            this.markerController.userController.users = discovered.users
+            this.markerController.scoutController.scouts = discovered.scouts
             this.lootController.loot = discovered.loot
             this.enemyController.goblins = discovered.goblins
             this.$refs.construction.buildingController.buildings = discovered.buildings
@@ -229,7 +224,7 @@ export default {
                     }
                     break
                 default:
-                    setMessage(this.uid, `Knock, knock. Hi ${this.userController.userNames[building.uid]}!`)
+                    setMessage(this.uid, `Knock, knock. Hi ${this.markerController.userController.userNames[building.uid]}!`)
                     break
             }
 
@@ -248,27 +243,27 @@ export default {
 
                         if (target === 'user') {
                             const heal = 100
-                            const healAmount = 100 - this.userController.users[uid].hitPoints
+                            const healAmount = 100 - this.markerController.userController.users[uid].hitPoints
                             const data = {
                                 mode: "HEALING",
                                 hitPoints: heal,
                                 healer: this.uid
                             }
 
-                            this.userController.updateUser(uid, data)
-                            setMessage(null, `${this.userController.userNames[data.healer]} heals ${this.userController.userNames[uid]} for ${healAmount} hit points!`)
+                            this.markerController.userController.updateUser(uid, data)
+                            setMessage(null, `${this.markerController.userController.userNames[data.healer]} heals ${this.markerController.userController.userNames[uid]} for ${healAmount} hit points!`)
                         }
                         if (target === 'scout') {
                             const heal = 100
-                            const healAmount = 100 - this.scoutController.scouts[uid].hitPoints
+                            const healAmount = 100 - this.markerController.scoutController.scouts[uid].hitPoints
                             const data = {
                                 mode: "HEALING",
                                 hitPoints: heal,
                                 healer: this.uid
                             }
 
-                            this.scoutController.scouts[uid].update(data)
-                            setMessage(null, `${this.userController.userNames[data.healer]} heals ${this.userController.userNames[uid]}'s scout' for ${healAmount} hit points!`)
+                            this.markerController.scoutController.scouts[uid].update(data)
+                            setMessage(null, `${this.markerController.userController.userNames[data.healer]} heals ${this.markerController.userController.userNames[uid]}'s scout' for ${healAmount} hit points!`)
                         }
                         if (target === 'goblin') {
                             const hitPoints = 100
@@ -277,7 +272,7 @@ export default {
                             goblin.indicator.setMap(MAP)
 
                             goblin.setHitPoints(hitPoints)
-                            setMessage(null, `${this.userController.userNames[this.uid]} heals an injured Goblin.`)
+                            setMessage(null, `${this.markerController.userController.userNames[this.uid]} heals an injured Goblin.`)
 
                             this.enemyController.goblins[uid] = goblin
                         }
@@ -304,23 +299,23 @@ export default {
 
                             this.enemyController.goblins[uid] = goblin
 
-                            setMessage(null, `${this.userController.userNames[this.uid]} hits a Goblin for ${damage} damage.`)
+                            setMessage(null, `${this.markerController.userController.userNames[this.uid]} hits a Goblin for ${damage} damage.`)
                         }
                         else if (goblin.hitPoints <= 0) {
                             goblin.setMap(null)
 
                             delete this.enemyController.goblins[uid]
 
-                            setMessage(null, `${this.userController.userNames[this.uid]} killed a goblin...`)
-                            const user = this.userController.myUser
-                            const exp = this.userController.myUser.exp + 1
+                            setMessage(null, `${this.markerController.userController.userNames[this.uid]} killed a goblin...`)
+                            const user = this.markerController.userController.myUser
+                            const exp = this.markerController.userController.myUser.exp + 1
 
-                            this.userController.updateUser(this.uid, {
+                            this.markerController.userController.updateUser(this.uid, {
                                 exp: exp
                             })
                         }
                         else {
-                            setMessage(null, `${this.userController.userNames[this.uid]} failed to hit a Goblin...`)
+                            setMessage(null, `${this.markerController.userController.userNames[this.uid]} failed to hit a Goblin...`)
                         }
 
                     }
@@ -331,15 +326,15 @@ export default {
                             mode: 'FIGHTING',
                             hitDmg: damage,
                             attacker: this.uid,
-                            hitPoints: this.userController.users[uid].hitPoints - damage
+                            hitPoints: this.markerController.userController.users[uid].hitPoints - damage
                         }
 
-                        if ((data.hitDmg > 0) && (this.userController.users[uid].hitPoints > 0)) {
-                            setMessage(null, `${this.userController.userNames[data.attacker]} hits ${this.userController.userNames[uid]} for ${data.hitDmg} damage.`)
-                            this.userController.updateUser(uid, data)
+                        if ((data.hitDmg > 0) && (this.markerController.userController.users[uid].hitPoints > 0)) {
+                            setMessage(null, `${this.markerController.userController.userNames[data.attacker]} hits ${this.markerController.userController.userNames[uid]} for ${data.hitDmg} damage.`)
+                            this.markerController.userController.updateUser(uid, data)
                         }
-                        else if (this.userController.users[uid].hitPoints <= 0) {
-                            // const position = this.userController.users[uid].position
+                        else if (this.markerController.userController.users[uid].hitPoints <= 0) {
+                            // const position = this.markerController.userController.users[uid].position
                             // const item = {
                             //     id: this.createMarkerId(position),
                             //     slug: 'gold',
@@ -349,10 +344,10 @@ export default {
                             // }
                             // this.lootController.dropAll(item)
 
-                            setMessage(null, `${this.userController.userNames[data.attacker]} hits ${this.userController.userNames[uid]}'s dead corpse...`)
+                            setMessage(null, `${this.markerController.userController.userNames[data.attacker]} hits ${this.markerController.userController.userNames[uid]}'s dead corpse...`)
                         }
                         else {
-                            setMessage(null, `${this.userController.userNames[data.attacker]} failed to hit ${this.userController.userNames[uid]}...`)
+                            setMessage(null, `${this.markerController.userController.userNames[data.attacker]} failed to hit ${this.markerController.userController.userNames[uid]}...`)
                         }
                     }
 
@@ -362,33 +357,33 @@ export default {
                             mode: 'FIGHTING',
                             hitDmg: damage,
                             attacker: this.uid,
-                            hitPoints: this.scoutController.scouts[uid].hitPoints - damage
+                            hitPoints: this.markerController.scoutController.scouts[uid].hitPoints - damage
                         }
 
-                        if ((data.hitDmg > 0) && (this.scoutController.scouts[uid].hitPoints > 0)) {
-                            this.scoutController.scouts[uid].setMode("STANDING")
-                            this.scoutController.scouts[uid].update(data)
-                            this.scoutController.scouts[uid].indicator.setMap(MAP)
+                        if ((data.hitDmg > 0) && (this.markerController.scoutController.scouts[uid].hitPoints > 0)) {
+                            this.markerController.scoutController.scouts[uid].setMode("STANDING")
+                            this.markerController.scoutController.scouts[uid].update(data)
+                            this.markerController.scoutController.scouts[uid].indicator.setMap(MAP)
 
-                            setMessage(null, `${this.userController.userNames[data.attacker]} hits ${this.userController.userNames[uid]}'s scout for ${data.hitDmg} damage.`)
+                            setMessage(null, `${this.markerController.userController.userNames[data.attacker]} hits ${this.markerController.userController.userNames[uid]}'s scout for ${data.hitDmg} damage.`)
                         }
-                        else if (this.scoutController.scouts[uid].hitPoints <= 0) {
-                            this.scoutController.scouts[uid].kill()
+                        else if (this.markerController.scoutController.scouts[uid].hitPoints <= 0) {
+                            this.markerController.scoutController.scouts[uid].kill()
 
-                            setMessage(null, `${this.userController.userNames[data.attacker]} hits ${this.userController.userNames[uid]} his scout's dead corpse...`)
+                            setMessage(null, `${this.markerController.userController.userNames[data.attacker]} hits ${this.markerController.userController.userNames[uid]} his scout's dead corpse...`)
                         }
                         else {
-                            setMessage(null, `${this.userController.userNames[data.attacker]} failed to hit ${this.userController.userNames[uid]}'s scout'...`)
+                            setMessage(null, `${this.markerController.userController.userNames[data.attacker]} failed to hit ${this.markerController.userController.userNames[uid]}'s scout'...`)
                         }
                     }
                     break
                 default:
                     this.$refs.equipment.active = false
                     if (target === 'user') {
-                        setMessage(this.uid, `Hi ${this.userController.userNames[uid]}!`)
+                        setMessage(this.uid, `Hi ${this.markerController.userController.userNames[uid]}!`)
                     }
                     if (target === 'scout') {
-                        setMessage(this.uid, `Hi ${this.userController.userNames[uid]}' scout!`)
+                        setMessage(this.uid, `Hi ${this.markerController.userController.userNames[uid]}' scout!`)
                     }
                     if (target === 'goblin') {
                         setMessage(this.uid, `Hi Goblin!`)
@@ -398,7 +393,7 @@ export default {
         onMapClick(e) {
             const storeController = this.$refs.store.storeController
             const inventoryController = this.$refs.inventory.inventoryController
-            const visibility = { user: this.userController.myUser, scout: this.scoutController.myScout, wards: this.lootController.myWards }
+            const visibility = { user: this.markerController.userController.myUser, scout: this.markerController.scoutController.myScout, wards: this.lootController.myWards }
             const isHidden = this.mapService.isPositionHidden(e.latLng, visibility)
             const position = { lat: e.latLng.lat(), lng: e.latLng.lng(), }
 
@@ -427,7 +422,7 @@ export default {
 
             switch (this.cursorMode) {
                 case "scout":
-                    this.scoutController.moveScout(e.latLng)
+                    this.markerController.scoutController.moveScout(e.latLng)
                     this.handlePixelClick(e.pixel)
                     break
                 case "ward":
@@ -466,12 +461,12 @@ export default {
                     window.MAP.setZoom(16)
                     inventoryController.substract(this.selectedItem, 1)
 
-                    for (let i in this.userController.users) {
-                        this.userController.users[i].setVisible(true)
+                    for (let i in this.markerController.userController.users) {
+                        this.markerController.userController.users[i].setVisible(true)
                     }
 
-                    for (let i in this.scoutController.scouts) {
-                        this.scoutController.scouts[i].setVisible(true)
+                    for (let i in this.markerController.scoutController.scouts) {
+                        this.markerController.scoutController.scouts[i].setVisible(true)
                     }
 
                     for (let i in this.enemyController.goblins) {
@@ -507,7 +502,7 @@ export default {
             }
         },
         onStopClick() {
-            this.scoutController.myScout.setMode("STANDING")
+            this.markerController.scoutController.myScout.setMode("STANDING")
         },
         onSignalClick() {
             this.geoService.getPosition().then(function(r) {
@@ -530,7 +525,7 @@ export default {
                     }
                 }
 
-                this.userController.updateUser(this.uid, data)
+                this.markerController.userController.updateUser(this.uid, data)
 
             }, this.onWatchError.bind(this), {
                 enableHighAccuracy: true,
@@ -557,23 +552,23 @@ export default {
             }
         },
         onPanUserClick() {
-            MAP.panTo(this.userController.myUser.marker.position)
+            MAP.panTo(this.markerController.userController.myUser.marker.position)
         },
         onPanScoutClick() {
             this.cursorMode = "scout"
 
-            if (this.scoutController.myScout != null) {
-                MAP.panTo(this.scoutController.myScout.marker.position)
+            if (this.markerController.scoutController.myScout != null) {
+                MAP.panTo(this.markerController.scoutController.myScout.marker.position)
             } else {
                 const data = {
                     uid: this.uid,
                     hp: 100,
                     position: {
-                        lat: this.userController.myUser.marker.position.lat(),
-                        lng: this.userController.myUser.marker.position.lng()
+                        lat: this.markerController.userController.myUser.marker.position.lat(),
+                        lng: this.markerController.userController.myUser.marker.position.lng()
                     }
                 }
-                this.scoutController.createScout(this.uid, data)
+                this.markerController.scoutController.createScout(this.uid, data)
             }
         },
         handlePixelClick(pixel) {

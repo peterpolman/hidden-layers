@@ -4,7 +4,7 @@
         <h2>{{ storeController.stores[storeController.store].name }}</h2>
         <div>
             Category: {{ storeController.stores[storeController.store].category }}<br>
-            Owner: {{ $parent.userController.userNames[storeController.stores[storeController.store].owner]  }}
+            Owner: {{ $parent.markerController.userController.userNames[storeController.stores[storeController.store].owner]  }}
         </div>
         <button v-on:click="onCloseStore">Close</button>
     </header>
