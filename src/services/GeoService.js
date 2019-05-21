@@ -1,11 +1,5 @@
-import firebase from 'firebase/app';
-import 'firebase/auth';
-
 export default class GeoService {
     constructor() {
-        this.uid = firebase.auth().currentUser.uid
-        this.signal = 'geo-off'
-        this.watcher = null
         this.options = {
             enableHighAccuracy: true,
             maximumAge: 1000,
