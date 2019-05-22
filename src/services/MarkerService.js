@@ -2,6 +2,7 @@ const Geohash = require('latlon-geohash');
 
 import firebase from 'firebase/app';
 import 'firebase/database';
+import 'firebase/auth';
 import CustomLayer from '../models/CustomLayer.js';
 import User from '../models/User.js';
 
@@ -36,13 +37,10 @@ export default class MarkerService {
             // Get the visible markers for the new position
             if (snap.key === 'position') {
                 this.markers[this.uid].setPosition(value);
+                // map.setCenter(value);
             }
         });
 
-    }
-
-    setMyPosition(position) {
-        this.db.ref(`users2/${this.uid}`).child('position').set(position);
     }
 
     discover(position) {

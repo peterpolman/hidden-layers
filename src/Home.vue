@@ -3,6 +3,9 @@
 </template>
 
 <script>
+import firebase from 'firebase/app';
+import 'firebase/database';
+import 'firebase/auth';
 import Map from './components/Map.vue'
 import MarkerService from './services/MarkerService.js'
 
@@ -20,11 +23,15 @@ export default {
                     lat: r.coords.latitude,
                     lng: r.coords.longitude
                 };
-                markers.setMyPosition(position);
-                map.setCenter(position);
+
+                firebase.database().ref(`users2/${firebase.auth().currentUser.uid}`).child('position').set(position);
             }, (err) => {
                 console.log(err);
-            }, this.options
+            }, {
+                enableHighAccuracy: true,
+                maximumAge: 1000,
+                timeout: 30000
+            }
         );
     }
 }

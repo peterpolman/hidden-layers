@@ -3,18 +3,14 @@
 </template>
 
 <script>
-import config from '../config.js';
 const mapboxgl = require('mapbox-gl/dist/mapbox-gl.js');
+
+import config from '../config.js';
 import * as THREE from 'three';
 
 export default {
     name: 'Map',
-    props: {
-
-    },
     mounted() {
-        var mapboxgl = require('mapbox-gl/dist/mapbox-gl.js');
-
         mapboxgl.accessToken = config.mapbox.key;
 
         var map = window.map = new mapboxgl.Map({
@@ -22,14 +18,28 @@ export default {
             style: 'mapbox://styles/peterpolman/cjsli3aee5gab1fl9lpwyx2rd',
             zoom: 19,
             maxZoom: 22,
-            minZoom: 13,
+            minZoom: 10,
             center: [4.8437, 52.3669],
             pitch: 60,
             bearing: 45
         });
 
         map.on('load', function() {
-            // Insert the layer beneath any symbol layer.
+
+            navigator.geolocation.getCurrentPosition(function(r) {
+                const position = {
+                    lat: r.coords.latitude,
+                    lng: r.coords.longitude
+                }
+                map.setCenter(position);
+            }, (err) => {
+                console.log(err);
+            }, {
+                enableHighAccuracy: true,
+                maximumAge: 1000,
+                timeout: 30000
+            });
+
             var layers = map.getStyle().layers;
             var labelLayerId;
             for (var i = 0; i < layers.length; i++) {
@@ -48,9 +58,6 @@ export default {
                 'minzoom': 15,
                 'paint': {
                     'fill-extrusion-color': '#EFEFEF',
-
-                    // use an 'interpolate' expression to add a smooth transition effect to the
-                    // buildings as the user zooms in
                     'fill-extrusion-height': [
                         "interpolate", ["linear"],
                         ["zoom"],
