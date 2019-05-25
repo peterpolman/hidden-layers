@@ -13,7 +13,7 @@ export default {
     mounted() {
         mapboxgl.accessToken = config.mapbox.key;
 
-        var map = window.map = new mapboxgl.Map({
+        const map = window.map = new mapboxgl.Map({
             container: 'map',
             style: 'mapbox://styles/peterpolman/cjsli3aee5gab1fl9lpwyx2rd',
             zoom: 19,
@@ -26,21 +26,14 @@ export default {
 
         map.on('load', function() {
 
-            navigator.geolocation.getCurrentPosition(function(r) {
-                const position = {
-                    lat: r.coords.latitude,
-                    lng: r.coords.longitude
-                }
-                map.setCenter(position);
-            }, (err) => {
-                console.log(err);
-            }, {
-                enableHighAccuracy: true,
-                maximumAge: 1000,
-                timeout: 30000
-            });
+            navigator.geolocation.getCurrentPosition(
+                (r) => map.setCenter({ lat: r.coords.latitude, lng: r.coords.longitude }),
+                (err) => console.log(err),
+                {enableHighAccuracy: true, maximumAge: 1000, timeout: 30000}
+            );
 
             var layers = map.getStyle().layers;
+
             var labelLayerId;
             for (var i = 0; i < layers.length; i++) {
                 if (layers[i].type === 'symbol' && layers[i].layout['text-field']) {
@@ -73,6 +66,8 @@ export default {
                     'fill-extrusion-opacity': .6
                 }
             }, labelLayerId);
+
+            console.log(map.getStyle().layers)
         });
     }
 }

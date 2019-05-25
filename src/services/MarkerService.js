@@ -3,6 +3,7 @@ const Geohash = require('latlon-geohash');
 import firebase from 'firebase/app';
 import 'firebase/database';
 import 'firebase/auth';
+
 import CustomLayer from '../models/CustomLayer.js';
 import User from '../models/User.js';
 
@@ -15,31 +16,30 @@ export default class MarkerService {
         this.markers = {};
         this.markersRef = firebase.database().ref('markers');
 
-        // Add my user to the map and discover other markers
-		this.db.ref(`users2/${this.uid}`).once('value').then((snap) => {
-            var position = snap.val().position;
+        map.on('load', () => {
 
-            this.customLayer = new CustomLayer('3d-scene');
-            window.map.addLayer(this.customLayer);
+            this.db.ref(`users2/${this.uid}`).once('value').then((snap) => {
+                const position = snap.val().position;
+                const customLayer = window.customLayer = new CustomLayer('3d-objects');
+                map.addLayer(customLayer, '3d-buildings');
 
-            const user = new User(this.uid, 0xFF0000, position);
-            this.markers[this.uid] = user;
+                this.markers[this.uid] = new User(this.uid, 0xFF0000, position);
 
-            this.customLayer.world.add(this.markers[this.uid].mesh);
+                this.discover(position);
+    		});
 
-            this.discover(position);
-		});
+            // Listen for changes in my user
+            this.db.ref(`users2/${this.uid}`).on('child_changed', (snap) => {
+                const value = snap.val();
 
-        // Listen for changes in my user
-        this.db.ref(`users2/${this.uid}`).on('child_changed', (snap) => {
-            var value = snap.val();
+                // // Get the visible markers for the new position
+                if (snap.key === 'position') {
+                    this.markers[this.uid].setPosition(value)
+                }
+            });
+        })
 
-            // Get the visible markers for the new position
-            if (snap.key === 'position') {
-                this.markers[this.uid].setPosition(value);
-                // map.setCenter(value);
-            }
-        });
+
 
     }
 
@@ -72,15 +72,19 @@ export default class MarkerService {
 	onMarkerAdded(id, data) {
         // Statically get all data for this user once
         this.db.ref(data.ref).once('value').then((snap) => {
-            var position = snap.val().position;
-
-            this.markers[id] = new User(snap.key, 0xFFFF00, position);
-            this.customLayer.world.add(this.markers[id].mesh);
+            const position = snap.val().position;
+            this.markers[id] = new User(id, 0x0000FF, position);
         });
 
         // Start watching this user for changing properties
         this.db.ref(data.ref).on('child_changed', (snap) => {
-            this.markers[id][snap.key] = snap.val();
+            // Get the visible markers for the new position
+            if (snap.key === 'position') {
+                this.markers[id].setPosition(position);
+            }
+            else {
+                this.markers[id][snap.key] = snap.val();
+            }
         });
 
         // Remove everything when user is removed from geohash

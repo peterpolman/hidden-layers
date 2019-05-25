@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import Utils from '../utils/Utils.js';
 
 export default class User {
@@ -7,20 +7,31 @@ export default class User {
         color,
         position
     ) {
-        const geometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
-        const material = new THREE.MeshPhongMaterial({color: color});
-        const worldProjection = new Utils().projectToWorld(position);
-
         this.id = id;
-        this.mesh = new THREE.Mesh(geometry, material);
-        this.mesh.position.set(worldProjection.x,worldProjection.y,worldProjection.z);
-        this.mesh.matrixAutoUpdate = true;
+        this.color = color;
+        this.coordinates = position;
+
+        customLayer.world.loadObj({
+            obj: './models/human/human.obj',
+            mtl: './models/human/human.mtl'
+        }, (human) => {
+            this.mesh = human.setCoords([position.lng, position.lat]);
+            this.mesh.scale.set(0.05,0.05,0.05);
+            customLayer.world.add(this.mesh);
+        });
+    }
+
+    load(model) {
+        const loader = new THREE.Loader();
+        return new Promise((resolve, reject) => {
+            loader.load(model, (geometry) => {
+                resolve(geometry);
+            });
+        });
     }
 
     setPosition(position) {
-        const worldProjection = new Utils().projectToWorld(position);
-
-        this.mesh.position.set(worldProjection.x,worldProjection.y,worldProjection.z);
+        this.mesh.setCoords([position.lng, position.lat]);
         this.mesh.updateMatrix();
     }
 

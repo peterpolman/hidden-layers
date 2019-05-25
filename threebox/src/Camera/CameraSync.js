@@ -1,47 +1,49 @@
-import * as THREE from 'three';
+var THREE = require("../three.js");
+var utils = require("../utils/utils.js");
+var ThreeboxConstants = require("../utils/constants.js");
 
-var ThreeboxConstants = require("../utils/Constants.js");
+function CameraSync(map, camera, world) {
 
-export default class CameraSync {
-    constructor(map, camera, world) {
-        this.map = map;
-        this.camera = camera;
-        this.active = true;
+    this.map = map;
+    this.camera = camera;
+    this.active = true;
 
-        this.camera.matrixAutoUpdate = false;   // We're in charge of the camera now!
+    this.camera.matrixAutoUpdate = false;   // We're in charge of the camera now!
 
-        // Postion and configure the world group so we can scale it appropriately when the camera zooms
-        this.world = world || new THREE.Group();
-        this.world.position.x = this.world.position.y = ThreeboxConstants.WORLD_SIZE/2
-        this.world.matrixAutoUpdate = false;
-
-
-        //set up basic camera state
-
-        this.state = {
-            fov: 0.6435011087932844,
-            translateCenter: new THREE.Matrix4,
-            worldSizeRatio: 512/ThreeboxConstants.WORLD_SIZE
-        };
-
-        this.state.translateCenter.makeTranslation(ThreeboxConstants.WORLD_SIZE/2, -ThreeboxConstants.WORLD_SIZE / 2, 0);
-
-        // Listen for move events from the map and update the Three.js camera. Some attributes only change when viewport resizes, so update those accordingly
-        var _this = this;
-
-        this.map
-            .on('move', function() {
-                _this.updateCamera()
-            })
-            .on('resize', function(){
-                _this.setupCamera();
-            })
+    // Postion and configure the world group so we can scale it appropriately when the camera zooms
+    this.world = world || new THREE.Group();
+    this.world.position.x = this.world.position.y = ThreeboxConstants.WORLD_SIZE/2
+    this.world.matrixAutoUpdate = false;
 
 
-        this.setupCamera();
-    }
+    //set up basic camera state
 
-    setupCamera() {
+    this.state = {
+        fov: 0.6435011087932844,
+        translateCenter: new THREE.Matrix4,
+        worldSizeRatio: 512/ThreeboxConstants.WORLD_SIZE
+    };
+
+    this.state.translateCenter.makeTranslation(ThreeboxConstants.WORLD_SIZE/2, -ThreeboxConstants.WORLD_SIZE / 2, 0);
+
+    // Listen for move events from the map and update the Three.js camera. Some attributes only change when viewport resizes, so update those accordingly
+    var _this = this;
+
+    this.map
+        .on('move', function() {
+            _this.updateCamera()
+        })
+        .on('resize', function(){
+            _this.setupCamera();
+        })
+
+
+    this.setupCamera();
+}
+
+CameraSync.prototype = {
+
+    setupCamera: function() {
 
         var t = this.map.transform
         const halfFov = this.state.fov / 2;
@@ -51,11 +53,11 @@ export default class CameraSync {
         this.state.cameraToCenterDistance = cameraToCenterDistance;
         this.state.cameraTranslateZ = new THREE.Matrix4().makeTranslation(0,0,cameraToCenterDistance);
         this.state.topHalfSurfaceDistance = Math.sin(halfFov) * cameraToCenterDistance / Math.sin(Math.PI - groundAngle - halfFov);
-
+    
         this.updateCamera();
-    }
+    },
 
-    updateCamera(ev) {
+    updateCamera: function(ev) {
 
         if(!this.camera) {
             console.log('nocamera')
@@ -70,24 +72,8 @@ export default class CameraSync {
         // Add a bit extra to avoid precision problems when a fragment's distance is exactly `furthestDistance`
         const farZ = furthestDistance * 1.01;
 
-        function makePerspectiveMatrix(fovy, aspect, near, far) {
-
-            var out = new THREE.Matrix4();
-            var f = 1.0 / Math.tan(fovy / 2),
-            nf = 1 / (near - far);
-
-            var newMatrix = [
-                f / aspect, 0, 0, 0,
-                0, f, 0, 0,
-                0, 0, (far + near) * nf, -1,
-                0, 0, (2 * far * near) * nf, 0
-            ]
-
-            out.elements = newMatrix
-            return out;
-        }
-
-        this.camera.projectionMatrix = makePerspectiveMatrix(this.state.fov, t.width / t.height, 1, farZ);
+        this.camera.projectionMatrix = utils.makePerspectiveMatrix(this.state.fov, t.width / t.height, 1, farZ);
+        
 
         var cameraWorldMatrix = new THREE.Matrix4();
         var cameraTranslateZ = new THREE.Matrix4().makeTranslation(0,0,this.state.cameraToCenterDistance);
@@ -100,12 +86,12 @@ export default class CameraSync {
         cameraWorldMatrix
             .premultiply(this.state.cameraTranslateZ)
             .premultiply(rotatePitch)
-            .premultiply(rotateBearing)
+            .premultiply(rotateBearing)   
 
         this.camera.matrixWorld.copy(cameraWorldMatrix);
 
 
-        var zoomPow = t.scale * this.state.worldSizeRatio;
+        var zoomPow = t.scale * this.state.worldSizeRatio; 
 
         // Handle scaling and translation of objects in the map in the world's matrix transform, not the camera
         var scale = new THREE.Matrix4;
@@ -115,14 +101,14 @@ export default class CameraSync {
 
         scale
             .makeScale( zoomPow, zoomPow , zoomPow );
-
-
+    
+        
         var x = -this.map.transform.x || -this.map.transform.point.x;
         var y = this.map.transform.y || this.map.transform.point.y;
 
         translateMap
             .makeTranslation(x, y, 0);
-
+        
         rotateMap
             .makeRotationZ(Math.PI);
 
@@ -133,9 +119,9 @@ export default class CameraSync {
             .premultiply(scale)
             .premultiply(translateMap)
 
-        // this.camera.updateMatrix();
 
         // utils.prettyPrintMatrix(this.camera.projectionMatrix.elements);
     }
-
 }
+
+module.exports = exports = CameraSync;
