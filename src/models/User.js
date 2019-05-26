@@ -1,12 +1,11 @@
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-import Utils from '../utils/Utils.js';
-
 export default class User {
     constructor (
         id,
         color,
         position
     ) {
+        const customLayer = window.customLayer;
+
         this.id = id;
         this.color = color;
         this.coordinates = position;
@@ -18,15 +17,6 @@ export default class User {
             this.mesh = human.setCoords([position.lng, position.lat]);
             this.mesh.scale.set(0.05,0.05,0.05);
             customLayer.world.add(this.mesh);
-        });
-    }
-
-    load(model) {
-        const loader = new THREE.Loader();
-        return new Promise((resolve, reject) => {
-            loader.load(model, (geometry) => {
-                resolve(geometry);
-            });
         });
     }
 

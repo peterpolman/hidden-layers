@@ -1,5 +1,3 @@
-import Utils from '../utils/Utils.js';
-
 export default class CustomLayer {
     constructor(id) {
         this.id = id;
@@ -8,6 +6,8 @@ export default class CustomLayer {
     }
 
     onAdd(map, mbxContext) {
+        const Threebox = window.Threebox;
+
         this.world = new Threebox(
             map,
             mbxContext,
@@ -34,7 +34,7 @@ export default class CustomLayer {
         });
     }
 
-    render(gl, matrix){
+    render(){
         this.world.update();
     }
 }

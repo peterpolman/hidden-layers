@@ -6,7 +6,6 @@
 const mapboxgl = require('mapbox-gl/dist/mapbox-gl.js');
 
 import config from '../config.js';
-import * as THREE from 'three';
 
 export default {
     name: 'Map',
@@ -17,8 +16,8 @@ export default {
             container: 'map',
             style: 'mapbox://styles/peterpolman/cjsli3aee5gab1fl9lpwyx2rd',
             zoom: 19,
-            maxZoom: 22,
-            minZoom: 10,
+            maxZoom: 20,
+            minZoom: 17,
             center: [4.8437, 52.3669],
             pitch: 60,
             bearing: 45
@@ -66,8 +65,6 @@ export default {
                     'fill-extrusion-opacity': .6
                 }
             }, labelLayerId);
-
-            console.log(map.getStyle().layers)
         });
     }
 }
