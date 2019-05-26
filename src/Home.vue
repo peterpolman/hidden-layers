@@ -3,11 +3,8 @@
 </template>
 
 <script>
-import firebase from 'firebase/app';
-import 'firebase/database';
-import 'firebase/auth';
-import Map from './components/Map.vue'
-import MarkerService from './services/MarkerService.js'
+import Map from './components/Map.vue';
+import MarkerService from './services/MarkerService';
 
 export default {
     name: 'app',
@@ -16,23 +13,7 @@ export default {
     },
     mounted() {
         var markers = new MarkerService;
-
-        navigator.geolocation.watchPosition(
-            (r) => {
-                const position = {
-                    lat: r.coords.latitude,
-                    lng: r.coords.longitude
-                };
-
-                firebase.database().ref(`users2/${firebase.auth().currentUser.uid}`).child('position').set(position);
-            }, (err) => {
-                console.log(err);
-            }, {
-                enableHighAccuracy: true,
-                maximumAge: 1000,
-                timeout: 30000
-            }
-        );
+        markers.load();
     }
 }
 </script>

@@ -8,16 +8,16 @@ export default class CustomLayer {
     onAdd(map, mbxContext) {
         const Threebox = window.Threebox;
 
-        this.world = new Threebox(
+        this.tb = new Threebox(
             map,
             mbxContext,
             {defaultLights: true, passiveRendering: false}
         );
 
         //add mousing interactions
-        map.on('click', (e) => {
+        MAP.on('click', (e) => {
             // calculate objects intersecting the picking ray
-            var intersect = this.world.queryRenderedFeatures(e.point)[0]
+            var intersect = this.tb.queryRenderedFeatures(e.point)[0]
             var intersectionExists = typeof intersect == "object"
 
             // if intersect exists, highlight it
@@ -29,12 +29,12 @@ export default class CustomLayer {
             // on state change, fire a repaint
             if (this.active !== intersectionExists) {
                 this.active = intersectionExists;
-                this.world.repaint();
+                this.tb.repaint();
             }
         });
     }
 
     render(){
-        this.world.update();
+        this.tb.update();
     }
 }

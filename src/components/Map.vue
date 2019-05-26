@@ -6,13 +6,14 @@
 const mapboxgl = require('mapbox-gl/dist/mapbox-gl.js');
 
 import config from '../config.js';
+import GeoService from '../services/GeoService';
 
 export default {
     name: 'Map',
     mounted() {
         mapboxgl.accessToken = config.mapbox.key;
-
-        const map = window.map = new mapboxgl.Map({
+        const geo = new GeoService();
+        const MAP = window.MAP = new mapboxgl.Map({
             container: 'map',
             style: 'mapbox://styles/peterpolman/cjsli3aee5gab1fl9lpwyx2rd',
             zoom: 19,
@@ -23,15 +24,10 @@ export default {
             bearing: 45
         });
 
-        map.on('load', function() {
+        MAP.on('load', function() {
+            geo.getPosition().then((position) => MAP.setCenter(position));
 
-            navigator.geolocation.getCurrentPosition(
-                (r) => map.setCenter({ lat: r.coords.latitude, lng: r.coords.longitude }),
-                (err) => console.log(err),
-                {enableHighAccuracy: true, maximumAge: 1000, timeout: 30000}
-            );
-
-            var layers = map.getStyle().layers;
+            var layers = MAP.getStyle().layers;
 
             var labelLayerId;
             for (var i = 0; i < layers.length; i++) {
@@ -41,7 +37,7 @@ export default {
                 }
             }
 
-            map.addLayer({
+            MAP.addLayer({
                 'id': '3d-buildings',
                 'source': 'composite',
                 'source-layer': 'building',

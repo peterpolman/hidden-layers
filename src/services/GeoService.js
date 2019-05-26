@@ -1,3 +1,7 @@
+import firebase from 'firebase/app';
+import 'firebase/database';
+import 'firebase/auth';
+
 export default class GeoService {
     constructor() {
         this.options = {
@@ -5,6 +9,7 @@ export default class GeoService {
             maximumAge: 1000,
             timeout: 30000
         }
+        this.watchPosition();
     }
 
     getPosition() {
@@ -19,5 +24,19 @@ export default class GeoService {
                 reject(err);
             }, this.options);
         })
+    }
+
+    watchPosition() {
+        return navigator.geolocation.watchPosition(
+            (r) => {
+                const position = {
+                    lat: r.coords.latitude,
+                    lng: r.coords.longitude
+                };
+                // MAP.setCenter(position);
+                firebase.database().ref(`users2/${firebase.auth().currentUser.uid}`).child('position').set(position);
+            }, (err) => {
+                console.log(err);
+            }, this.options);
     }
 }

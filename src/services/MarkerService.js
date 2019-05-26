@@ -9,94 +9,129 @@ import User from '../models/User.js';
 
 export default class MarkerService {
     constructor() {
-        this.uid = firebase.auth().currentUser.uid
+        this.uid = firebase.auth().currentUser.uid;
         this.db = firebase.database()
-		this.listeners = [];
+		this.hashes = [];
 
         this.markers = {};
         this.markersRef = firebase.database().ref('markers');
+        this.markersLoaded = false;
 
-        map.on('load', () => {
+        // firebase.database().ref(`users2`).once('value').then((snap) => {
+        //     const allUsers = snap.val();
+        //
+        //     for (let uid in allUsers) {
+        //         let position = allUsers[uid].position;
+        //         let hash = Geohash.encode(position.lat, position.lng, 7);
+        //
+        //         this.markersRef.child(hash).child(uid).set({position: {lat: position.lat, lng: position.lng }, ref: `users2/${uid}`});
+        //         console.log(uid);
+        //     }
+        // })
+    }
+
+    load() {
+        const MAP = window.MAP;
+
+        MAP.on('load', () => {
 
             this.db.ref(`users2/${this.uid}`).once('value').then((snap) => {
+                const HL = window.HL = new CustomLayer('3d-objects');
                 const position = snap.val().position;
-                const customLayer = window.customLayer = new CustomLayer('3d-objects');
-                map.addLayer(customLayer, '3d-buildings');
 
-                this.markers[this.uid] = new User(this.uid, 0xFF0000, position);
+                // Add to layer array before buildings
+                MAP.addLayer(HL, '3d-buildings');
 
-                this.discover(position);
-    		});
+                this.markers[this.uid] = new User(this.uid, position);
+                this.loadNearbyMarkers(this.uid, position);
+
+                console.log("Initial discovery! ", snap.key, position);
+            });
 
             // Listen for changes in my user
             this.db.ref(`users2/${this.uid}`).on('child_changed', (snap) => {
                 const value = snap.val();
-
+                console.log('I changed')
                 // // Get the visible markers for the new position
                 if (snap.key === 'position') {
-                    this.markers[this.uid].setPosition(value)
+                    this.loadNearbyMarkers(this.uid, value);
+                    console.log("Discover after position change: ", snap.key, value);
                 }
             });
-        })
-
-
-
+        });
     }
 
-    discover(position) {
-        // Get current geohash and neigbours
-		let hash = Geohash.encode(position.lat, position.lng, 7);
-		let neighbours = Geohash.neighbours(hash);
+    /*
+     * Load nearby markers for the given objects position.
+     * @param uid The user id doing the discovery
+     * @param position The lat, lng for the origin of the discovery
+     */
+    loadNearbyMarkers(uid, position) {
+        // Get the old geohash
+        let oldHash = Geohash.encode(this.markers[uid].position.lat, this.markers[uid].position.lng, 7);
+        // Get current geohash
+        let hash = Geohash.encode(position.lat, position.lng, 7);
+        // Get neighbours for current geohash
+        let neighbours = Geohash.neighbours(hash);
 
-		// Remove the existing listeners
-		for (let l in this.listeners) {
-			this.markersRef.child(this.listeners[l]).off()
-		}
+        // Check if the hash is changed
+        if ((oldHash !== hash) || !this.markersLoaded) {
+            console.log('Hash change detected!');
 
-		this.listeners = [];
+            // Remove the marker record from the old hash
+            this.markersRef.child(oldHash).child(uid).remove();
 
-		// Add new listeners for the current geohash
-		this.markersRef.child(hash).on('child_added', (snap) => (snap.key != this.uid) ? this.onMarkerAdded(snap.key, snap.val()) : '');
-		this.markersRef.child(hash).on('child_removed', (snap) => (snap.key != this.uid) ? this.onMarkerRemoved(snap.key, snap.val()) : '');
-		this.listeners.push(hash);
+            // Set the new or updated marker record
+            this.markersRef.child(hash).child(uid).set({ position: position, ref: `users2/${uid}` });
 
-		// Add new listeners for the neighbouring geohashes
-		for (let n in neighbours) {
-			this.markersRef.child(neighbours[n]).on('child_added', (snap) => (snap.key != this.uid) ? this.onMarkerAdded(snap.key, snap.val()) : '');
-			this.markersRef.child(neighbours[n]).on('child_removed', (snap) => (snap.key != this.uid) ? this.onMarkerRemoved(snap.key, snap.val()) : '');
-			this.listeners.push(neighbours[n]);
-		}
-	}
+            // Remove the existing listeners
+            for (let l in this.hashes) {
+                this.markersRef.child(this.hashes[l]).off()
+            }
 
-    // A marker has been added to the geohash, set up a listener for the reference
+            // Remove all existing other users from the scene and detach listeners
+            for (let uid in this.markers) {
+                if (uid != this.uid) this.markers[uid].remove()
+            }
+        }
+
+        this.watchNearbyGeohashes(hash, neighbours);
+        console.log(this.hashes)
+
+        this.markersLoaded = true;
+    }
+
+    watchNearbyGeohashes(hash, neighbours) {
+        // Empty the listeners and set up new ones
+        this.hashes = [];
+
+        // Add new listeners for the current geohash if there is a hash change
+        this.markersRef.child(hash).on('child_added', (snap) => (this.uid !== snap.key) ? this.onMarkerAdded(snap.key, snap.val()) : '');
+        this.markersRef.child(hash).on('child_removed', (snap) => (this.uid !== snap.key) ? this.onMarkerRemoved(snap.key, snap.val()) : '');
+        this.hashes.push(hash);
+
+        // Add new listeners for the neighbouring geohashes if there is a hash change
+        for (let n in neighbours) {
+            this.markersRef.child(neighbours[n]).on('child_added', (snap) => (this.uid !== snap.key) ? this.onMarkerAdded(snap.key, snap.val()) : '');
+            this.markersRef.child(neighbours[n]).on('child_removed', (snap) => (this.uid !== snap.key) ? this.onMarkerRemoved(snap.key, snap.val()) : '');
+            this.hashes.push(neighbours[n]);
+        }
+    }
+
+    // A marker is added to geohash
 	onMarkerAdded(id, data) {
+        console.log('Marker is added: ', id, data);
         // Statically get all data for this user once
         this.db.ref(data.ref).once('value').then((snap) => {
-            const position = snap.val().position;
-            this.markers[id] = new User(id, 0x0000FF, position);
-        });
-
-        // Start watching this user for changing properties
-        this.db.ref(data.ref).on('child_changed', (snap) => {
-            // Get the visible markers for the new position
-            if (snap.key === 'position') {
-                this.markers[id].setPosition(position);
-            }
-            else {
-                this.markers[id][snap.key] = snap.val();
-            }
-        });
-
-        // Remove everything when user is removed from geohash
-        this.db.ref(data.ref).on('child_removed', (snap) => {
-            console.log("Removed: ", snap.val());
+            this.markers[id] = new User(id, snap.val().position);
         });
 	}
 
-	// A marker has been removed from the geohash, remove from list and its
+	// A marker is removed from geohash
 	onMarkerRemoved(id, data) {
-		delete this.markersProxy[id];
-		this.db.ref(data.ref).off();
+        console.log('Marker is removed: ', id, data);
+        this.markers[id].remove()
+		delete this.markers[id];
 	}
 
 }
