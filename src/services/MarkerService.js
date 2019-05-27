@@ -96,7 +96,6 @@ export default class MarkerService {
         }
 
         this.watchNearbyGeohashes(hash, neighbours);
-        console.log(this.hashes)
 
         this.markersLoaded = true;
     }

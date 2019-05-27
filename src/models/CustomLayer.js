@@ -7,11 +7,12 @@ export default class CustomLayer {
 
     onAdd(map, mbxContext) {
         const Threebox = window.Threebox;
+        const MAP = window.MAP;
 
         this.tb = new Threebox(
-            map,
+            MAP,
             mbxContext,
-            {defaultLights: true, passiveRendering: false}
+            {defaultLights: true}
         );
 
         //add mousing interactions
@@ -23,7 +24,9 @@ export default class CustomLayer {
             // if intersect exists, highlight it
             if (intersect) {
                 var nearestObject = intersect.object;
-                alert(nearestObject.uuid)
+                var target = nearestObject.parent.parent;
+                alert(target.name);
+                console.log(target.userData);
             }
 
             // on state change, fire a repaint
