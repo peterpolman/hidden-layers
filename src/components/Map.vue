@@ -16,13 +16,22 @@ export default {
         const MAP = window.MAP = new mapboxgl.Map({
             container: 'map',
             style: 'mapbox://styles/peterpolman/cjsli3aee5gab1fl9lpwyx2rd',
-            zoom: 19,
+            zoom: 20,
             maxZoom: 20,
             minZoom: 17,
+            dragZoom: true,
+            dragPan: false,
             center: [4.8437, 52.3669],
             pitch: 60,
-            bearing: 45
+            bearing: 45,
+            antialias: true,
+            pitchWithRotate: false,
+            touchZoomRotate: false,
+            doubleClickZoom: false,
+            scrollZoom: false
         });
+
+        MAP.addControl(new mapboxgl.NavigationControl());
 
         MAP.on('load', function() {
             geo.getPosition().then((position) => MAP.setCenter(position));
@@ -61,6 +70,11 @@ export default {
                     'fill-extrusion-opacity': .6
                 }
             }, labelLayerId);
+
+            var tag = document.createElement('SCRIPT');
+            tag.type = "text/javascript";
+            tag.src = `https://maps.googleapis.com/maps/api/js?key=${config.google.key}&libraries=places`;
+            document.body.appendChild(tag);
         });
     }
 }

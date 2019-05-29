@@ -19,7 +19,6 @@ export default class User {
 
     loadAtPosition(id, position) {
         return this.tb.loadObj({
-            // obj: './models/robot/robot.obj',
             obj: './models/human/human.obj',
             mtl: './models/human/human.mtl'
         }, (human) => {
@@ -34,13 +33,11 @@ export default class User {
                 position: position
             }
 
+            this.mesh = this.tb.Object3D({obj:human, units:'meters', scale: 0.05 });
+            this.mesh.setCoords([position.lng, position.lat]);
+            this.tb.add(this.mesh);
 
-            const mesh = this.tb.Object3D({obj:human, units:'meters', scale: 0.05 }).setCoords([position.lng, position.lat]);
-            mesh.material = new THREE.MeshLambertMaterial({color: 0xff0000, transparent: true, opacity: 0.5});
-
-            var material = new THREE.MeshStandardMaterial({metalness: 0, roughness: 0.5});
-
-            this.tb.add(mesh);
+            console.log('Mesh added: ', id, this.mesh)
         });
     }
 
