@@ -4,7 +4,7 @@ import firebase from 'firebase/app';
 import 'firebase/database';
 import 'firebase/auth';
 
-import CustomLayer from '../models/CustomLayer.js';
+import HiddenLayer from '../models/HiddenLayer.js';
 import User from '../models/User.js';
 
 export default class MarkerService {
@@ -13,7 +13,6 @@ export default class MarkerService {
         this.db = firebase.database()
 		this.hashes = [];
 
-        this.markers = {};
         this.markersRef = firebase.database().ref('markers');
         this.markersLoaded = false;
 
@@ -36,13 +35,13 @@ export default class MarkerService {
         MAP.on('load', () => {
 
             this.db.ref(`users2/${this.uid}`).once('value').then((snap) => {
-                const HL = window.HL = new CustomLayer('3d-objects');
+                const HL = window.HL = new HiddenLayer('3d-objects');
                 const position = snap.val().position;
 
                 // Add to layer array before buildings
                 MAP.addLayer(HL, '3d-buildings');
 
-                this.markers[this.uid] = new User(this.uid, position);
+                HL.markers[this.uid] = new User(this.uid, snap.val());
                 this.loadNearbyMarkers(this.uid, position);
 
                 console.log("Initial discovery! ", snap.key, position);
@@ -63,12 +62,12 @@ export default class MarkerService {
 
     /*
      * Load nearby markers for the given objects position.
-     * @param uid The user id doing the discovery
-     * @param position The lat, lng for the origin of the discovery
+     * @param {string} uid The user id doing the discovery
+     * @param {object} position The {lat, lng} for the origin of the discovery
      */
     loadNearbyMarkers(uid, position) {
         // Get the old geohash
-        let oldHash = Geohash.encode(this.markers[uid].position.lat, this.markers[uid].position.lng, 7);
+        let oldHash = Geohash.encode(HL.markers[uid].position.lat, HL.markers[uid].position.lng, 7);
         // Get current geohash
         let hash = Geohash.encode(position.lat, position.lng, 7);
         // Get neighbours for current geohash
@@ -90,8 +89,8 @@ export default class MarkerService {
             }
 
             // Remove all existing other users from the scene and detach listeners
-            for (let uid in this.markers) {
-                if (uid != this.uid) this.markers[uid].remove()
+            for (let uid in HL.markers) {
+                if (uid != this.uid) HL.markers[uid].remove()
             }
         }
 
@@ -122,15 +121,16 @@ export default class MarkerService {
         console.log('Marker is added: ', id, data);
         // Statically get all data for this user once
         this.db.ref(data.ref).once('value').then((snap) => {
-            this.markers[id] = new User(id, snap.val().position);
+            console.log(HL)
+            HL.markers[id] = new User(id, snap.val());
         });
 	}
 
 	// A marker is removed from geohash
 	onMarkerRemoved(id, data) {
         console.log('Marker is removed: ', id, data);
-        this.markers[id].remove()
-		delete this.markers[id];
+        HL.markers[id].remove()
+		delete HL.markers[id];
 	}
 
 }

@@ -1,5 +1,5 @@
 <template>
-<div id="map"></div>
+    <div id="map"></div>
 </template>
 
 <script>
@@ -18,17 +18,18 @@ export default {
             style: 'mapbox://styles/peterpolman/cjsli3aee5gab1fl9lpwyx2rd',
             zoom: 20,
             maxZoom: 20,
-            minZoom: 17,
-            dragZoom: true,
-            dragPan: false,
+            // minZoom: 17,
+            // dragZoom: false,
+            // dragPan: false,
+            // dragRotate: true,
             center: [4.8437, 52.3669],
             pitch: 60,
             bearing: 45,
             antialias: true,
-            pitchWithRotate: false,
-            touchZoomRotate: false,
-            doubleClickZoom: false,
-            scrollZoom: false
+            // scrollZoom: false,
+            // pitchWithRotate: false,
+            // touchZoomRotate: false,
+            // doubleClickZoom: false
         });
 
         MAP.addControl(new mapboxgl.NavigationControl());

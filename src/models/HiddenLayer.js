@@ -1,6 +1,7 @@
-export default class CustomLayer {
+export default class HiddenLayer {
     constructor(id) {
         this.id = id;
+        this.markers = {};
         this.type = 'custom';
         this.renderingMode = '3d';
         this.active = false;
@@ -45,9 +46,10 @@ export default class CustomLayer {
     }
 
     handleObjectClick(nearestObject) {
-        var target = nearestObject.parent.parent;
-        console.log('Casted ray hit: ', target.name);
-        alert(target.name);
+        const target = nearestObject.parent.parent;
+        const id = target.userData.id;
+
+        console.log('Casted ray hit: ', this.markers[id]);
     }
 
     handleMapClick(e) {
