@@ -18,28 +18,33 @@ export default {
             style: 'mapbox://styles/peterpolman/cjsli3aee5gab1fl9lpwyx2rd',
             zoom: 20,
             maxZoom: 20,
-            // minZoom: 17,
-            // dragZoom: false,
-            // dragPan: false,
-            // dragRotate: true,
+            minZoom: 17,
             center: [4.8437, 52.3669],
             pitch: 60,
             bearing: 45,
             antialias: true,
+            doubleClickZoom: false,
+            // dragZoom: false,
+            // dragPan: false,
             // scrollZoom: false,
             // pitchWithRotate: false,
-            // touchZoomRotate: false,
-            // doubleClickZoom: false
+            // touchZoomRotate: false
         });
 
-        MAP.addControl(new mapboxgl.NavigationControl());
+        MAP.on('click', 'water', function (e) {
+            new mapboxgl.Popup()
+                .setLngLat(e.lngLat)
+                .setHTML('Water')
+                .addTo(MAP);
+        });
 
         MAP.on('load', function() {
             geo.getPosition().then((position) => MAP.setCenter(position));
 
             var layers = MAP.getStyle().layers;
-
+            // var features = MAP.queryRenderedFeatures({ layers: ['water', 'national_park'] });
             var labelLayerId;
+
             for (var i = 0; i < layers.length; i++) {
                 if (layers[i].type === 'symbol' && layers[i].layout['text-field']) {
                     labelLayerId = layers[i].id;
@@ -71,12 +76,12 @@ export default {
                     'fill-extrusion-opacity': .6
                 }
             }, labelLayerId);
-
-            var tag = document.createElement('SCRIPT');
-            tag.type = "text/javascript";
-            tag.src = `https://maps.googleapis.com/maps/api/js?key=${config.google.key}&libraries=places`;
-            document.body.appendChild(tag);
         });
+
+        let tag = document.createElement('SCRIPT');
+        tag.type = "text/javascript";
+        tag.src = `https://maps.googleapis.com/maps/api/js?key=${config.google.key}&libraries=places`;
+        document.body.appendChild(tag);
     }
 }
 </script>

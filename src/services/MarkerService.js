@@ -12,21 +12,8 @@ export default class MarkerService {
         this.uid = firebase.auth().currentUser.uid;
         this.db = firebase.database()
 		this.hashes = [];
-
         this.markersRef = firebase.database().ref('markers');
         this.markersLoaded = false;
-
-        // firebase.database().ref(`users2`).once('value').then((snap) => {
-        //     const allUsers = snap.val();
-        //
-        //     for (let uid in allUsers) {
-        //         let position = allUsers[uid].position;
-        //         let hash = Geohash.encode(position.lat, position.lng, 7);
-        //
-        //         this.markersRef.child(hash).child(uid).set({position: {lat: position.lat, lng: position.lng }, ref: `users2/${uid}`});
-        //         console.log(uid);
-        //     }
-        // })
     }
 
     load() {
@@ -50,7 +37,7 @@ export default class MarkerService {
             // Listen for changes in my user
             this.db.ref(`users2/${this.uid}`).on('child_changed', (snap) => {
                 const value = snap.val();
-                console.log('I changed')
+
                 // // Get the visible markers for the new position
                 if (snap.key === 'position') {
                     this.loadNearbyMarkers(this.uid, value);
@@ -66,6 +53,7 @@ export default class MarkerService {
      * @param {object} position The {lat, lng} for the origin of the discovery
      */
     loadNearbyMarkers(uid, position) {
+        const HL = window.HL;
         // Get the old geohash
         let oldHash = Geohash.encode(HL.markers[uid].position.lat, HL.markers[uid].position.lng, 7);
         // Get current geohash
@@ -118,16 +106,17 @@ export default class MarkerService {
 
     // A marker is added to geohash
 	onMarkerAdded(id, data) {
+        const HL = window.HL;
         console.log('Marker is added: ', id, data);
         // Statically get all data for this user once
         this.db.ref(data.ref).once('value').then((snap) => {
-            console.log(HL)
             HL.markers[id] = new User(id, snap.val());
         });
 	}
 
 	// A marker is removed from geohash
 	onMarkerRemoved(id, data) {
+        const HL = window.HL;
         console.log('Marker is removed: ', id, data);
         HL.markers[id].remove()
 		delete HL.markers[id];

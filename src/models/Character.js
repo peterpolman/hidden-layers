@@ -1,6 +1,3 @@
-import firebase from 'firebase/app';
-import 'firebase/database';
-
 export default class Character {
     constructor(id, data) {
         const HL = window.HL;
@@ -25,8 +22,7 @@ export default class Character {
                 position: position
             }
 
-            this.mesh = this.tb.Object3D({obj:object, units:'meters', scale: 0.05 });
-            this.mesh.setCoords([position.lng, position.lat]);
+            this.mesh = this.tb.Object3D({obj:object, units:'meters', scale: 0.05 }).setCoords([position.lng, position.lat]);
             this.tb.add(this.mesh);
 
             console.log('Object added: ', id, this.mesh)

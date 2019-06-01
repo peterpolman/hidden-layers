@@ -2,7 +2,7 @@
     <div class="panel panel-default">
         <ul>
             <li :key="item" v-for="item in items"> -->
-                <button>
+                <button class="btn btn-">
                 <!-- v-bind:style="{ backgroundImage: `url(${assets[item.slug]})` }"
                 v-bind:class="`btn btn-${item.slug}`"
                 v-on:click="onItemClick(item)">

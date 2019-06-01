@@ -1,17 +1,24 @@
 <template>
-    <div class="container">
-        <router-view></router-view>
+    <div>
+        <img src.bind="wiz" alt="" />
     </div>
 </template>
 
 <script>
 import firebase from 'firebase/app';
-import 'firebase/auth';
+
 export default {
+    name: 'Profile',
+    props: ['markers'],
     data() {
         return {
-            currentUser: firebase.auth().currentUser
         }
+    },
+    mounted() {
+
     }
 }
 </script>
+
+<style scoped>
+</style>

@@ -1,25 +1,22 @@
 <template>
     <div>
         <Map />
-        <Panel class="actions" items="items" />
     </div>
 </template>
 
 <script>
 import Map from './components/Map.vue';
-import Panel from './components/Panel.vue';
-
 import MarkerService from './services/MarkerService';
 
 export default {
     name: 'app',
     components: {
-        Map,
-        Panel
+        Map
     },
     data() {
         return {
-            items: [1,2,3,4,5]
+            items: null,
+            HL: null
         }
     },
     mounted() {
