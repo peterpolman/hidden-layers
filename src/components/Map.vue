@@ -34,7 +34,7 @@ export default {
         MAP.on('click', 'water', function (e) {
             new mapboxgl.Popup()
                 .setLngLat(e.lngLat)
-                .setHTML('Water')
+                .setHTML('You discovered some water! Add it to your resources.')
                 .addTo(MAP);
         });
 

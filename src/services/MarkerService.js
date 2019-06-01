@@ -27,8 +27,10 @@ export default class MarkerService {
 
                 // Add to layer array before buildings
                 MAP.addLayer(HL, '3d-buildings');
-
                 HL.markers[this.uid] = new User(this.uid, snap.val());
+
+                HL.discover(snap.val().position);
+
                 this.loadNearbyMarkers(this.uid, position);
 
                 console.log("Initial discovery! ", snap.key, position);
@@ -107,7 +109,7 @@ export default class MarkerService {
     // A marker is added to geohash
 	onMarkerAdded(id, data) {
         const HL = window.HL;
-        console.log('Marker is added: ', id, data);
+        console.log('Marker is discovered: ', id, data);
         // Statically get all data for this user once
         this.db.ref(data.ref).once('value').then((snap) => {
             HL.markers[id] = new User(id, snap.val());

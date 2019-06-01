@@ -1,6 +1,9 @@
+import firebase from 'firebase/app';
+
 export default class HiddenLayer {
     constructor(id) {
         const google = window.google;
+        const MAP = window.MAP;
 
         this.id = id;
         this.markers = {};
@@ -9,6 +12,12 @@ export default class HiddenLayer {
         this.active = false;
         this.tb = null;
         this.placesService = new google.maps.places.PlacesService(document.createElement('div'));
+        this.fog = null;
+
+        // Update the fog of war when viewport changes
+        MAP.on('move', () => {
+            this.discover(this.markers[firebase.auth().currentUser.uid].position);
+        });
     }
 
     onAdd(map, mbxContext) {
@@ -20,10 +29,6 @@ export default class HiddenLayer {
             mbxContext,
             {defaultLights: true}
         );
-
-        // var fogColor = new THREE.Color(0xffffff);
-        // this.tb.scene.background = fogColor;
-        // this.tb.scene.fog = new THREE.FogExp2( 0xffffff, 0.001 );
 
         MAP.on('click', (e) => {
             // calculate objects intersecting the picking ray
@@ -47,12 +52,60 @@ export default class HiddenLayer {
         });
     }
 
+    discover(p) {
+        const THREE = window.THREE;
+        const MAP = window.MAP;
+        const objectInScene = this.tb.world.getObjectByName('fogOfWar');
+        this.tb.world.remove(objectInScene);
+
+        const b = MAP.getBounds();
+        const xy = this.tb.utils.projectToWorld([p.lng, p.lat]);
+        const ne = this.tb.utils.projectToWorld([b._ne.lng, b._ne.lat]);
+        const sw = this.tb.utils.projectToWorld([b._sw.lng, b._sw.lat]);
+
+        let planeShape = this.createPlane(ne, sw);
+        let circleShape = this.createHole(2, xy);
+
+        planeShape.holes.push(circleShape);
+
+        let geometry = new THREE.ShapeGeometry( planeShape );
+        let material = new THREE.MeshLambertMaterial( {color: 0x000000, transparent: true, opacity: 0.5, side: THREE.DoubleSide} );
+
+        this.fog = new THREE.Mesh( geometry, material );
+        this.fog.name = 'fogOfWar';
+
+        this.tb.add(this.fog);
+        this.tb.repaint();
+    }
+
+    createPlane(ne, sw) {
+        const THREE = window.THREE;
+        let planeShape = new THREE.Shape();
+        planeShape.moveTo( ne.x, ne.y);
+        planeShape.lineTo( sw.x, ne.y);
+        planeShape.lineTo( sw.x, sw.y);
+        planeShape.lineTo( ne.y, ne.y);
+
+        return planeShape;
+    }
+
+    createHole(size, xy) {
+        const THREE = window.THREE;
+        let circleShape = new THREE.Path();
+        circleShape.moveTo( (xy.x - size/2), (xy.y - size/2));
+        circleShape.lineTo( (xy.x - size/2) + size, (xy.y - size/2));
+        circleShape.lineTo( (xy.x - size/2) + size, (xy.y - size/2) + size);
+        circleShape.lineTo( (xy.x - size/2), (xy.y - size/2) + size);
+
+        return circleShape;
+    }
+
     handleObjectClick(nearestObject) {
         const HL = window.HL;
         const target = nearestObject.parent.parent;
         const id = target.userData.id;
 
-        HL.markers[id].onClick();
+        if (typeof HL.markers[id] != 'undefined') HL.markers[id].onClick();
 
         console.log('Casted ray hit: ', this.markers[id]);
     }

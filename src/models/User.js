@@ -38,6 +38,6 @@ export default class User extends Character {
     }
 
     onClick() {
-
+        alert(`Hi ${this.userName}!`);
     }
 }

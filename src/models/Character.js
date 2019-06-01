@@ -37,10 +37,12 @@ export default class Character {
 
     // Set the position of the objects in the world scene
     setPosition(position) {
+        const HL = window.HL;
         this.position = position;
         this.marker.setLngLat([position.lng, position.lat])
         this.mesh.setCoords([position.lng, position.lat]);
         this.mesh.updateMatrix();
+        HL.discover(this.position);
     }
 
     // Watch user properties for change and remove events
