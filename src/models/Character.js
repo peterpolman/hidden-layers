@@ -1,3 +1,5 @@
+import firebase from 'firebase/app';
+
 export default class Character {
     constructor(id, data) {
         const HL = window.HL;
@@ -5,6 +7,10 @@ export default class Character {
         this.id = data.uid;
         this.tb = HL.tb;
         this.world = HL.tb.world;
+        this.ref = firebase.database().ref(`users2/${id}`);
+        this.position = data.position;
+        this.loadAtPosition(id, 'wizard', data.position);
+        this.watch();
     }
 
     loadAtPosition(id, obj, position) {
@@ -32,6 +38,7 @@ export default class Character {
     // Set the position of the objects in the world scene
     setPosition(position) {
         this.position = position;
+        this.marker.setLngLat([position.lng, position.lat])
         this.mesh.setCoords([position.lng, position.lat]);
         this.mesh.updateMatrix();
     }
