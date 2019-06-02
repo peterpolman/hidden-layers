@@ -9,11 +9,15 @@ export default class Character {
         this.world = HL.tb.world;
         this.ref = firebase.database().ref(`users2/${id}`);
         this.position = data.position;
-        this.loadAtPosition(id, 'wizard', data.position);
+        this.loadAtPosition(id, data.userClass, data.position);
         this.watch();
     }
 
     loadAtPosition(id, obj, position) {
+        if (obj !== 'wizard' && obj !== 'archer') {
+            obj = 'wizard';
+        }
+        console.log(obj)
         return this.tb.loadObj({
             obj: `./models/${obj}/${obj}.obj`,
             mtl: `./models/${obj}/${obj}.mtl`
@@ -28,7 +32,9 @@ export default class Character {
                 position: position
             }
 
-            this.mesh = this.tb.Object3D({obj:object, units:'meters', scale: 0.05 }).setCoords([position.lng, position.lat]);
+            this.mesh = this.tb.Object3D({obj:object, units:'meters' }).setCoords([position.lng, position.lat]);
+            this.mesh.receiveShadow = true;
+            this.mesh.castShadow = true;
             this.tb.add(this.mesh);
 
             console.log('Object added: ', id, this.mesh)

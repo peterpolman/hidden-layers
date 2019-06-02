@@ -22,13 +22,17 @@ export default class HiddenLayer {
 
     onAdd(map, mbxContext) {
         const Threebox = window.Threebox;
+        const THREE = window.THREE;
         const MAP = window.MAP;
+        const directionalLight = new THREE.DirectionalLight(0x808080);
 
         this.tb = new Threebox(
             MAP,
             mbxContext,
             {defaultLights: true}
         );
+
+        this.tb.add(directionalLight);
 
         MAP.on('click', (e) => {
             // calculate objects intersecting the picking ray
@@ -55,23 +59,22 @@ export default class HiddenLayer {
     discover(p) {
         const THREE = window.THREE;
         const MAP = window.MAP;
-        const objectInScene = this.tb.world.getObjectByName('fogOfWar');
-        this.tb.world.remove(objectInScene);
-
         const b = MAP.getBounds();
         const xy = this.tb.utils.projectToWorld([p.lng, p.lat]);
         const ne = this.tb.utils.projectToWorld([b._ne.lng, b._ne.lat]);
         const sw = this.tb.utils.projectToWorld([b._sw.lng, b._sw.lat]);
+        const objectInScene = this.tb.world.getObjectByName('fogOfWar');
+        this.tb.world.remove(objectInScene);
 
         let planeShape = this.createPlane(ne, sw);
         let circleShape = this.createHole(2, xy);
 
         planeShape.holes.push(circleShape);
 
-        let geometry = new THREE.ShapeGeometry( planeShape );
-        let material = new THREE.MeshLambertMaterial( {color: 0x000000, transparent: true, opacity: 0.5, side: THREE.DoubleSide} );
+        let geometry = new THREE.ShapeGeometry(planeShape);
+        let material = new THREE.MeshLambertMaterial({color: 0x000000, transparent: true, opacity: 0.5, side: THREE.DoubleSide});
 
-        this.fog = new THREE.Mesh( geometry, material );
+        this.fog = new THREE.Mesh(geometry, material);
         this.fog.name = 'fogOfWar';
 
         this.tb.add(this.fog);
