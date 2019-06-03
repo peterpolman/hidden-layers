@@ -1,30 +1,38 @@
 <template>
-    <div class="panel panel-default">
+    <div
+        class="panel panel-default">
         <ul>
-            <li :key="item" v-for="item in items"> -->
-                <button class="btn btn-">
-                <!-- v-bind:style="{ backgroundImage: `url(${assets[item.slug]})` }"
-                v-bind:class="`btn btn-${item.slug}`"
+            <li :key="item.key" v-for="item in items">
+                <button
+                v-bind:class="`btn btn-image btn-${item.slug}`"
+                v-bind:style="`background-image: url(${img[item.slug]});`"
                 v-on:click="onItemClick(item)">
-                    {{ item.name }}
-                    <small v-if="(item.amount > 1)">
-                        {{ item.amount }}
-                    </small> -->
+                    {{ item }}
                 </button>
             </li>
         </ul>
     </div>
 </template>
-
 <script>
 export default {
     name: 'Panel',
-    props: {
-        // items: items
-    },
+    props: ['items'],
     data() {
         return {
-            items: this.$refs.items
+            img: {
+                tools: require('../assets/img/tools.png'),
+                ward: require('../assets/img/ward-1.png'),
+                knight: require('../assets/img/knight-1.png'),
+                archer: require('../assets/img/archer-1.png'),
+                scout: require('../assets/img/wolf-0.png'),
+                gold: require('../assets/img/coin.png'),
+                potion: require('../assets/img/potion.png'),
+                sword: require('../assets/img/woodSword.png'),
+                inventory: require('../assets/img/backpack.png'),
+                inventoryOpen: require('../assets/img/backpack_open.png'),
+                discover: require('../assets/img/discover.png'),
+                house: require('../assets/img/house-4.png'),
+            }
         }
     },
     mounted() {
@@ -37,11 +45,9 @@ export default {
     }
 }
 </script>
-
 <style scoped>
     .panel {
         border-radius: 2px;
-        position: fixed;
         margin: auto;
         display: block;
         background: rgba(0,0,0,0.4);
@@ -53,11 +59,7 @@ export default {
         margin: 0;
         list-style: none;
         padding: 0;
-        display: flex;
-        width: 100%;
-        flex-wrap: wrap;
-        display: flex;
-        flex-wrap: wrap;
+        width: 200px;
     }
 
     .panel li {
@@ -66,12 +68,8 @@ export default {
         width: 40px;
         height: 40px;
         background-color: rgba(0,0,0,0.5);
-        display: block;
+        display: inline-block;
     }
 
-    .panel .btn {
-        flex: 0 auto;
-        position: relative;
-        margin: 0;
-    }
+
 </style>

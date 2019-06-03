@@ -97,12 +97,8 @@ export default class HiddenLayer {
     createHole(size, xy) {
         const THREE = window.THREE;
         let circleShape = new THREE.Path();
-
-        circleShape.moveTo( (xy.x - size/2), (xy.y - size/2));
-        circleShape.lineTo( (xy.x - size/2) + size, (xy.y - size/2));
-        circleShape.lineTo( (xy.x - size/2) + size, (xy.y - size/2) + size);
-        circleShape.lineTo( (xy.x - size/2), (xy.y - size/2) + size);
-        circleShape.lineTo( (xy.x - size/2), (xy.y - size/2));
+        circleShape.moveTo((xy.x), (xy.y));
+        circleShape.absarc((xy.x), (xy.y), size, 0, 2 * Math.PI, false );
 
         return circleShape;
     }

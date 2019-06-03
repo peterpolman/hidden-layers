@@ -82,11 +82,16 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
 #map {
     position: absolute;
     top: 0;
     bottom: 0;
     width: 100%;
+}
+
+.mapboxgl-ctrl-bottom-left,
+.mapboxgl-ctrl-bottom-right {
+    display: none !important;
 }
 </style>

@@ -1,7 +1,8 @@
 <template>
     <div>
         <Map />
-        <div class="actions">
+        <Inventory class="ui-inventory" />
+        <div class="ui-actions">
             <button v-on:click="reload()" class="btn btn-default">Reload</button>
             <button v-on:click="findMe()" class="btn btn-default">Find me</button>
         </div>
@@ -10,13 +11,15 @@
 
 <script>
 import Map from './components/Map.vue';
+import Inventory from './components/Inventory.vue';
 import MarkerService from './services/MarkerService';
 import firebase from 'firebase/app';
 
 export default {
     name: 'app',
     components: {
-        Map
+        Map,
+        Inventory
     },
     data() {
         return {
@@ -50,23 +53,46 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
-.actions {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    padding: 1rem;
+
+.ui-wrapper {
 }
+
+.ui-actions {
+    position: fixed;
+    top: .5rem;
+    left: .5rem;
+}
+
+.ui-inventory {
+    position: fixed;
+    right: .5rem;
+    bottom: .5rem;
+}
+
 .btn {
     display: inline-block;
     position: relative;
     margin-right: .5rem;
-    background: white;
     text-transform: uppercase;
+    border-radius: 2px;
+    background: white;
+}
+
+.btn-default {
     font-family: 'Avenir', Helvetica, Arial, sans-serif;
     font-size: 12px;
     font-weight: bold;
-    border-radius: 2px;
-    padding: 5px;
 }
+
+.btn-image {
+    width: 40px;
+    height: 40px;
+    padding: 5px;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-color: white;
+    background-size: 50% 50%;
+    font-size: 0;
+}
+
 </style>

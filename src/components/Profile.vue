@@ -9,9 +9,9 @@ import firebase from 'firebase/app';
 
 export default {
     name: 'Profile',
-    props: ['markers'],
     data() {
         return {
+            
         }
     },
     mounted() {
