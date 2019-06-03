@@ -23,7 +23,6 @@ export default class Character {
             this.tb.remove(objectInScene);
 
             // Add user specific data to be retreived later.
-            object.name = id;
             object.userData = {
                 id: id,
                 position: position
@@ -31,8 +30,6 @@ export default class Character {
 
             this.mesh = this.tb.Object3D({obj:object, units:'meters' }).setCoords([position.lng, position.lat]);
             this.mesh.name = id;
-            this.mesh.receiveShadow = true;
-            this.mesh.castShadow = true;
 
             this.tb.add(this.mesh);
             this.tb.repaint();

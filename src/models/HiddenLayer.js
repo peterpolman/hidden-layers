@@ -109,7 +109,6 @@ export default class HiddenLayer {
         const id = target.userData.id;
 
         if (typeof HL.markers[id] != 'undefined') HL.markers[id].onClick();
-
         console.log('Casted ray hit: ', this.markers[id]);
     }
 

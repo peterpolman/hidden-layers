@@ -25,7 +25,7 @@ export default {
     data() {
         return {
             isOpen: false,
-            items: [1,2,3,4],
+            items: null,
             imgBackpack: require('../assets/img/backpack.png')
         }
     },
@@ -50,10 +50,13 @@ export default {
         bottom: 10px;
         right: 0;
         background-size: contain;
+        box-shadow: rgba(0, 0, 0, 0.3) 0 1px 4px -1px;
     }
+
     .panel {
         position: absolute;
         right: calc(40px + 20px);
         bottom: 0;
     }
+
 </style>

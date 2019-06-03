@@ -2,9 +2,12 @@
     <div>
         <Map />
         <Inventory class="ui-inventory" />
+        <Profile
+            v-if="user"
+            v-bind:user="user"
+            class="ui-profile" />
         <div class="ui-actions">
             <button v-on:click="reload()" class="btn btn-default">Reload</button>
-            <button v-on:click="findMe()" class="btn btn-default">Find me</button>
         </div>
     </div>
 </template>
@@ -12,6 +15,7 @@
 <script>
 import Map from './components/Map.vue';
 import Inventory from './components/Inventory.vue';
+import Profile from './components/Profile.vue';
 import MarkerService from './services/MarkerService';
 import firebase from 'firebase/app';
 
@@ -19,24 +23,27 @@ export default {
     name: 'app',
     components: {
         Map,
-        Inventory
+        Inventory,
+        Profile
     },
     data() {
         return {
+            user: null,
             items: null,
             HL: null
         }
     },
     mounted() {
-        var markers = new MarkerService;
-        markers.load();
+        const markerService = new MarkerService;
+        const MAP = window.MAP;
+
+        MAP.on('load', () => {
+            markerService.load().then((user) => {
+                this.user = user;
+            });
+        });
     },
     methods: {
-        findMe() {
-            const MAP = window.MAP;
-            const HL = window.HL;
-            MAP.setCenter(HL.markers[firebase.auth().currentUser.uid].position);
-        },
         reload() {
             location.reload(true);
         }
@@ -55,9 +62,19 @@ body {
 }
 
 .ui-wrapper {
+    position: fixed;
+    top: .5rem;
+    left: .5rem;
 }
 
 .ui-actions {
+    position: fixed;
+    top: .5rem;
+    right: .5rem;
+    width: auto;
+}
+
+.ui-profile {
     position: fixed;
     top: .5rem;
     left: .5rem;
@@ -82,6 +99,7 @@ body {
     font-family: 'Avenir', Helvetica, Arial, sans-serif;
     font-size: 12px;
     font-weight: bold;
+    padding: 5px;
 }
 
 .btn-image {
@@ -93,6 +111,21 @@ body {
     background-color: white;
     background-size: 50% 50%;
     font-size: 0;
+    border: 0;
 }
+
+.btn-image small {
+    position: absolute;
+    font-size: 8px;
+    padding: 2px;
+    background-color: black;
+    font-weight: bold;
+    color: white;
+    bottom: 0;
+    right: 0;
+    border-top-left-radius: 2px;
+    border-bottom-right-radius: 2px;
+}
+
 
 </style>

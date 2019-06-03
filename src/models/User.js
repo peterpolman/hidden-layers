@@ -5,7 +5,7 @@ export default class User extends Character {
     constructor (id, data) {
         super(id, data);
 
-        this.exp = data.exp;
+        this.xp = data.exp;
         this.userName = data.username;
         this.userClass = data.userClass;
         this.stats = data.stats;
@@ -24,12 +24,16 @@ export default class User extends Character {
 
         // TODO Create styles for this:)
         el.innerHTML = `
-            <div style="box-shadow: 1px 1px rgba(0,0,0,.35); position: absolute; width: 30px; padding: 5px; height: 30px; border-radius: 5px; text-align: center; background-color: white; margin-left: -47px; margin-top: -2px">
-                <img width="auto" height="30" src="./img/${this.userClass}-1.png" alt="" />
-            </div>
-            <strong style="color: white; text-shadow: 1px 1px rgba(0,0,0,.35);">${this.userName}</strong><br>
-            <div style="box-shadow: 1px 1px rgba(0,0,0,.35); width: 100px; border: 2px solid white; border-radius: 2px;">
-                <div style="height: 8px; background-color: ${color}; width: ${this.hitPoints}px;"></div>
+            <div class="user-wrapper">
+                <div class="user-picture user-picture-s">
+                    <img src="./img/${this.userClass}-1.png" alt="" />
+                </div>
+                <div class="user-info">
+                    <strong class="user-name">${this.userName}</strong><br>
+                    <div class="bar-wrapper user-hp">
+                        <div class="bar" style="background-color: ${color}; width: ${this.hitPoints}px;"></div>
+                    </div>
+                </div>
             </div>`;
 
         if (this.marker === null) {

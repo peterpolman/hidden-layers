@@ -34,9 +34,8 @@ export default class MarkerService {
     }
 
     load() {
-        const MAP = window.MAP;
-
-        MAP.on('load', () => {
+        return new Promise((resolve, reject) => {
+            const MAP = window.MAP;
 
             this.db.ref(`users2/${this.uid}`).once('value').then((snap) => {
                 const HL = window.HL = new HiddenLayer('3d-objects');
@@ -47,6 +46,8 @@ export default class MarkerService {
 
                 // Creates my user and discovers for position.
                 HL.markers[this.uid] = new User(this.uid, snap.val());
+                resolve(HL.markers[this.uid]);
+
                 HL.discover(snap.val().position);
 
                 // Loads all nearby markers based on position.
@@ -65,6 +66,7 @@ export default class MarkerService {
                     console.log("Discover after position change: ", snap.key, value);
                 }
             });
+
         });
     }
 

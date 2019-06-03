@@ -7,7 +7,7 @@
                 v-bind:class="`btn btn-image btn-${item.slug}`"
                 v-bind:style="`background-image: url(${img[item.slug]});`"
                 v-on:click="onItemClick(item)">
-                    {{ item }}
+                    <small>{{ item.amount }}</small>
                 </button>
             </li>
         </ul>
@@ -70,6 +70,5 @@ export default {
         background-color: rgba(0,0,0,0.5);
         display: inline-block;
     }
-
 
 </style>
