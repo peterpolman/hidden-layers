@@ -17,7 +17,6 @@ import Map from './components/Map.vue';
 import Inventory from './components/Inventory.vue';
 import Profile from './components/Profile.vue';
 import MarkerService from './services/MarkerService';
-import firebase from 'firebase/app';
 
 export default {
     name: 'app',

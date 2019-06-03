@@ -45,8 +45,13 @@ export default class MarkerService {
                 MAP.addLayer(HL, '3d-buildings');
 
                 // Creates my user and discovers for position.
-                HL.markers[this.uid] = new User(this.uid, snap.val());
-                resolve(HL.markers[this.uid]);
+                if (snap.val() !== null) {
+                    HL.markers[this.uid] = new User(this.uid, snap.val());
+                    resolve(HL.markers[this.uid]);
+                }
+                else {
+                    reject('No user found!');
+                }
 
                 HL.discover(snap.val().position);
 
