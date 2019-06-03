@@ -14,10 +14,6 @@ export default class Character {
     }
 
     loadAtPosition(id, obj, position) {
-        if (obj !== 'wizard' && obj !== 'archer') {
-            obj = 'wizard';
-        }
-        console.log(obj)
         return this.tb.loadObj({
             obj: `./models/${obj}/${obj}.obj`,
             mtl: `./models/${obj}/${obj}.mtl`
@@ -27,16 +23,19 @@ export default class Character {
             this.tb.remove(objectInScene);
 
             // Add user specific data to be retreived later.
+            object.name = id;
             object.userData = {
                 id: id,
                 position: position
             }
 
             this.mesh = this.tb.Object3D({obj:object, units:'meters' }).setCoords([position.lng, position.lat]);
+            this.mesh.name = id;
             this.mesh.receiveShadow = true;
             this.mesh.castShadow = true;
-            this.tb.add(this.mesh);
 
+            this.tb.add(this.mesh);
+            this.tb.repaint();
             console.log('Object added: ', id, this.mesh)
         });
     }
@@ -44,11 +43,16 @@ export default class Character {
     // Set the position of the objects in the world scene
     setPosition(position) {
         const HL = window.HL;
+        const lngLat = [position.lng, position.lat];
+
         this.position = position;
-        this.marker.setLngLat([position.lng, position.lat])
-        this.mesh.setCoords([position.lng, position.lat]);
-        this.mesh.updateMatrix();
+        this.marker.setLngLat(lngLat)
+        this.mesh.setCoords(lngLat);
+
         HL.discover(this.position);
+
+        this.mesh.updateMatrix();
+        this.tb.repaint();
     }
 
     // Watch user properties for change and remove events
@@ -74,7 +78,7 @@ export default class Character {
     remove() {
         const objectInScene = this.world.getObjectByName(this.id);
         this.world.remove(objectInScene);
-
+        this.marker.remove();
         this.ref.off();
 
         console.log(`Removed: ${this.id}`)

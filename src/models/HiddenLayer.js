@@ -66,7 +66,7 @@ export default class HiddenLayer {
         const objectInScene = this.tb.world.getObjectByName('fogOfWar');
         this.tb.world.remove(objectInScene);
 
-        let planeShape = this.createPlane(ne, sw);
+        let planeShape = this.createPlane(ne, sw, 5);
         let circleShape = this.createHole(2, xy);
 
         planeShape.holes.push(circleShape);
@@ -81,13 +81,15 @@ export default class HiddenLayer {
         this.tb.repaint();
     }
 
-    createPlane(ne, sw) {
+    createPlane(ne, sw, padding) {
         const THREE = window.THREE;
         let planeShape = new THREE.Shape();
-        planeShape.moveTo( ne.x, ne.y);
-        planeShape.lineTo( sw.x, ne.y);
-        planeShape.lineTo( sw.x, sw.y);
-        planeShape.lineTo( ne.y, ne.y);
+
+        planeShape.moveTo( sw.x + padding, sw.y + padding);
+        planeShape.lineTo( ne.x - padding, sw.y + padding);
+        planeShape.lineTo( ne.x - padding, ne.y - padding);
+        planeShape.lineTo( sw.x + padding, ne.y - padding);
+        planeShape.lineTo( sw.x + padding, sw.y + padding);
 
         return planeShape;
     }
@@ -95,10 +97,12 @@ export default class HiddenLayer {
     createHole(size, xy) {
         const THREE = window.THREE;
         let circleShape = new THREE.Path();
+
         circleShape.moveTo( (xy.x - size/2), (xy.y - size/2));
         circleShape.lineTo( (xy.x - size/2) + size, (xy.y - size/2));
         circleShape.lineTo( (xy.x - size/2) + size, (xy.y - size/2) + size);
         circleShape.lineTo( (xy.x - size/2), (xy.y - size/2) + size);
+        circleShape.lineTo( (xy.x - size/2), (xy.y - size/2));
 
         return circleShape;
     }

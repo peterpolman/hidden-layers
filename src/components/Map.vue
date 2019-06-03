@@ -16,19 +16,15 @@ export default {
         const MAP = window.MAP = new mapboxgl.Map({
             container: 'map',
             style: 'mapbox://styles/peterpolman/cjsli3aee5gab1fl9lpwyx2rd',
-            zoom: 20,
-            maxZoom: 20,
+            zoom: 21,
+            maxZoom: 21,
             minZoom: 17,
             center: [4.8437, 52.3669],
-            pitch: 60,
+            pitch: 85,
             bearing: 45,
             antialias: true,
             doubleClickZoom: false,
-            // dragZoom: false,
-            // dragPan: false,
-            // scrollZoom: false,
-            // pitchWithRotate: false,
-            // touchZoomRotate: false
+            pitchWithRotate: false
         });
 
         MAP.on('click', 'water', function (e) {

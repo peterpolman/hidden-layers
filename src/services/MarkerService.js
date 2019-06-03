@@ -16,6 +16,23 @@ export default class MarkerService {
         this.markersLoaded = false;
     }
 
+    rebuildMarkerDB() {
+        this.db.ref(`users2`).on('child_added', (snap) => {
+            let hash = Geohash.encode(snap.val().position.lat, snap.val().position.lng, 7);
+            this.markersRef.child(hash).child(snap.key).set({
+                position: snap.val().position,
+                ref: `users2/${snap.key}`
+            });
+        });
+        this.db.ref(`scouts2`).on('child_added', (snap) => {
+            let hash = Geohash.encode(snap.val().position.lat, snap.val().position.lng, 7);
+            this.markersRef.child(hash).child(snap.key).set({
+                position: snap.val().position,
+                ref: `scouts2/${snap.key}`
+            });
+        });
+    }
+
     load() {
         const MAP = window.MAP;
 
@@ -25,12 +42,14 @@ export default class MarkerService {
                 const HL = window.HL = new HiddenLayer('3d-objects');
                 const position = snap.val().position;
 
-                // Add to layer array before buildings
+                // Add to layer array before buildings.
                 MAP.addLayer(HL, '3d-buildings');
-                HL.markers[this.uid] = new User(this.uid, snap.val());
 
+                // Creates my user and discovers for position.
+                HL.markers[this.uid] = new User(this.uid, snap.val());
                 HL.discover(snap.val().position);
 
+                // Loads all nearby markers based on position.
                 this.loadNearbyMarkers(this.uid, position);
 
                 console.log("Initial discovery! ", snap.key, position);
@@ -63,6 +82,7 @@ export default class MarkerService {
         // Get neighbours for current geohash
         let neighbours = Geohash.neighbours(hash);
 
+        console.log('Reload the markers: ', ((oldHash !== hash) || !this.markersLoaded))
         // Check if the hash is changed
         if ((oldHash !== hash) || !this.markersLoaded) {
             console.log('Hash change detected!');
@@ -82,9 +102,9 @@ export default class MarkerService {
             for (let uid in HL.markers) {
                 if (uid != this.uid) HL.markers[uid].remove()
             }
-        }
 
-        this.watchNearbyGeohashes(hash, neighbours);
+            this.watchNearbyGeohashes(hash, neighbours);
+        }
 
         this.markersLoaded = true;
     }
