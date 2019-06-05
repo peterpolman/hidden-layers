@@ -1,38 +1,44 @@
 import firebase from 'firebase/app';
 
 export default class HiddenLayer {
-    constructor(id) {
-        const google = window.google;
-        const MAP = window.MAP;
+    constructor() {
+        this.uid = firebase.auth().currentUser.uid;
 
-        this.id = id;
-        this.markers = {};
+        this.id = '3d-objects';
         this.type = 'custom';
         this.renderingMode = '3d';
+
+        this.markers = {};
         this.active = false;
         this.tb = null;
-        this.placesService = new google.maps.places.PlacesService(document.createElement('div'));
-        this.fog = null;
 
-        // Update the fog of war when viewport changes
-        MAP.on('move', () => {
-            this.discover(this.markers[firebase.auth().currentUser.uid].position);
-        });
+        // this.placesService = new google.maps.places.PlacesService(document.createElement('div'));
+        this.walking = false;
+        this.line = null;
+        this.fog = null;
+        this.visibility = [];
     }
 
     onAdd(map, mbxContext) {
         const Threebox = window.Threebox;
         const THREE = window.THREE;
         const MAP = window.MAP;
-        const directionalLight = new THREE.DirectionalLight(0x808080);
+        const directionalLight = new THREE.DirectionalLight(0xFFFFFF);
+        const ambientLightLight = new THREE.AmbientLight(0xFFFFFF, 0.75);
 
         this.tb = new Threebox(
             MAP,
             mbxContext,
-            {defaultLights: true}
+            {defaultLights: false}
         );
 
+        this.tb.add(ambientLightLight);
         this.tb.add(directionalLight);
+
+        const ne = this.tb.utils.projectToWorld([180, 85]);
+        const sw = this.tb.utils.projectToWorld([-180, -85]);
+
+        this.planeShape = this.createPlane(ne, sw, 5);
 
         MAP.on('click', (e) => {
             // calculate objects intersecting the picking ray
@@ -48,6 +54,8 @@ export default class HiddenLayer {
                 this.handleMapClick(e);
             }
 
+            this.onClick(e);
+
             // on state change, fire a repaint
             if (this.active !== intersectionExists) {
                 this.active = intersectionExists;
@@ -56,27 +64,31 @@ export default class HiddenLayer {
         });
     }
 
-    discover(p) {
+    onClick(e) {
+        const sid = this.markers[this.uid].scout;
+        this.markers[sid].setDestination(e);
+    }
+
+    discover(uid) {
         const THREE = window.THREE;
-        const MAP = window.MAP;
-        const b = MAP.getBounds();
-        const xy = this.tb.utils.projectToWorld([p.lng, p.lat]);
-        const ne = this.tb.utils.projectToWorld([b._ne.lng, b._ne.lat]);
-        const sw = this.tb.utils.projectToWorld([b._sw.lng, b._sw.lat]);
-        const objectInScene = this.tb.world.getObjectByName('fogOfWar');
-        this.tb.world.remove(objectInScene);
+        const u = this.markers[uid];
+        const s = this.markers[u.scout];
+        const positions = [
+            this.tb.utils.projectToWorld([u.position.lng, u.position.lat]),
+            this.tb.utils.projectToWorld([s.position.lng, s.position.lat])
+        ]
 
-        let planeShape = this.createPlane(ne, sw, 5);
-        let circleShape = this.createHole(2, xy);
+        for (var i = 0; i < positions.length; i++) {
+            this.planeShape.holes[i] = this.createHole(2, positions[i]);
+        }
 
-        planeShape.holes.push(circleShape);
-
-        let geometry = new THREE.ShapeGeometry(planeShape);
+        let geometry = new THREE.ShapeGeometry(this.planeShape);
         let material = new THREE.MeshLambertMaterial({color: 0x000000, transparent: true, opacity: 0.5, side: THREE.DoubleSide});
 
         this.fog = new THREE.Mesh(geometry, material);
         this.fog.name = 'fogOfWar';
 
+        this.tb.world.remove(this.tb.world.getObjectByName('fogOfWar'));
         this.tb.add(this.fog);
         this.tb.repaint();
     }
@@ -104,11 +116,10 @@ export default class HiddenLayer {
     }
 
     handleObjectClick(nearestObject) {
-        const HL = window.HL;
         const target = nearestObject.parent.parent;
         const id = target.userData.id;
 
-        if (typeof HL.markers[id] != 'undefined') HL.markers[id].onClick();
+        if (typeof this.markers[id] != 'undefined') this.markers[id].onClick();
         console.log('Casted ray hit: ', this.markers[id]);
     }
 
@@ -127,5 +138,11 @@ export default class HiddenLayer {
 
     render(){
         this.tb.update();
+
+        if ((typeof this.markers[this.markers[this.uid].scout] !== 'undefined') && (this.markers[this.markers[this.uid].scout].walking)) {
+            // console.log('walking')
+            this.discover(this.uid);
+            this.tb.repaint();
+        }
     }
 }

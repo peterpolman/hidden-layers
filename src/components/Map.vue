@@ -12,18 +12,20 @@ export default {
     name: 'Map',
     mounted() {
         mapboxgl.accessToken = config.mapbox.key;
+
         const geo = new GeoService();
+
         const MAP = window.MAP = new mapboxgl.Map({
             container: 'map',
             style: 'mapbox://styles/peterpolman/cjsli3aee5gab1fl9lpwyx2rd',
-            zoom: 21,
+            zoom: 19,
             maxZoom: 21,
             minZoom: 17,
             center: [4.8437, 52.3669],
             pitch: 85,
             bearing: 45,
             antialias: true,
-            doubleClickZoom: false,
+            doubleClickZoom: true,
             pitchWithRotate: false
         });
 
@@ -74,10 +76,10 @@ export default {
             }, labelLayerId);
         });
 
-        let tag = document.createElement('SCRIPT');
-        tag.type = "text/javascript";
-        tag.src = `https://maps.googleapis.com/maps/api/js?key=${config.google.key}&libraries=places`;
-        document.body.appendChild(tag);
+        // let tag = document.createElement('SCRIPT');
+        // tag.type = "text/javascript";
+        // tag.src = `https://maps.googleapis.com/maps/api/js?key=${config.google.key}&libraries=places,directions`;
+        // document.body.appendChild(tag);
     }
 }
 </script>

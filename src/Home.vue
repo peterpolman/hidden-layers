@@ -17,6 +17,10 @@ import Map from './components/Map.vue';
 import Inventory from './components/Inventory.vue';
 import Profile from './components/Profile.vue';
 import MarkerService from './services/MarkerService';
+import firebase from 'firebase/app';
+import HiddenLayer from './models/HiddenLayer';
+import User from './models/User';
+import Scout from './models/Scout';
 
 export default {
     name: 'app',
@@ -28,19 +32,74 @@ export default {
     data() {
         return {
             user: null,
-            items: null,
-            HL: null
+            items: null
         }
     },
     mounted() {
         const markerService = new MarkerService;
         const MAP = window.MAP;
+        const uid = firebase.auth().currentUser.uid;
 
         MAP.on('load', () => {
-            markerService.load().then((user) => {
-                this.user = user;
+            console.log('style loaded')
+
+            firebase.database().ref(`users2/`).child(uid).once('value').then(snap => {
+                const HL = window.HL = new HiddenLayer();
+                const position = snap.val().position;
+
+                // Add to layer array before buildings.
+                MAP.addLayer(HL, '3d-buildings');
+
+                // Creates my user and discovers for position.
+                this.user = HL.markers[snap.key] = new User(snap.key, snap.val());
+
+                // Loads all nearby markers based on position.
+                markerService.loadNearbyMarkers(uid, position);
+
+                // Listen for changes in my user
+                firebase.database().ref(`users2/`).child(uid).on('child_changed',snap => {
+                    const value = snap.val();
+
+                    // // Get the visible markers for the new position
+                    switch(snap.key) {
+                        case 'position':
+                            markerService.loadNearbyMarkers(uid, value);
+                            console.log("Discover after user position change: ", snap.key, value);
+                            break;
+                    }
+                });
+
+                firebase.database().ref(`scouts2/`).child(this.user.scout).once('value').then(snap => {
+
+                    // Creates my user and discovers for position.
+                    this.scout = HL.markers[this.user.scout] = new Scout(this.user.scout, snap.val());
+
+                    // Loads all nearby markers based on position.
+                    markerService.loadNearbyMarkers(this.user.scout, position);
+                    console.log("Initial discovery for scout! ", this.user.scout, position);
+
+                    HL.discover(uid);
+                    console.log("Initial discovery for user! ", snap.key, position);
+
+                    // Listen for changes in my scout
+                    firebase.database().ref(`scouts2/`).child(this.user.scout).on('child_changed',snap => {
+                        const value = snap.val();
+
+                        // // Get the visible markers for the new position
+                        switch (snap.key) {
+                            case 'position':
+                                markerService.loadNearbyMarkers(this.user.scout, value);
+                                HL.discover(uid);
+                                console.log("Discover after scout position change: ", this.user.scout, value);
+                                break;
+                        }
+                    });
+                });
+
             });
+
         });
+
     },
     methods: {
         reload() {

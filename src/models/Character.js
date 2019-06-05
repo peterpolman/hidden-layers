@@ -4,12 +4,17 @@ export default class Character {
     constructor(id, data) {
         const HL = window.HL;
 
-        this.id = data.uid;
+        this.id = id;
+        this.uid = firebase.auth().currentUser.uid;
+
         this.tb = HL.tb;
         this.world = HL.tb.world;
-        this.ref = firebase.database().ref(`users2/${id}`);
+
+        this.ref = firebase.database().ref((data.email != null) ? 'users2' : 'scouts2').child(id);
         this.position = data.position;
-        this.loadAtPosition(id, data.userClass, data.position);
+
+        this.loadAtPosition(id, (data.userClass ? data.userClass : 'scout'), data.position);
+
         this.watch();
     }
 
@@ -39,6 +44,7 @@ export default class Character {
 
     // Set the position of the objects in the world scene
     setPosition(position) {
+        console.log(position);
         const HL = window.HL;
         const lngLat = [position.lng, position.lat];
 
@@ -46,7 +52,7 @@ export default class Character {
         this.marker.setLngLat(lngLat)
         this.mesh.setCoords(lngLat);
 
-        HL.discover(this.position);
+        HL.discover(this.uid);
 
         this.mesh.updateMatrix();
         this.tb.repaint();
@@ -61,7 +67,7 @@ export default class Character {
             switch(snap.key) {
                 case 'position':
                     this.setPosition(snap.val());
-                break
+                    break
                 default:
                     console.error("No handler available", snap.key, snap.val());
             }

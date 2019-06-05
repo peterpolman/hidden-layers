@@ -4,8 +4,8 @@ import firebase from 'firebase/app';
 import 'firebase/database';
 import 'firebase/auth';
 
-import HiddenLayer from '../models/HiddenLayer.js';
 import User from '../models/User.js';
+import Scout from '../models/Scout.js';
 
 export default class MarkerService {
     constructor() {
@@ -16,7 +16,8 @@ export default class MarkerService {
         this.markersLoaded = false;
     }
 
-    rebuildMarkerDB() {
+    // TEMP: Should be removed when data is migrated.
+    rebuildMarkerDatabase() {
         this.db.ref(`users2`).on('child_added', (snap) => {
             let hash = Geohash.encode(snap.val().position.lat, snap.val().position.lng, 7);
             this.markersRef.child(hash).child(snap.key).set({
@@ -30,48 +31,6 @@ export default class MarkerService {
                 position: snap.val().position,
                 ref: `scouts2/${snap.key}`
             });
-        });
-    }
-
-    load() {
-        return new Promise((resolve, reject) => {
-            const MAP = window.MAP;
-
-            this.db.ref(`users2/${this.uid}`).once('value').then((snap) => {
-                const HL = window.HL = new HiddenLayer('3d-objects');
-                const position = snap.val().position;
-
-                // Add to layer array before buildings.
-                MAP.addLayer(HL, '3d-buildings');
-
-                // Creates my user and discovers for position.
-                if (snap.val() !== null) {
-                    HL.markers[this.uid] = new User(this.uid, snap.val());
-                    resolve(HL.markers[this.uid]);
-                }
-                else {
-                    reject('No user found!');
-                }
-
-                HL.discover(snap.val().position);
-
-                // Loads all nearby markers based on position.
-                this.loadNearbyMarkers(this.uid, position);
-
-                console.log("Initial discovery! ", snap.key, position);
-            });
-
-            // Listen for changes in my user
-            this.db.ref(`users2/${this.uid}`).on('child_changed', (snap) => {
-                const value = snap.val();
-
-                // // Get the visible markers for the new position
-                if (snap.key === 'position') {
-                    this.loadNearbyMarkers(this.uid, value);
-                    console.log("Discover after position change: ", snap.key, value);
-                }
-            });
-
         });
     }
 
@@ -117,19 +76,25 @@ export default class MarkerService {
     }
 
     watchNearbyGeohashes(hash, neighbours) {
+        var isNotMineNorExists = key =>{
+            const HL = window.HL;
+            return ((this.uid !== key) && (HL.markers[this.uid].scout !== key) && (typeof HL.markers[key] === 'undefined'));
+        }
         // Empty the listeners and set up new ones
         this.hashes = [];
 
         // Add new listeners for the current geohash if there is a hash change
-        this.markersRef.child(hash).on('child_added', (snap) => (this.uid !== snap.key) ? this.onMarkerAdded(snap.key, snap.val()) : '');
-        this.markersRef.child(hash).on('child_removed', (snap) => (this.uid !== snap.key) ? this.onMarkerRemoved(snap.key, snap.val()) : '');
-        this.hashes.push(hash);
+        this.markersRef.child(hash).on('child_added', (snap) => isNotMineNorExists(snap.key) ? this.onMarkerAdded(snap.key, snap.val()) : '');
+        this.markersRef.child(hash).on('child_removed', (snap) => isNotMineNorExists(snap.key) ? this.onMarkerRemoved(snap.key, snap.val()) : '');
+
+        if (!this.hashes.includes(hash)) this.hashes.push(hash);
 
         // Add new listeners for the neighbouring geohashes if there is a hash change
         for (let n in neighbours) {
-            this.markersRef.child(neighbours[n]).on('child_added', (snap) => (this.uid !== snap.key) ? this.onMarkerAdded(snap.key, snap.val()) : '');
-            this.markersRef.child(neighbours[n]).on('child_removed', (snap) => (this.uid !== snap.key) ? this.onMarkerRemoved(snap.key, snap.val()) : '');
-            this.hashes.push(neighbours[n]);
+            this.markersRef.child(neighbours[n]).on('child_added', (snap) => isNotMineNorExists(snap.key) ? this.onMarkerAdded(snap.key, snap.val()) : '');
+            this.markersRef.child(neighbours[n]).on('child_removed', (snap) => isNotMineNorExists(snap.key) ? this.onMarkerRemoved(snap.key, snap.val()) : '');
+
+            if (!this.hashes.includes(hash)) this.hashes.push(neighbours[n]);
         }
     }
 
@@ -137,9 +102,12 @@ export default class MarkerService {
 	onMarkerAdded(id, data) {
         const HL = window.HL;
         console.log('Marker is discovered: ', id, data);
+
         // Statically get all data for this user once
         this.db.ref(data.ref).once('value').then((snap) => {
-            HL.markers[id] = new User(id, snap.val());
+            HL.markers[id] = (snap.val().exp == null)
+                ? new Scout(id, snap.val())
+                : new User(id, snap.val());
         });
 	}
 
