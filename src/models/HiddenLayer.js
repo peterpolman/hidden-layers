@@ -1,3 +1,5 @@
+const jsts = require('jsts');
+
 import firebase from 'firebase/app';
 
 export default class HiddenLayer {
@@ -12,11 +14,7 @@ export default class HiddenLayer {
         this.active = false;
         this.tb = null;
 
-        // this.placesService = new google.maps.places.PlacesService(document.createElement('div'));
-        this.walking = false;
-        this.line = null;
         this.fog = null;
-        this.visibility = [];
     }
 
     onAdd(map, mbxContext) {
@@ -67,6 +65,33 @@ export default class HiddenLayer {
         }
     }
 
+    jstsPoly(path) {
+        const geometryFactory = new jsts.geom.GeometryFactory();
+        const jstsPath = this.convertToJSTSPath(path);
+        const linearRing = geometryFactory.createLinearRing(jstsPath);
+
+        return geometryFactory.createPolygon(linearRing);
+    }
+
+    convertToJSTSPath(boundaries) {
+        const points = boundaries.getPoints();
+        let coordinates = [];
+
+        for (var i = 0; i < points.length; i++) {
+            coordinates.push(new jsts.geom.Coordinate(points[i].x, points[i].y));
+        }
+
+        return coordinates;
+    }
+
+    convertFromJSTSPath(hole) {
+        let path = new THREE.Path();
+        let points = hole.getCoordinates()
+        path.setFromPoints(points);
+
+        return path;
+    }
+
     discover(uid) {
         const THREE = window.THREE;
         const u = this.markers[uid];
@@ -76,9 +101,32 @@ export default class HiddenLayer {
             this.tb.utils.projectToWorld([s.position.lng, s.position.lat])
         ]
 
-        for (var i = 0; i < positions.length; i++) {
-            this.planeShape.holes[i] = this.createHole(2, positions[i]);
+        this.planeShape.holes = [];
+
+        let holes = []
+        for (let i in positions) {
+            let hole = this.createHole(2, positions[i]);
+            let jstsHole = this.jstsPoly(hole);
+
+            holes.push(jstsHole);
         }
+
+        let visibility = [];
+        for (let i in holes) {
+            for (let j in holes) {
+                // Checks if first hole intersects with the second hole and skip the first
+                if (holes[i].intersects(holes[j]) && (i != j)) {
+                    holes[i] = holes[i].union(holes[j])
+
+                    delete holes[j]
+                }
+
+            }
+            visibility.push(this.convertFromJSTSPath(holes[i]));
+        }
+
+
+        this.planeShape.holes = visibility;
 
         let geometry = new THREE.ShapeGeometry(this.planeShape);
         let material = new THREE.MeshLambertMaterial({color: 0x000000, transparent: true, opacity: 0.5, side: THREE.DoubleSide});
@@ -106,11 +154,12 @@ export default class HiddenLayer {
 
     createHole(size, xy) {
         const THREE = window.THREE;
-        let circleShape = new THREE.Path();
-        circleShape.moveTo((xy.x), (xy.y));
-        circleShape.absarc((xy.x), (xy.y), size, 0, 2 * Math.PI, false );
+        let circlePath = new THREE.Path();
 
-        return circleShape;
+        circlePath.moveTo((xy.x), (xy.y));
+        circlePath.absarc((xy.x), (xy.y), size, 0, 2 * Math.PI, false);
+
+        return circlePath;
     }
 
     handleObjectClick(e, object) {
@@ -132,7 +181,7 @@ export default class HiddenLayer {
     handleMapClick(e) {
         const sid = this.markers[this.uid].scout;
         this.markers[sid].setDestination(e);
-        
+
         console.log('Map click at', e);
     }
 

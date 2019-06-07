@@ -16,7 +16,7 @@ export default class Character {
     watch() {
         console.log('Start watching!', this.id)
         this.ref.on('child_changed', (snap) => {
-            console.log("Property changed: ", this.id, snap.val());
+            // console.log("Property changed: ", this.id, snap.val());
             switch(snap.key) {
                 case 'position':
                     this.setPosition(snap.val());
