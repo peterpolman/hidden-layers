@@ -1,3 +1,4 @@
+const THREE = window.THREE;
 const mapboxgl = require('mapbox-gl/dist/mapbox-gl.js');
 import DamagableCharacter from './DamagableCharacter';
 import config from '../config.js';
@@ -54,7 +55,7 @@ export default class Scout extends DamagableCharacter {
     }
 
     travelTo(options, destination) {
-        const THREE = window.THREE;
+        const HL = window.HL;
         const path = new THREE.CatmullRomCurve3(this.tb.utils.lnglatsToWorld(options.path))
         let position = 0;
 
@@ -92,6 +93,7 @@ export default class Scout extends DamagableCharacter {
     }
 
     onClick() {
+        const HL = window.HL;
         const lngLat = [this.position.lng, this.position.lat];
         let geometry = new THREE.CylinderGeometry( 5, 5, .03, 16 );
         let material = new THREE.MeshLambertMaterial({color: 0x0000FF, transparent: true, opacity: 0.25, side: THREE.DoubleSide});
