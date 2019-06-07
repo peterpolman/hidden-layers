@@ -1,6 +1,6 @@
 import firebase from 'firebase/app';
 
-export default class Character {
+export default class BaseCharacter {
     constructor(id, data) {
         const HL = window.HL;
         this.id = id;

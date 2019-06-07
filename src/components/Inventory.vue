@@ -35,6 +35,16 @@ export default {
         firebase.database().ref('items').child(uid).once('value').then(snap => {
             this.items = snap.val();
             console.log('Inventory mounted and items loaded.', this.items)
+
+            firebase.database().ref('items').child(uid).on('child_added', snap => {
+                this.items[snap.key] = snap.val();
+                console.log('Inventory item added.', snap.val())
+            });
+
+            firebase.database().ref('items').child(uid).on('child_removed', snap => {
+                delete this.items[snap.key];
+                console.log('Inventory item remove.', snap.key)
+            });
         });
     },
     methods: {

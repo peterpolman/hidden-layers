@@ -14,6 +14,9 @@
     </div>
 </template>
 <script>
+import firebase from 'firebase/app';
+import Item from '../models/Item';
+
 export default {
     name: 'Panel',
     props: ['items'],
@@ -22,16 +25,10 @@ export default {
             img: {
                 tools: require('../assets/img/tools.png'),
                 ward: require('../assets/img/ward-1.png'),
-                knight: require('../assets/img/knight-1.png'),
-                archer: require('../assets/img/archer-1.png'),
-                scout: require('../assets/img/wolf-0.png'),
                 gold: require('../assets/img/coin.png'),
                 potion: require('../assets/img/potion.png'),
                 sword: require('../assets/img/woodSword.png'),
-                inventory: require('../assets/img/backpack.png'),
-                inventoryOpen: require('../assets/img/backpack_open.png'),
                 discover: require('../assets/img/discover.png'),
-                house: require('../assets/img/house-4.png'),
             }
         }
     },
@@ -40,7 +37,16 @@ export default {
     },
     methods: {
         onItemClick(item) {
-            console.log(item);
+            const HL = window.HL;
+            const data = {
+                id: firebase.database().ref('loot').push().key,
+                slug: item.slug,
+                name: item.name,
+                amount: item.amount,
+                position: {}
+            }
+
+            HL.selected = new Item(data.id, data);
         }
     }
 }

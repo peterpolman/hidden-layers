@@ -1,6 +1,6 @@
-import Character from './Character';
+import BaseCharacter from './BaseCharacter';
 
-export default class User extends Character {
+export default class User extends BaseCharacter {
     constructor (id, data) {
         super(id, data);
 

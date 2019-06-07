@@ -98,17 +98,19 @@ export default class HiddenLayer {
         const positions = [
             this.tb.utils.projectToWorld([u.position.lng, u.position.lat]),
             this.tb.utils.projectToWorld([s.position.lng, s.position.lat])
-        ]
+        ];
+        let holes = [], visibility = [];
 
-        let holes = []
+        // Creates an array of JSTS holes
         for (let i in positions) {
-            let hole = this.createHole(2, positions[i]);
+            let hole = this.createHole(1, positions[i]);
             let jstsHole = this.jstsPoly(hole);
 
             holes.push(jstsHole);
         }
 
-        let visibility = [];
+        // Checks for intersections and unites the holes and then converts them back
+        // to Three paths and pushes them in the visility array
         for (let i in holes) {
             for (let j in holes) {
                 // Checks if first hole intersects with the second hole and skip the first

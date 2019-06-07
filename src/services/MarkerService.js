@@ -1,11 +1,10 @@
 const Geohash = require('latlon-geohash');
 
 import firebase from 'firebase/app';
-import 'firebase/database';
-import 'firebase/auth';
 
 import User from '../models/User.js';
 import Scout from '../models/Scout.js';
+import Item from '../models/Item.js';
 
 export default class MarkerService {
     constructor() {
@@ -116,9 +115,9 @@ export default class MarkerService {
 
         // Statically get all data for this marker once
         this.db.ref(data.ref).once('value').then((snap) => {
-            HL.markers[id] = (snap.val().email == null)
-                ? new Scout(snap.key, snap.val())
-                : new User(snap.key, snap.val());
+            if (data.ref.startsWith('users')) HL.markers[id] = new User(snap.key, snap.val());
+            if (data.ref.startsWith('scouts')) HL.markers[id] = new Scout(snap.key, snap.val());
+            if (data.ref.startsWith('loot')) HL.markers[id] = new Item(snap.key, snap.val());
 
             console.log('Marker is discovered: ', id, data);
         });
