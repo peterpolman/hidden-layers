@@ -8,6 +8,7 @@ export default class Character {
         this.world = HL.tb.world;
         this.ref = firebase.database().ref((data.email != null) ? 'users2' : 'scouts2').child(id);
         this.position = data.position;
+
         this.loadAtPosition(id, (data.userClass ? data.userClass : 'scout'), data.position);
     }
 

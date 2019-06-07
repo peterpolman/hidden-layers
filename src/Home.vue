@@ -61,7 +61,7 @@ export default {
                 scoutsRef.child(this.user.scout).once('value').then(snap => {
 
                     // Creates my user and discovers for position.
-                    this.scout = HL.markers[this.user.scout] = new Scout(this.user.scout, snap.val());
+                    this.scout = HL.markers[this.user.scout] = new Scout(snap.key, snap.val());
 
                     // Loads all nearby markers based on the uid.
                     markerService.loadNearbyMarkers(this.user.id, position);

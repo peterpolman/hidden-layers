@@ -6,7 +6,8 @@ export default class Scout extends DamagableCharacter {
     constructor (id, data) {
         super(id, data);
 
-        this.name = `${HL.markers[data.uid].name}'s scout`;
+        this.uid = data.uid;
+        this.name = data.name;
         this.avatar = 'wolf';
         this.marker = null;
         this.destination = null;
@@ -17,7 +18,6 @@ export default class Scout extends DamagableCharacter {
 
     getInfoMarkup() {
         let el = document.createElement('div');
-        el.style = {position: 'relative'};
         el.classList.add(`marker-${this.id}`);
         el.innerHTML = `
             <div class="character-wrapper">
@@ -32,7 +32,6 @@ export default class Scout extends DamagableCharacter {
 
     loadInfo(markup) {
         const MAP = window.MAP;
-
         if (this.marker === null) {
             this.marker = new mapboxgl.Marker({
                 element: markup,
@@ -55,8 +54,7 @@ export default class Scout extends DamagableCharacter {
                         path: data.routes[0].geometry.coordinates,
                         duration: data.routes[0].duration * 60
                     }
-                    this.setTarget(destination);
-                    this.travelTo(options);
+                    this.travelTo(options, destination);
                 })
             }
         });
@@ -65,28 +63,28 @@ export default class Scout extends DamagableCharacter {
     setTarget(lngLat) {
         const THREE = window.THREE;
         const geometry = new THREE.SphereGeometry(.5, 16, 16);
-        const material = new THREE.MeshPhongMaterial( {color: 0x0000FF} );
+        const material = new THREE.MeshPhongMaterial( {color: 0xFF0000} );
         const cube = new THREE.Mesh( geometry, material );
 
         this.destination = this.tb.Object3D({obj: cube, units:'meters', scale: 1 }).setCoords(lngLat);
-        this.destination.name = 'destinationTarget';
 
         this.tb.add(this.destination);
         this.tb.repaint();
     }
 
-    travelTo(options) {
+    travelTo(options, destination) {
         const THREE = window.THREE;
-        var position = 0;
-        var path = new THREE.CatmullRomCurve3(this.tb.utils.lnglatsToWorld(options.path))
+        const path = new THREE.CatmullRomCurve3(this.tb.utils.lnglatsToWorld(options.path))
+        let position = 0;
 
         clearInterval(this.timer);
-        this.walking = true;
+        this.world.remove(this.destination);
+        this.setTarget(destination);
         this.timer = setInterval(() => {
             position += 0.01;
-            if (position <= 1) {
-                var point = path.getPointAt(position);
-                var lngLat = this.tb.utils.unprojectFromWorld(point);
+            if (position < 1) {
+                const point = path.getPointAt(position);
+                const lngLat = this.tb.utils.unprojectFromWorld(point);
                 this.ref.update({
                     position: {
                         lng: lngLat[0],
@@ -95,16 +93,14 @@ export default class Scout extends DamagableCharacter {
                 });
             }
             else {
-                const objectInScene = this.world.getObjectByName('destinationTarget');
-                this.world.remove(objectInScene);
-                this.walking = false;
+                this.world.remove(this.destination);
                 clearInterval(this.timer);
             }
         }, 100)
     }
 
     onClick() {
-        alert(`Hi ${this.name}!`);
+        alert(`Hi ${this.name}`);
     }
 
 }

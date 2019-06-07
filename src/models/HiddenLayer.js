@@ -35,7 +35,6 @@ export default class HiddenLayer {
         this.tb.add(directionalLight);
         this.tb.add(ambientLightLight);
 
-
         // Create a plane that covers the world.
         const ne = this.tb.utils.projectToWorld([180, 85]);
         const sw = this.tb.utils.projectToWorld([-180, -85]);
@@ -54,15 +53,12 @@ export default class HiddenLayer {
 
         // if intersect exists, highlight it
         if (intersect) {
-            var nearestObject = intersect.object;
-            this.handleObjectClick(nearestObject);
+            var object = intersect.object;
+            this.handleObjectClick(e, object);
         }
         else {
             this.handleMapClick(e);
         }
-
-        const sid = this.markers[this.uid].scout;
-        this.markers[sid].setDestination(e);
 
         // on state change, fire a repaint
         if (this.active !== intersectionExists) {
@@ -117,18 +113,27 @@ export default class HiddenLayer {
         return circleShape;
     }
 
-    handleObjectClick(nearestObject) {
-        const target = nearestObject.parent.parent;
+    handleObjectClick(e, object) {
+        // Select parent of parent which contains the userData
+        const target = object.parent.parent;
         const id = target.userData.id;
 
         if (typeof this.markers[id] != 'undefined') {
             this.markers[id].onClick();
         }
-        console.log('Casted ray hit: ', nearestObject);
+        else {
+            const sid = this.markers[this.uid].scout;
+            this.markers[sid].setDestination(e);
+        }
+
+        console.log('Casted ray hit: ', object);
     }
 
     handleMapClick(e) {
-        // Do map click
+        const sid = this.markers[this.uid].scout;
+        this.markers[sid].setDestination(e);
+        
+        console.log('Map click at', e);
     }
 
     render(){

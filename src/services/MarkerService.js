@@ -54,27 +54,6 @@ export default class MarkerService {
         // Get neighbours for current geohash
         let neighbours = Geohash.neighbours(hash);
 
-        MAP.addLayer({
-            'id': 'maine',
-            'type': 'fill',
-            'source': {
-                'type': 'geojson',
-                'data': {
-                    'type': 'Feature',
-                    'geometry': {
-                        'type': 'Polygon',
-                        'coordinates': [hash]
-                    }
-                }
-            },
-            'layout': {},
-            'paint': {
-                'fill-color': '#088',
-                'fill-opacity': 0.8
-            }
-        });
-
-
         console.log('Reload the markers: ', ((oldHash !== hash) || !this.markersLoaded))
 
         // Check if the hash is changed
@@ -104,7 +83,7 @@ export default class MarkerService {
     }
 
     watchNearbyGeohashes(hash, neighbours) {
-        var isNotMine = key =>{
+        const isNotMine = key => {
             const HL = window.HL;
             const isNotMyUser = (this.uid !== key);
             const isNotMyScout = (HL.markers[this.uid].scout !== key);
@@ -132,28 +111,24 @@ export default class MarkerService {
     // A marker is added to geohash
 	onMarkerAdded(id, data) {
         const HL = window.HL;
-        const doesNotExist = (typeof HL.markers[id] === 'undefined');
 
         // Statically get all data for this marker once
         this.db.ref(data.ref).once('value').then((snap) => {
-            // Check if the marker already exists
-            console.log('Does it not exist?: ',  doesNotExist)
-            if (doesNotExist === true) {
-                console.log('Marker is discovered: ', id, data);
-                HL.markers[id] = (snap.val().email == null)
-                    ? new Scout(id, snap.val())
-                    : new User(id, snap.val());
-            }
-        });
+            HL.markers[id] = (snap.val().email == null)
+                ? new Scout(snap.key, snap.val())
+                : new User(snap.key, snap.val());
 
+            console.log('Marker is discovered: ', id, data);
+        });
 	}
 
 	// A marker is removed from geohash
 	onMarkerRemoved(id, data) {
         const HL = window.HL;
-        console.log('Marker is removed: ', id, data);
         HL.markers[id].remove()
 		delete HL.markers[id];
+
+        console.log('Marker is removed: ', id, data);
 	}
 
 }

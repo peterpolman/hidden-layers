@@ -25,8 +25,6 @@
 </template>
 
 <script>
-import firebase from 'firebase/app';
-
 export default {
     name: 'Profile',
     props: ['user', 'scout'],
