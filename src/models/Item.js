@@ -65,6 +65,7 @@ export default class Item {
     }
 
     onMapClickWhenSelected(e) {
+        const HL = window.HL;
         const item = HL.selected
         const uid = firebase.auth().currentUser.uid;
         const hash = Geohash.encode(e.lngLat.lat, e.lngLat.lng, 7);
@@ -91,9 +92,6 @@ export default class Item {
 
     // Set the position of the objects in the world scene
     setPosition(lngLat) {
-        const HL = window.HL;
-        const uid = firebase.auth().currentUser.uid;
-
         this.position = {lng: lngLat[0], lat: lngLat[1]};
         this.mesh.setCoords(lngLat);
 
