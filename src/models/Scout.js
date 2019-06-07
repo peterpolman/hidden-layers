@@ -10,7 +10,7 @@ export default class Scout extends DamagableCharacter {
         this.name = data.name;
         this.avatar = 'wolf';
         this.marker = null;
-        this.destination = null;
+        this.indicator = null;
 
         this.loadInfo();
     }
@@ -53,26 +53,14 @@ export default class Scout extends DamagableCharacter {
         });
     }
 
-    setTarget(lngLat) {
-        const THREE = window.THREE;
-        const geometry = new THREE.SphereGeometry(.5, 16, 16);
-        const material = new THREE.MeshPhongMaterial( {color: 0xFF0000} );
-        const cube = new THREE.Mesh( geometry, material );
-
-        this.destination = this.tb.Object3D({obj: cube, units:'meters', scale: 1 }).setCoords(lngLat);
-
-        this.tb.add(this.destination);
-        this.tb.repaint();
-    }
-
     travelTo(options, destination) {
         const THREE = window.THREE;
         const path = new THREE.CatmullRomCurve3(this.tb.utils.lnglatsToWorld(options.path))
         let position = 0;
 
         clearInterval(this.timer);
-        this.world.remove(this.destination);
-        this.setTarget(destination);
+        this.moveIndicator(destination);
+
         this.timer = setInterval(() => {
             position += 0.01;
             if (position < 1) {
@@ -86,14 +74,41 @@ export default class Scout extends DamagableCharacter {
                 });
             }
             else {
-                this.world.remove(this.destination);
+                HL.selected = null;
+                this.world.remove(this.indicator);
+                this.tb.repaint();
                 clearInterval(this.timer);
             }
         }, 100)
     }
 
+    onMapClickWhenSelected(e) {
+        this.setDestination(e);
+    }
+
+    moveIndicator(lngLat) {
+        this.indicator.setCoords(lngLat);
+        this.indicator.position.z = -0.05;
+    }
+
     onClick() {
-        alert(`Hi ${this.name}`);
+        const lngLat = [this.position.lng, this.position.lat];
+        let geometry = new THREE.CylinderGeometry( 5, 5, .03, 16 );
+        let material = new THREE.MeshLambertMaterial({color: 0x0000FF, transparent: true, opacity: 0.25, side: THREE.DoubleSide});
+        let cylinder = new THREE.Mesh( geometry, material );
+
+        this.world.remove(this.indicator);
+
+        this.indicator = this.tb.Object3D({obj: cylinder, units:'meters', scale: 1})
+        this.indicator.rotateX(THREE.Math.degToRad(90));
+        this.moveIndicator(lngLat);
+
+        this.tb.add(this.indicator);
+        this.tb.repaint();
+
+        HL.selected = this;
+
+        console.log('Selected scout', this.name);
     }
 
 }

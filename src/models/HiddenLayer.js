@@ -1,4 +1,5 @@
 const jsts = require('jsts');
+const THREE = window.THREE;
 
 import firebase from 'firebase/app';
 
@@ -10,16 +11,15 @@ export default class HiddenLayer {
         this.type = 'custom';
         this.renderingMode = '3d';
 
-        this.markers = {};
+        this.markers = [];
         this.active = false;
         this.tb = null;
-
         this.fog = null;
+        this.selected = null;
     }
 
     onAdd(map, mbxContext) {
         const Threebox = window.Threebox;
-        const THREE = window.THREE;
         const MAP = window.MAP;
         const directionalLight = new THREE.DirectionalLight(0xFFFFFF);
         const ambientLightLight = new THREE.AmbientLight(0xFFFFFF, 0.75);
@@ -85,7 +85,6 @@ export default class HiddenLayer {
     }
 
     convertFromJSTSPath(hole) {
-        const THREE = window.THREE;
         let path = new THREE.Path();
         let points = hole.getCoordinates()
         path.setFromPoints(points);
@@ -94,15 +93,12 @@ export default class HiddenLayer {
     }
 
     discover(uid) {
-        const THREE = window.THREE;
         const u = this.markers[uid];
         const s = this.markers[u.scout];
         const positions = [
             this.tb.utils.projectToWorld([u.position.lng, u.position.lat]),
             this.tb.utils.projectToWorld([s.position.lng, s.position.lat])
         ]
-
-        this.planeShape.holes = [];
 
         let holes = []
         for (let i in positions) {
@@ -121,11 +117,9 @@ export default class HiddenLayer {
 
                     delete holes[j]
                 }
-
             }
             visibility.push(this.convertFromJSTSPath(holes[i]));
         }
-
 
         this.planeShape.holes = visibility;
 
@@ -154,7 +148,6 @@ export default class HiddenLayer {
     }
 
     createHole(size, xy) {
-        const THREE = window.THREE;
         let circlePath = new THREE.Path();
 
         circlePath.moveTo((xy.x), (xy.y));
@@ -180,9 +173,9 @@ export default class HiddenLayer {
     }
 
     handleMapClick(e) {
-        const sid = this.markers[this.uid].scout;
-        this.markers[sid].setDestination(e);
-
+        if (this.selected) {
+            this.selected.onMapClickWhenSelected(e);
+        }
         console.log('Map click at', e);
     }
 

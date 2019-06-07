@@ -51,9 +51,9 @@ export default class Character {
 
             this.tb.add(this.mesh);
             this.tb.repaint();
-            console.log('Object added: ', id, this.mesh)
-
             this.watch();
+
+            console.log('Object added: ', id, this.mesh)
         });
     }
 
