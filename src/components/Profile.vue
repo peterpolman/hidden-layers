@@ -44,7 +44,6 @@ export default {
     methods: {
         locate(position) {
             const MAP = window.MAP;
-            const HL = window.HL;
             MAP.setCenter(position);
         }
     }

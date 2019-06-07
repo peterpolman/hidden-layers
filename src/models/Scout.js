@@ -12,14 +12,14 @@ export default class Scout extends DamagableCharacter {
         this.marker = null;
         this.destination = null;
 
-        const markup = this.getInfoMarkup();
-        this.loadInfo(markup);
+        this.loadInfo();
     }
 
-    getInfoMarkup() {
-        let el = document.createElement('div');
-        el.classList.add(`marker-${this.id}`);
-        el.innerHTML = `
+    loadInfo() {
+        const MAP = window.MAP;
+        let markup = document.createElement('div');
+        markup.classList.add(`marker-${this.id}`);
+        markup.innerHTML = `
             <div class="character-wrapper">
                 <div class="character-info">
                     <strong class="character-name">${this.name}</strong><br>
@@ -27,19 +27,12 @@ export default class Scout extends DamagableCharacter {
                 </div>
             </div>`;
 
-        return el;
-    }
-
-    loadInfo(markup) {
-        const MAP = window.MAP;
-        if (this.marker === null) {
-            this.marker = new mapboxgl.Marker({
-                element: markup,
-                offset: [30,40]
-            })
-            .setLngLat([this.position.lng, this.position.lat])
-            .addTo(MAP);
-        }
+        this.marker = new mapboxgl.Marker({
+            element: markup,
+            offset: [30,40]
+        })
+        .setLngLat([this.position.lng, this.position.lat])
+        .addTo(MAP);
     }
 
     setDestination(e) {

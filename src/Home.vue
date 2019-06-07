@@ -3,9 +3,9 @@
         <Map />
         <Inventory class="ui-inventory" />
         <Profile
-            v-if="user && scout"
-            v-bind:user="user"
-            v-bind:scout="scout"
+            v-if="markerService.user && markerService.scout"
+            v-bind:user="markerService.user"
+            v-bind:scout="markerService.scout"
             class="ui-profile" />
         <div class="ui-actions">
             <button v-on:click="reload()" class="btn btn-default">Reload</button>
@@ -14,11 +14,11 @@
 </template>
 
 <script>
+import firebase from 'firebase/app';
 import Map from './components/Map.vue';
 import Inventory from './components/Inventory.vue';
 import Profile from './components/Profile.vue';
 import MarkerService from './services/MarkerService';
-import firebase from 'firebase/app';
 import HiddenLayer from './models/HiddenLayer';
 import User from './models/User';
 import Scout from './models/Scout';
@@ -32,42 +32,39 @@ export default {
     },
     data() {
         return {
-            user: null,
-            scout: null,
-            items: null
+            items: null,
+            markerService: new MarkerService()
         }
     },
     mounted() {
-        const markerService = new MarkerService;
         const MAP = window.MAP;
         const uid = firebase.auth().currentUser.uid;
 
         MAP.on('load', () => {
-            const usersRef = firebase.database().ref(`users2/`);
-            const scoutsRef = firebase.database().ref(`scouts2/`);
+            const usersRef = firebase.database().ref('users2');
+            const scoutsRef = firebase.database().ref('scouts2');
 
             // Load the user data
             usersRef.child(uid).once('value').then(snap => {
                 const HL = window.HL = new HiddenLayer();
-                const position = snap.val().position;
 
                 // Add to layer array before buildings.
                 MAP.addLayer(HL, '3d-buildings');
-
+                
                 // Creates my user
-                this.user = HL.markers[snap.key] = new User(snap.key, snap.val());
+                this.markerService.user = HL.markers[snap.key] = new User(snap.key, snap.val());
 
                 // Load the scout data
-                scoutsRef.child(this.user.scout).once('value').then(snap => {
+                scoutsRef.child(this.markerService.user.scout).once('value').then(snap => {
 
                     // Creates my user and discovers for position.
-                    this.scout = HL.markers[this.user.scout] = new Scout(snap.key, snap.val());
+                    this.markerService.scout = HL.markers[snap.key] = new Scout(snap.key, snap.val());
 
                     // Loads all nearby markers based on the uid.
-                    markerService.loadNearbyMarkers(this.user.id, position);
-                    HL.discover(this.user.id);
+                    this.markerService.loadNearbyMarkers(this.markerService.user.id, this.markerService.user.position);
+                    HL.discover(this.markerService.user.id);
 
-                    console.log("Initial discovery for user! ", this.user.id, position);
+                    console.log("Initial discovery for user! ", this.markerService.user.id, this.markerService.user.position);
                 });
             });
         });

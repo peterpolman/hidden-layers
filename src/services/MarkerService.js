@@ -10,6 +10,8 @@ import Scout from '../models/Scout.js';
 export default class MarkerService {
     constructor() {
         this.uid = firebase.auth().currentUser.uid;
+        this.user = null;
+        this.scout = null;
         this.db = firebase.database()
 		this.hashes = [];
         this.markersRef = firebase.database().ref('markers');
@@ -72,8 +74,8 @@ export default class MarkerService {
             }
 
             // Remove all existing other users from the scene and detach listeners
-            for (let uid in HL.markers) {
-                if (uid != this.uid) HL.markers[uid].remove()
+            for (let id in HL.markers) {
+                if (id !== this.user.id && id !== this.scout.id) HL.markers[id].remove()
             }
 
             this.watchNearbyGeohashes(hash, neighbours);
