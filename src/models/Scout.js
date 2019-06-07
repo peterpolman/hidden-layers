@@ -6,10 +6,11 @@ export default class Scout extends DamagableCharacter {
     constructor (id, data) {
         super(id, data);
 
-        this.name = 'Scout';
+        this.name = `${HL.markers[data.uid].name}'s scout`;
         this.avatar = 'wolf';
-
         this.marker = null;
+        this.destination = null;
+
         const markup = this.getInfoMarkup();
         this.loadInfo(markup);
     }
@@ -34,54 +35,53 @@ export default class Scout extends DamagableCharacter {
 
         if (this.marker === null) {
             this.marker = new mapboxgl.Marker({
-                    element: markup,
-                    offset: [30,40]
-                })
-                .setLngLat([this.position.lng, this.position.lat])
-                .addTo(MAP);
+                element: markup,
+                offset: [30,40]
+            })
+            .setLngLat([this.position.lng, this.position.lat])
+            .addTo(MAP);
         }
-    }
-
-    fetchFunction(url, cb) {
-       fetch(url)
-           .then(
-               function(response){
-                   if (response.status === 200) {
-                       response.json()
-                           .then(function(data){
-                               cb(data)
-                           })
-                   }
-               }
-           )
     }
 
     setDestination(e) {
         const origin = [this.position.lng, this.position.lat];
         const destination = [e.lngLat.lng, e.lngLat.lat];
         const url = "https://api.mapbox.com/directions/v5/mapbox/walking/"+[origin, destination].join(';')+"?geometries=geojson&access_token=" + config.mapbox.key;
-        const callback = (data) => {
-            const options = {
-                path: data.routes[0].geometry.coordinates,
-                duration: data.routes[0].duration * 60
-            }
-            this.travelTo(options);
-        }
 
-        this.fetchFunction(url, callback);
+        return fetch(url).then((response) => {
+            if (response.status === 200) {
+                response.json().then((data) => {
+                    const options = {
+                        path: data.routes[0].geometry.coordinates,
+                        duration: data.routes[0].duration * 60
+                    }
+                    this.setTarget(destination);
+                    this.travelTo(options);
+                })
+            }
+        });
+    }
+
+    setTarget(lngLat) {
+        const THREE = window.THREE;
+        const geometry = new THREE.SphereGeometry(.5, 16, 16);
+        const material = new THREE.MeshPhongMaterial( {color: 0x0000FF} );
+        const cube = new THREE.Mesh( geometry, material );
+
+        this.destination = this.tb.Object3D({obj: cube, units:'meters', scale: 1 }).setCoords(lngLat);
+        this.destination.name = 'destinationTarget';
+
+        this.tb.add(this.destination);
+        this.tb.repaint();
     }
 
     travelTo(options) {
-        this.walking = true;
-        this.followPath(options);
-    }
-
-    followPath(options) {
         const THREE = window.THREE;
         var position = 0;
         var path = new THREE.CatmullRomCurve3(this.tb.utils.lnglatsToWorld(options.path))
 
         clearInterval(this.timer);
+        this.walking = true;
         this.timer = setInterval(() => {
             position += 0.01;
             if (position <= 1) {
@@ -95,14 +95,16 @@ export default class Scout extends DamagableCharacter {
                 });
             }
             else {
+                const objectInScene = this.world.getObjectByName('destinationTarget');
+                this.world.remove(objectInScene);
                 this.walking = false;
                 clearInterval(this.timer);
             }
-        }, 500)
+        }, 100)
     }
 
     onClick() {
-        alert(`Hi scout ${this.name}!`);
+        alert(`Hi ${this.name}!`);
     }
 
 }

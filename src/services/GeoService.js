@@ -33,7 +33,6 @@ export default class GeoService {
                     lat: r.coords.latitude,
                     lng: r.coords.longitude
                 };
-                // MAP.setCenter(position);
                 firebase.database().ref(`users2/${firebase.auth().currentUser.uid}`).child('position').set(position);
             }, (err) => {
                 console.log(err);

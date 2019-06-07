@@ -32,41 +32,43 @@ export default class HiddenLayer {
             {defaultLights: false}
         );
 
-        this.tb.add(ambientLightLight);
         this.tb.add(directionalLight);
+        this.tb.add(ambientLightLight);
 
+
+        // Create a plane that covers the world.
         const ne = this.tb.utils.projectToWorld([180, 85]);
         const sw = this.tb.utils.projectToWorld([-180, -85]);
 
         this.planeShape = this.createPlane(ne, sw, 5);
 
         MAP.on('click', (e) => {
-            // calculate objects intersecting the picking ray
-            var intersect = this.tb.queryRenderedFeatures(e.point)[0]
-            var intersectionExists = typeof intersect == "object"
-
-            // if intersect exists, highlight it
-            if (intersect) {
-                var nearestObject = intersect.object;
-                this.handleObjectClick(nearestObject);
-            }
-            else {
-                this.handleMapClick(e);
-            }
-
             this.onClick(e);
-
-            // on state change, fire a repaint
-            if (this.active !== intersectionExists) {
-                this.active = intersectionExists;
-                this.tb.repaint();
-            }
         });
     }
 
     onClick(e) {
+        // calculate objects intersecting the picking ray
+        var intersect = this.tb.queryRenderedFeatures(e.point)[0]
+        var intersectionExists = typeof intersect == "object"
+
+        // if intersect exists, highlight it
+        if (intersect) {
+            var nearestObject = intersect.object;
+            this.handleObjectClick(nearestObject);
+        }
+        else {
+            this.handleMapClick(e);
+        }
+
         const sid = this.markers[this.uid].scout;
         this.markers[sid].setDestination(e);
+
+        // on state change, fire a repaint
+        if (this.active !== intersectionExists) {
+            this.active = intersectionExists;
+            this.tb.repaint();
+        }
     }
 
     discover(uid) {
@@ -119,30 +121,17 @@ export default class HiddenLayer {
         const target = nearestObject.parent.parent;
         const id = target.userData.id;
 
-        if (typeof this.markers[id] != 'undefined') this.markers[id].onClick();
-        console.log('Casted ray hit: ', this.markers[id]);
+        if (typeof this.markers[id] != 'undefined') {
+            this.markers[id].onClick();
+        }
+        console.log('Casted ray hit: ', nearestObject);
     }
 
     handleMapClick(e) {
-        const THREE = window.THREE;
-
-        var geometry = new THREE.BoxGeometry( 1, 1, 1 );
-        var material = new THREE.MeshPhongMaterial( {color: 0xFF0000} );
-        var cube = new THREE.Mesh( geometry, material );
-
-        const mesh = this.tb.Object3D({obj:cube, units:'meters', scale: 1 }).setCoords([e.lngLat.lng, e.lngLat.lat]);
-
-        this.tb.add( mesh );
-        this.tb.repaint();
+        // Do map click
     }
 
     render(){
         this.tb.update();
-
-        if ((typeof this.markers[this.markers[this.uid].scout] !== 'undefined') && (this.markers[this.markers[this.uid].scout].walking)) {
-            // console.log('walking')
-            this.discover(this.uid);
-            this.tb.repaint();
-        }
     }
 }

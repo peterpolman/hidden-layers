@@ -1,16 +1,24 @@
 <template>
-    <div class="character-wrapper">
-        <div class="character-picture" v-on:click="locateUser()">
-            <img v-bind:src="img[user.class]" alt="" />
-            <small>{{user.xp}}</small>
-        </div>
-        <div class="character-info">
-            <strong class="character-name">{{user.name}}</strong><br>
-            <div class="bar-wrapper character-hp">
-                <div class="bar bar-l" v-bind:style="`background-color: ${(user.hitPoints > 50 ) ? '#8CC63E' : (user.hitPoints > 25) ? '#FFBB33' : '#ED1C24'}; width: ${user.hitPoints}%;`"></div>
+    <div>
+        <div class="character-wrapper">
+            <div class="character-picture" v-on:click="locate(user.position)">
+                <img v-bind:src="img[user.class]" alt="" />
+                <small>{{user.xp}}</small>
             </div>
-            <div class="bar-wrapper character-xp">
-                <div class="bar bar-l" v-bind:style="`background-color: #FFD700; width: ${user.xp}%;`"></div>
+            <div class="character-info">
+                <strong class="character-name">{{user.name}}</strong><br>
+                <div class="bar-wrapper character-hp">
+                    <div class="bar bar-l" v-bind:style="`background-color: ${(user.hitPoints > 50 ) ? '#8CC63E' : (user.hitPoints > 25) ? '#FFBB33' : '#ED1C24'}; width: ${user.hitPoints}%;`"></div>
+                </div>
+                <div class="bar-wrapper character-xp">
+                    <div class="bar bar-l" v-bind:style="`background-color: #FFD700; width: ${user.xp}%;`"></div>
+                </div>
+            </div>
+        </div>
+        <div class="character-wrapper">
+            <div class="character-picture character-picture-s" v-on:click="locate(scout.position)">
+                <img v-bind:src="img['wolf']" alt="" />
+                <small>{{user.xp}}</small>
             </div>
         </div>
     </div>
@@ -21,13 +29,14 @@ import firebase from 'firebase/app';
 
 export default {
     name: 'Profile',
-    props: ['user'],
+    props: ['user', 'scout'],
     data() {
         return {
             img: {
                 knight: require('../assets/img/knight-1.png'),
                 archer: require('../assets/img/archer-1.png'),
-                wizard: require('../assets/img/wizard-1.png')
+                wizard: require('../assets/img/wizard-1.png'),
+                wolf: require('../assets/img/wolf-0.png')
             }
         }
     },
@@ -35,10 +44,10 @@ export default {
 
     },
     methods: {
-        locateUser() {
+        locate(position) {
             const MAP = window.MAP;
             const HL = window.HL;
-            MAP.setCenter(HL.markers[firebase.auth().currentUser.uid].position);
+            MAP.setCenter(position);
         }
     }
 
@@ -80,6 +89,13 @@ export default {
     border-top-left-radius: 3px;
 }
 
+.character-picture-s {
+    flex: 0 35px;
+    width: 35px;
+    height: 35px;
+    margin-top: .5rem;
+}
+
 .character-level {
     box-shadow: rgba(0, 0, 0, 0.3) 0 1px 4px -1px;
     border-radius: 50%;
@@ -98,6 +114,13 @@ export default {
 }
 
 .character-picture img {
+    margin: auto;
+    flex: 0 auto;
+    width: auto;
+    height: 30px;
+}
+
+.character-picture-s img {
     margin: auto;
     flex: 0 auto;
     width: auto;

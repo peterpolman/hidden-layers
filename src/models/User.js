@@ -11,7 +11,7 @@ export default class User extends DamagableCharacter {
         this.avatar = data.userClass;
         this.stats = data.stats;
         this.scout = data.scout;
-        
+
         this.marker = null;
         const markup = this.getInfoMarkup();
         this.loadInfo(markup);

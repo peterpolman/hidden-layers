@@ -14,10 +14,15 @@ export default class MarkerService {
 		this.hashes = [];
         this.markersRef = firebase.database().ref('markers');
         this.markersLoaded = false;
+
+        // TEMP: Should be removed when data is migrated.
+        // this.rebuildMarkerDatabase();
     }
 
     // TEMP: Should be removed when data is migrated.
     rebuildMarkerDatabase() {
+        this.markersRef.remove();
+
         this.db.ref(`users2`).on('child_added', (snap) => {
             let hash = Geohash.encode(snap.val().position.lat, snap.val().position.lng, 7);
             this.markersRef.child(hash).child(snap.key).set({
@@ -25,6 +30,7 @@ export default class MarkerService {
                 ref: `users2/${snap.key}`
             });
         });
+
         this.db.ref(`scouts2`).on('child_added', (snap) => {
             let hash = Geohash.encode(snap.val().position.lat, snap.val().position.lng, 7);
             this.markersRef.child(hash).child(snap.key).set({
@@ -48,7 +54,29 @@ export default class MarkerService {
         // Get neighbours for current geohash
         let neighbours = Geohash.neighbours(hash);
 
+        MAP.addLayer({
+            'id': 'maine',
+            'type': 'fill',
+            'source': {
+                'type': 'geojson',
+                'data': {
+                    'type': 'Feature',
+                    'geometry': {
+                        'type': 'Polygon',
+                        'coordinates': [hash]
+                    }
+                }
+            },
+            'layout': {},
+            'paint': {
+                'fill-color': '#088',
+                'fill-opacity': 0.8
+            }
+        });
+
+
         console.log('Reload the markers: ', ((oldHash !== hash) || !this.markersLoaded))
+
         // Check if the hash is changed
         if ((oldHash !== hash) || !this.markersLoaded) {
             console.log('Hash change detected!');
@@ -76,39 +104,48 @@ export default class MarkerService {
     }
 
     watchNearbyGeohashes(hash, neighbours) {
-        var isNotMineNorExists = key =>{
+        var isNotMine = key =>{
             const HL = window.HL;
-            return ((this.uid !== key) && (HL.markers[this.uid].scout !== key) && (typeof HL.markers[key] === 'undefined'));
+            const isNotMyUser = (this.uid !== key);
+            const isNotMyScout = (HL.markers[this.uid].scout !== key);
+
+            return (isNotMyUser && isNotMyScout);
         }
         // Empty the listeners and set up new ones
         this.hashes = [];
 
         // Add new listeners for the current geohash if there is a hash change
-        this.markersRef.child(hash).on('child_added', (snap) => isNotMineNorExists(snap.key) ? this.onMarkerAdded(snap.key, snap.val()) : '');
-        this.markersRef.child(hash).on('child_removed', (snap) => isNotMineNorExists(snap.key) ? this.onMarkerRemoved(snap.key, snap.val()) : '');
+        this.markersRef.child(hash).on('child_added', (snap) => isNotMine(snap.key) ? this.onMarkerAdded(snap.key, snap.val()) : '');
+        this.markersRef.child(hash).on('child_removed', (snap) => isNotMine(snap.key) ? this.onMarkerRemoved(snap.key, snap.val()) : '');
 
         if (!this.hashes.includes(hash)) this.hashes.push(hash);
 
         // Add new listeners for the neighbouring geohashes if there is a hash change
         for (let n in neighbours) {
-            this.markersRef.child(neighbours[n]).on('child_added', (snap) => isNotMineNorExists(snap.key) ? this.onMarkerAdded(snap.key, snap.val()) : '');
-            this.markersRef.child(neighbours[n]).on('child_removed', (snap) => isNotMineNorExists(snap.key) ? this.onMarkerRemoved(snap.key, snap.val()) : '');
+            this.markersRef.child(neighbours[n]).on('child_added', (snap) => isNotMine(snap.key) ? this.onMarkerAdded(snap.key, snap.val()) : '');
+            this.markersRef.child(neighbours[n]).on('child_removed', (snap) => isNotMine(snap.key) ? this.onMarkerRemoved(snap.key, snap.val()) : '');
 
-            if (!this.hashes.includes(hash)) this.hashes.push(neighbours[n]);
+            if (!this.hashes.includes(neighbours[n])) this.hashes.push(neighbours[n]);
         }
     }
 
     // A marker is added to geohash
 	onMarkerAdded(id, data) {
         const HL = window.HL;
-        console.log('Marker is discovered: ', id, data);
+        const doesNotExist = (typeof HL.markers[id] === 'undefined');
 
-        // Statically get all data for this user once
+        // Statically get all data for this marker once
         this.db.ref(data.ref).once('value').then((snap) => {
-            HL.markers[id] = (snap.val().exp == null)
-                ? new Scout(id, snap.val())
-                : new User(id, snap.val());
+            // Check if the marker already exists
+            console.log('Does it not exist?: ',  doesNotExist)
+            if (doesNotExist === true) {
+                console.log('Marker is discovered: ', id, data);
+                HL.markers[id] = (snap.val().email == null)
+                    ? new Scout(id, snap.val())
+                    : new User(id, snap.val());
+            }
         });
+
 	}
 
 	// A marker is removed from geohash

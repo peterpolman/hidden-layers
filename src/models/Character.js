@@ -3,19 +3,31 @@ import firebase from 'firebase/app';
 export default class Character {
     constructor(id, data) {
         const HL = window.HL;
-
         this.id = id;
-        this.uid = firebase.auth().currentUser.uid;
-
         this.tb = HL.tb;
         this.world = HL.tb.world;
-
         this.ref = firebase.database().ref((data.email != null) ? 'users2' : 'scouts2').child(id);
         this.position = data.position;
-
         this.loadAtPosition(id, (data.userClass ? data.userClass : 'scout'), data.position);
+    }
 
-        this.watch();
+    // Watch user properties for change and remove events
+    watch() {
+        console.log('Start watching!', this.id)
+        this.ref.on('child_changed', (snap) => {
+            console.log("Property changed: ", this.id, snap.val());
+            switch(snap.key) {
+                case 'position':
+                    this.setPosition(snap.val());
+                    this.tb.repaint();
+                    break
+                default:
+                    console.error("No handler available", snap.key, snap.val());
+            }
+        });
+        this.ref.on('child_removed', (snap) => {
+            console.log("Property removed: ", snap.key, snap.val());
+        });
     }
 
     loadAtPosition(id, obj, position) {
@@ -39,42 +51,23 @@ export default class Character {
             this.tb.add(this.mesh);
             this.tb.repaint();
             console.log('Object added: ', id, this.mesh)
+
+            this.watch();
         });
     }
 
     // Set the position of the objects in the world scene
     setPosition(position) {
-        console.log(position);
         const HL = window.HL;
         const lngLat = [position.lng, position.lat];
+        const uid = firebase.auth().currentUser.uid;
 
         this.position = position;
         this.marker.setLngLat(lngLat)
         this.mesh.setCoords(lngLat);
 
-        HL.discover(this.uid);
-
-        this.mesh.updateMatrix();
+        HL.discover(uid);
         this.tb.repaint();
-    }
-
-    // Watch user properties for change and remove events
-    watch() {
-        console.log('Start watching!', this.id)
-        this.ref.on('child_changed', (snap) => {
-            console.log("Property changed: ", this.id, snap.val());
-
-            switch(snap.key) {
-                case 'position':
-                    this.setPosition(snap.val());
-                    break
-                default:
-                    console.error("No handler available", snap.key, snap.val());
-            }
-        });
-        this.ref.on('child_removed', (snap) => {
-            console.log("Property removed: ", snap.key, snap.val());
-        });
     }
 
     // Remove user from scene and detach listener
@@ -85,5 +78,10 @@ export default class Character {
         this.ref.off();
 
         console.log(`Removed: ${this.id}`)
+    }
+
+
+    onClick() {
+        alert(`This is ${this.name}`);
     }
 }
