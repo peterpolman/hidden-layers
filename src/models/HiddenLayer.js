@@ -85,6 +85,7 @@ export default class HiddenLayer {
     }
 
     convertFromJSTSPath(hole) {
+        const THREE = window.THREE;
         let path = new THREE.Path();
         let points = hole.getCoordinates()
         path.setFromPoints(points);
