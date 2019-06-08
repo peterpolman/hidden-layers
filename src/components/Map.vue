@@ -37,19 +37,11 @@ export default {
         });
 
         MAP.on('load', function() {
+            const layers = MAP.getStyle().layers;
+
             geo.getPosition().then((position) => MAP.setCenter(position));
 
-            var layers = MAP.getStyle().layers;
             // var features = MAP.queryRenderedFeatures({ layers: ['water', 'national_park'] });
-            var labelLayerId;
-
-            for (var i = 0; i < layers.length; i++) {
-                if (layers[i].type === 'symbol' && layers[i].layout['text-field']) {
-                    labelLayerId = layers[i].id;
-                    break;
-                }
-            }
-
             MAP.addLayer({
                 'id': '3d-buildings',
                 'source': 'composite',
@@ -73,7 +65,7 @@ export default {
                     ],
                     'fill-extrusion-opacity': .6
                 }
-            }, labelLayerId);
+            }, layers[layers.length-1].id);
         });
 
         // let tag = document.createElement('SCRIPT');

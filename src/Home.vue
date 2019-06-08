@@ -19,6 +19,7 @@ import Map from './components/Map.vue';
 import Inventory from './components/Inventory.vue';
 import Profile from './components/Profile.vue';
 import MarkerService from './services/MarkerService';
+import SpawnService from './services/SpawnService';
 import HiddenLayer from './models/HiddenLayer';
 import User from './models/User';
 import Scout from './models/Scout';
@@ -33,7 +34,8 @@ export default {
     data() {
         return {
             items: null,
-            markerService: new MarkerService()
+            markerService: new MarkerService(),
+            spawnSerice: new SpawnService(),
         }
     },
     mounted() {
@@ -50,7 +52,7 @@ export default {
 
                 // Add to layer array before buildings.
                 MAP.addLayer(HL, '3d-buildings');
-                
+
                 // Creates my user
                 this.markerService.user = HL.markers[snap.key] = new User(snap.key, snap.val());
 

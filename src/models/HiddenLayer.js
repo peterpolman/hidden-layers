@@ -126,7 +126,12 @@ export default class HiddenLayer {
         this.planeShape.holes = visibility;
 
         let geometry = new THREE.ShapeGeometry(this.planeShape);
-        let material = new THREE.MeshLambertMaterial({color: 0x000000, transparent: true, opacity: 0.5, side: THREE.DoubleSide});
+        let material = new THREE.MeshLambertMaterial({
+            color: 0x000000,
+            transparent: true,
+            opacity: 0.5,
+            side: THREE.DoubleSide
+        });
 
         this.fog = new THREE.Mesh(geometry, material);
         this.fog.name = 'fogOfWar';
@@ -140,11 +145,11 @@ export default class HiddenLayer {
         const THREE = window.THREE;
         let planeShape = new THREE.Shape();
 
-        planeShape.moveTo( sw.x + padding, sw.y + padding);
-        planeShape.lineTo( ne.x - padding, sw.y + padding);
-        planeShape.lineTo( ne.x - padding, ne.y - padding);
-        planeShape.lineTo( sw.x + padding, ne.y - padding);
-        planeShape.lineTo( sw.x + padding, sw.y + padding);
+        planeShape.moveTo(sw.x + padding, sw.y + padding);
+        planeShape.lineTo(ne.x - padding, sw.y + padding);
+        planeShape.lineTo(ne.x - padding, ne.y - padding);
+        planeShape.lineTo(sw.x + padding, ne.y - padding);
+        planeShape.lineTo(sw.x + padding, sw.y + padding);
 
         return planeShape;
     }
@@ -163,12 +168,15 @@ export default class HiddenLayer {
         const target = object.parent.parent;
         const id = target.userData.id;
 
+        // Mind that the fog of war can also be clicked but is not in the marker list
+        // Handle that click as a destination that is set
         if (typeof this.markers[id] != 'undefined') {
             this.markers[id].onClick();
         }
         else {
-            const sid = this.markers[this.uid].scout;
-            this.markers[sid].setDestination(e);
+            if (this.selected) {
+                this.selected.onMapClickWhenSelected(e);
+            }
         }
 
         console.log('Casted ray hit: ', object);

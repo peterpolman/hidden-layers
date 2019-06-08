@@ -39,6 +39,14 @@ export default class MarkerService {
                 ref: `scouts2/${snap.key}`
             });
         });
+
+        this.db.ref(`loot`).on('child_added', (snap) => {
+            let hash = Geohash.encode(snap.val().position.lat, snap.val().position.lng, 7);
+            this.markersRef.child(hash).child(snap.key).set({
+                position: snap.val().position,
+                ref: `loot/${snap.key}`
+            });
+        });
     }
 
     /*
