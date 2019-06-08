@@ -5,10 +5,14 @@ import firebase from 'firebase/app';
 export default class Item {
     constructor(id, data) {
         const HL = window.HL;
+        const uid = firebase.auth().currentUser.uid;
 
         this.tb = HL.tb;
         this.world = HL.tb.world;
-        this.ref = firebase.database().ref('loot').child(id);
+
+        this.lootRef = firebase.database().ref('loot').child(id);
+        this.itemsRef = firebase.database().ref('items').child(uid);
+        this.markersRef = firebase.database().ref('markers');
 
         this.id = id;
         this.slug = data.slug;
@@ -23,7 +27,7 @@ export default class Item {
 
     // Watch user properties for change and remove events
     watch() {
-        this.ref.on('child_changed', (snap) => {
+        this.lootRef.on('child_changed', (snap) => {
             switch(snap.key) {
                 case 'position':
                     this.setPosition(snap.val());
@@ -39,9 +43,7 @@ export default class Item {
 
     loadAtPosition(id, obj, position) {
         // TEMP hack
-        if (obj != 'sword') {
-            obj = 'scout';
-        }
+        obj = (obj != 'sword' && obj != 'potion' && obj != 'gold') ? 'dummy' : obj;
 
         return this.tb.loadObj({
             obj: `./models/items/${obj}.obj`,
@@ -72,11 +74,10 @@ export default class Item {
     onMapClickWhenSelected(e) {
         const HL = window.HL;
         const item = HL.selected
-        const uid = firebase.auth().currentUser.uid;
         const hash = Geohash.encode(e.lngLat.lat, e.lngLat.lng, 7);
 
         // Set the item in the loot database
-        this.ref.update({
+        this.lootRef.update({
             id: item.id,
             slug: item.slug,
             name: item.name,
@@ -84,13 +85,13 @@ export default class Item {
             position: e.lngLat
         });
 
-        firebase.database().ref('markers').child(hash).child(item.id).set({
+        this.markersRef.child(hash).child(item.id).set({
             position: e.lngLat,
             ref: `loot/${item.id}`,
         });
 
         // Remove the item from the inventory of the owner
-        firebase.database().ref('items').child(uid).child(item.slug).remove();
+        this.itemsRef.child(item.slug).remove();
 
         HL.selected = null;
     }
@@ -107,25 +108,27 @@ export default class Item {
     remove() {
         const objectInScene = this.world.getObjectByName(this.id);
         this.world.remove(objectInScene);
-        this.ref.off();
+
+        this.lootRef.remove();
+        this.lootRef.off();
+        this.tb.repaint();
 
         console.log(`Removed: ${this.id}`)
     }
 
 
     onClick() {
-        const uid = firebase.auth().currentUser.uid;
         const hash = Geohash.encode(this.position.lat, this.position.lng, 7);
 
-        firebase.database().ref('items').child(uid).child(this.slug).once('value').then((snap) => {
+        this.itemsRef.child(this.slug).once('value').then((snap) => {
             // Increase the amount when there is a similar item there
             const item = snap.val()
             const amount = (item !== null && item.amount > 0)
-                ? this.items[snap.key].amount + snap.val().amount
+                ? this.amount + snap.val().amount
                 : this.amount;
 
             // Pick up the item and place in inventory
-            firebase.database().ref('items').child(uid).child(this.slug).set({
+            this.itemsRef.child(this.slug).set({
                 id: this.id,
                 slug: this.slug,
                 name: this.name,
@@ -134,7 +137,7 @@ export default class Item {
             });
 
             // Remove from marker database
-            firebase.database().ref('markers').child(hash).child(this.id).remove()
+            this.markersRef.child(hash).child(this.id).remove()
         })
     }
 }

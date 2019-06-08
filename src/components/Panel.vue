@@ -65,7 +65,9 @@ export default {
         margin: 0;
         list-style: none;
         padding: 0;
-        width: 200px;
+        display: flex;
+        min-width: 50px;
+        min-height: 50px;
     }
 
     .panel li {
@@ -75,6 +77,7 @@ export default {
         height: 40px;
         background-color: rgba(0,0,0,0.5);
         display: inline-block;
+        flex: 0 40px;
     }
 
 </style>

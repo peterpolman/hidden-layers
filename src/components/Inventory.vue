@@ -41,6 +41,11 @@ export default {
                 console.log('Inventory item added.', snap.val())
             });
 
+            this.ref.on('child_changed', snap => {
+                Vue.set(this.items, snap.key, snap.val());
+                console.log('Inventory item added.', snap.val())
+            });
+
             this.ref.on('child_removed', snap => {
                 Vue.delete(this.items, snap.key);
                 console.log('Inventory item remove.', snap.key)

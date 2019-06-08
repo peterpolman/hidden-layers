@@ -68,7 +68,6 @@ export default {
     width: 45px;
     height: 45px;
     border-radius: 5px;
-    border: 3px solid black;
     box-shadow: rgba(0, 0, 0, 0.3) 0 1px 4px -1px;
     margin-right: .5rem;
 }
@@ -79,11 +78,13 @@ export default {
     color: white;
     padding-top: 2px;
     padding-left: 3px;
+    padding-right: 3px;
     background: black;
     position: absolute;
     bottom: 0;
     right: 0;
-    border-top-left-radius: 3px;
+    border-top-left-radius: 5px;
+    border-bottom-right-radius: 5px;
 }
 
 .character-picture-s {
