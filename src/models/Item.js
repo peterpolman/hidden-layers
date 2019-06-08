@@ -38,6 +38,11 @@ export default class Item {
     }
 
     loadAtPosition(id, obj, position) {
+        // TEMP hack
+        if (obj != 'sword') {
+            obj = 'scout';
+        }
+
         return this.tb.loadObj({
             obj: `./models/items/${obj}.obj`,
             mtl: `./models/items/${obj}.mtl`
@@ -112,17 +117,24 @@ export default class Item {
         const uid = firebase.auth().currentUser.uid;
         const hash = Geohash.encode(this.position.lat, this.position.lng, 7);
 
-        // Pick up the item and place in inventory
-        firebase.database().ref('items').child(uid).child(this.slug).set({
-            id: this.id,
-            slug: this.slug,
-            name: this.name,
-            amount: this.amount,
-            position: this.position
-        });
+        firebase.database().ref('items').child(uid).child(this.slug).once('value').then((snap) => {
+            // Increase the amount when there is a similar item there
+            const item = snap.val()
+            const amount = (item !== null && item.amount > 0)
+                ? this.items[snap.key].amount + snap.val().amount
+                : this.amount;
 
-        // Remove from marker database
-        firebase.database().ref('markers').child(hash).child(this.id).remove()
+            // Pick up the item and place in inventory
+            firebase.database().ref('items').child(uid).child(this.slug).set({
+                id: this.id,
+                slug: this.slug,
+                name: this.name,
+                amount: amount,
+                position: this.position
+            });
 
+            // Remove from marker database
+            firebase.database().ref('markers').child(hash).child(this.id).remove()
+        })
     }
 }

@@ -95,7 +95,7 @@ export default class Scout extends DamagableCharacter {
     onClick() {
         const HL = window.HL;
         const lngLat = [this.position.lng, this.position.lat];
-        let geometry = new THREE.CylinderGeometry( 2, 2, .03, 16 );
+        let geometry = new THREE.CylinderGeometry( 3, 3, .03, 16 );
         let material = new THREE.MeshLambertMaterial({color: 0x0000FF, transparent: true, opacity: 0.25, side: THREE.DoubleSide});
         let cylinder = new THREE.Mesh( geometry, material );
 

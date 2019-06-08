@@ -16,6 +16,7 @@
 <script>
 import firebase from 'firebase/app';
 import Panel from './Panel.vue';
+import Vue from 'vue';
 
 export default {
     name: 'Inventory',
@@ -24,25 +25,24 @@ export default {
     },
     data() {
         return {
+            ref: firebase.database().ref('items').child(firebase.auth().currentUser.uid),
             isOpen: false,
             items: null,
             imgBackpack: require('../assets/img/backpack.png')
         }
     },
     mounted() {
-        const uid = firebase.auth().currentUser.uid;
-
-        firebase.database().ref('items').child(uid).once('value').then(snap => {
+        this.ref.once('value').then(snap => {
             this.items = snap.val();
             console.log('Inventory mounted and items loaded.', this.items)
 
-            firebase.database().ref('items').child(uid).on('child_added', snap => {
-                this.items[snap.key] = snap.val();
+            this.ref.on('child_added', snap => {
+                Vue.set(this.items, snap.key, snap.val());
                 console.log('Inventory item added.', snap.val())
             });
 
-            firebase.database().ref('items').child(uid).on('child_removed', snap => {
-                delete this.items[snap.key];
+            this.ref.on('child_removed', snap => {
+                Vue.delete(this.items, snap.key);
                 console.log('Inventory item remove.', snap.key)
             });
         });

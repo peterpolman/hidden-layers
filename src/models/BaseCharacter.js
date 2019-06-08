@@ -46,14 +46,16 @@ export default class BaseCharacter {
                 position: position
             }
 
-            this.mesh = this.tb.Object3D({obj:object, units:'meters' }).setCoords([position.lng, position.lat]);
+            object.scale.set(1.5,1.5,1.5);
+
+            this.mesh = this.tb.Object3D({obj: object, units:'meters' }).setCoords([position.lng, position.lat]);
             this.mesh.name = id;
 
             this.tb.add(this.mesh);
             this.tb.repaint();
             this.watch();
 
-            console.log('Object added: ', id, this.mesh)
+            console.log('Object added to world: ', id, this.mesh)
         });
     }
 

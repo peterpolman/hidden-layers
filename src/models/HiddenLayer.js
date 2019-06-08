@@ -21,8 +21,8 @@ export default class HiddenLayer {
     onAdd(map, mbxContext) {
         const Threebox = window.Threebox;
         const MAP = window.MAP;
-        const directionalLight = new THREE.DirectionalLight(0xFFFFFF);
-        const ambientLightLight = new THREE.AmbientLight(0xFFFFFF, 0.75);
+        const directionalLight = new THREE.DirectionalLight(0xFFFFFF, 0.65);
+        const ambientLightLight = new THREE.AmbientLight(0xFFFFFF, 1);
 
         this.tb = new Threebox(
             MAP,
