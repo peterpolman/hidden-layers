@@ -3,9 +3,9 @@
         <Map />
         <Inventory class="ui-inventory" />
         <Profile
-            v-if="markerService.user && markerService.scout"
-            v-bind:user="markerService.user"
-            v-bind:scout="markerService.scout"
+            v-if="user && scout"
+            v-bind:user="user"
+            v-bind:scout="scout"
             class="ui-profile" />
         <div class="ui-actions">
             <button v-on:click="reload()" class="btn btn-default">Reload</button>
@@ -14,13 +14,13 @@
 </template>
 
 <script>
+const Geohash = require('latlon-geohash');
+
 import firebase from 'firebase/app';
 import Map from './components/Map.vue';
 import Inventory from './components/Inventory.vue';
 import Profile from './components/Profile.vue';
-import MarkerService from './services/MarkerService';
-import SpawnService from './services/SpawnService';
-import HiddenLayer from './models/HiddenLayer';
+import HiddenLayer from './HiddenLayer';
 import User from './models/User';
 import Scout from './models/Scout';
 
@@ -33,40 +33,48 @@ export default {
     },
     data() {
         return {
+            user: null,
+            scout: null,
             items: null,
-            markerService: new MarkerService(),
-            spawnSerice: new SpawnService(),
+            spawnSerice: null,
         }
     },
     mounted() {
         const MAP = window.MAP;
-        const uid = firebase.auth().currentUser.uid;
 
         MAP.on('load', () => {
             const usersRef = firebase.database().ref('users2');
             const scoutsRef = firebase.database().ref('scouts2');
+            const uid = firebase.auth().currentUser.uid;
 
             // Load the user data
             usersRef.child(uid).once('value').then(snap => {
+                // This will also start the geoService and markerService;
                 const HL = window.HL = new HiddenLayer();
 
                 // Add to layer array before buildings.
                 MAP.addLayer(HL, '3d-buildings');
 
                 // Creates my user
-                this.markerService.user = HL.markers[snap.key] = new User(snap.key, snap.val());
+                this.user = HL.user = new User(snap.key, snap.val());
+
+                let hash = Geohash.encode(this.user.position.lat, this.user.position.lng, 7);
+                HL.markerService.hashes[this.user.id] = hash;
+                HL.markerService.positions[this.user.id] = this.user.position;
 
                 // Load the scout data
-                scoutsRef.child(this.markerService.user.scout).once('value').then(snap => {
+                scoutsRef.child(this.user.scout).once('value').then(snap => {
 
                     // Creates my user and discovers for position.
-                    this.markerService.scout = HL.markers[snap.key] = new Scout(snap.key, snap.val());
+                    this.scout = HL.scout = new Scout(snap.key, snap.val());
 
-                    // Loads all nearby markers based on the uid.
-                    this.markerService.loadNearbyMarkers(this.markerService.user.id, this.markerService.user.position);
-                    HL.discover(this.markerService.user.id);
+                    let hash = Geohash.encode(this.scout.position.lat, this.scout.position.lng, 7);
+                    HL.markerService.hashes[this.scout.id] = hash;
+                    HL.markerService.positions[this.scout.id] = this.scout.position;
 
-                    console.log("Initial discovery for user! ", this.markerService.user.id, this.markerService.user.position);
+                    // Start discovery
+                    HL.updateFog();
+                    console.log("Initial discovery started!");
                 });
             });
         });

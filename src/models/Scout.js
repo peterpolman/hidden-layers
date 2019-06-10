@@ -1,5 +1,7 @@
+const Geohash = require('latlon-geohash');
 const THREE = window.THREE;
 const mapboxgl = require('mapbox-gl/dist/mapbox-gl.js');
+import firebase from 'firebase/app';
 import DamagableCharacter from './DamagableCharacter';
 import config from '../config.js';
 
@@ -9,10 +11,10 @@ export default class Scout extends DamagableCharacter {
 
         this.uid = data.uid;
         this.name = data.name;
-        this.avatar = 'wolf';
         this.marker = null;
         this.indicator = null;
-
+        this.ref = firebase.database().ref('scouts2').child(id);
+        this.markersRef = firebase.database().ref('markers');
         this.loadInfo();
     }
 
@@ -57,21 +59,31 @@ export default class Scout extends DamagableCharacter {
     travelTo(options, destination) {
         const HL = window.HL;
         const path = new THREE.CatmullRomCurve3(this.tb.utils.lnglatsToWorld(options.path))
-        let position = 0;
+        let offset = 0;
 
         clearInterval(this.timer);
         this.moveIndicator(destination);
 
         this.timer = setInterval(() => {
-            position += 0.01;
-            if (position < 1) {
-                const point = path.getPointAt(position);
+            offset += 0.01;
+            if (offset < 1) {
+                const point = path.getPointAt(offset);
                 const lngLat = this.tb.utils.unprojectFromWorld(point);
+                const position = { lng: lngLat[0], lat: lngLat[1] };
+                const oldHash = Geohash.encode(HL.scout.position.lat, HL.scout.position.lng, 7);
+                const hash = Geohash.encode(position.lat, position.lng, 7);
+
+                if (oldHash !== hash) {
+                    // Remove the old record
+                    this.markersRef.child(oldHash).child(this.id).remove();
+                    this.markersRef.child(hash).child(this.id).update({
+                        position: position,
+                        ref: `scouts2/${this.id}`
+                    });
+                }
+                
                 this.ref.update({
-                    position: {
-                        lng: lngLat[0],
-                        lat: lngLat[1]
-                    }
+                    position: position
                 });
             }
             else {

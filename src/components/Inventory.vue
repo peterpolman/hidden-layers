@@ -15,6 +15,7 @@
 
 <script>
 import firebase from 'firebase/app';
+import 'firebase/database';
 import Panel from './Panel.vue';
 import Vue from 'vue';
 

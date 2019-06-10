@@ -9,12 +9,12 @@ import Item from '../models/Item.js';
 export default class MarkerService {
     constructor() {
         this.uid = firebase.auth().currentUser.uid;
-        this.user = null;
-        this.scout = null;
         this.db = firebase.database()
 		this.hashes = [];
+        this.positions = [];
+        this.listeners = [];
         this.markersRef = firebase.database().ref('markers');
-        this.markersLoaded = false;
+        this.markersLoaded = [];
 
         // TEMP: Should be removed when data is migrated.
         // this.rebuildMarkerDatabase();
@@ -51,69 +51,62 @@ export default class MarkerService {
 
     /*
      * Load nearby markers for the given objects position.
-     * @param {string} uid The user id doing the discovery
+     * @param {string} id The character id doing the discovery
      * @param {object} position The {lat, lng} for the origin of the discovery
      */
-    loadNearbyMarkers(uid, position) {
+    loadNearbyMarkers(id, position, oldHash) {
         const HL = window.HL;
-        // Get the old geohash
-        let oldHash = Geohash.encode(HL.markers[uid].position.lat, HL.markers[uid].position.lng, 7);
-        // Get current geohash
-        let hash = Geohash.encode(position.lat, position.lng, 7);
-        // Get neighbours for current geohash
-        let neighbours = Geohash.neighbours(hash);
+        const hash = Geohash.encode(position.lat, position.lng, 7);
+        const neighbours = Geohash.neighbours(hash);
 
-        console.log('Reload the markers: ', ((oldHash !== hash) || !this.markersLoaded))
-
-        // Check if the hash is changed
-        if ((oldHash !== hash) || !this.markersLoaded) {
-            console.log('Hash change detected!');
-
-            // Remove the marker record from the old hash
-            this.markersRef.child(oldHash).child(uid).remove();
-
-            // Set the new or updated marker record
-            this.markersRef.child(hash).child(uid).set({ position: position, ref: `users2/${uid}` });
-
-            // Remove the existing listeners
-            for (let l in this.hashes) {
-                this.markersRef.child(this.hashes[l]).off()
-            }
-
-            // Remove all existing other users from the scene and detach listeners
-            for (let id in HL.markers) {
-                if (id !== this.user.id && id !== this.scout.id) HL.markers[id].remove()
-            }
-
-            this.watchNearbyGeohashes(hash, neighbours);
+        // Remove the existing listeners for hashes
+        for (let i in this.listeners[id]) {
+            this.markersRef.child(this.listeners[id][i]).off()
+        }
+        //
+        // // Remove all existing other users from the scene
+        // This should only remove the users from a lost geohash
+        for (let i in HL.markers) {
+            HL.markers[i].remove()
+            delete HL.markers[i];
         }
 
-        this.markersLoaded = true;
+        // Rebuild the list of listeners
+        // Fired twice (scout and user) but should create one list with unique hashes.
+        this.listeners[id] = [hash]
+        for (let n in neighbours) {
+            this.listeners[id].push(neighbours[n])
+        }
+
+        this.hashes[id] = hash;
+        this.positions[id] = position;
+        this.markersLoaded[id] = true;
+
+        this.watchNearbyGeohashes(this.listeners[id]);
     }
 
-    watchNearbyGeohashes(hash, neighbours) {
+    watchNearbyGeohashes(listeners) {
         const isNotMine = key => {
             const HL = window.HL;
-            const isNotMyUser = (this.uid !== key);
-            const isNotMyScout = (HL.markers[this.uid].scout !== key);
+            const isNotMyUser = (HL.user.id !== key);
+            const isNotMyScout = (HL.user.scout !== key);
 
-            return (isNotMyUser && isNotMyScout);
+            return (isNotMyUser && isNotMyScout && isNotExisting);
         }
-        // Empty the listeners and set up new ones
-        this.hashes = [];
-
-        // Add new listeners for the current geohash if there is a hash change
-        this.markersRef.child(hash).on('child_added', (snap) => isNotMine(snap.key) ? this.onMarkerAdded(snap.key, snap.val()) : '');
-        this.markersRef.child(hash).on('child_removed', (snap) => isNotMine(snap.key) ? this.onMarkerRemoved(snap.key, snap.val()) : '');
-
-        if (!this.hashes.includes(hash)) this.hashes.push(hash);
+        const isNotExisting = key => {
+            return (typeof HL.markers[key] === 'undefined');
+        }
 
         // Add new listeners for the neighbouring geohashes if there is a hash change
-        for (let n in neighbours) {
-            this.markersRef.child(neighbours[n]).on('child_added', (snap) => isNotMine(snap.key) ? this.onMarkerAdded(snap.key, snap.val()) : '');
-            this.markersRef.child(neighbours[n]).on('child_removed', (snap) => isNotMine(snap.key) ? this.onMarkerRemoved(snap.key, snap.val()) : '');
-
-            if (!this.hashes.includes(neighbours[n])) this.hashes.push(neighbours[n]);
+        for (let i in listeners) {
+            this.markersRef.child(listeners[i]).on('child_added', (snap) => (isNotMine(snap.key) && isNotExisting)
+                ? this.onMarkerAdded(snap.key, snap.val())
+                : ''
+            );
+            this.markersRef.child(listeners[i]).on('child_removed', (snap) => isNotMine(snap.key)
+                ? this.onMarkerRemoved(snap.key, snap.val())
+                : ''
+            );
         }
     }
 
@@ -121,23 +114,29 @@ export default class MarkerService {
 	onMarkerAdded(id, data) {
         const HL = window.HL;
 
-        // Statically get all data for this marker once
-        this.db.ref(data.ref).once('value').then((snap) => {
-            if (data.ref.startsWith('users')) HL.markers[id] = new User(snap.key, snap.val());
-            if (data.ref.startsWith('scouts')) HL.markers[id] = new Scout(snap.key, snap.val());
-            if (data.ref.startsWith('loot')) HL.markers[id] = new Item(snap.key, snap.val());
+        // Only create and add it to the scene if it does not exist
+        if (typeof HL.markers[id] === 'undefined') {
+            // Statically get all data for this marker once
+            this.db.ref(data.ref).once('value').then((snap) => {
+                if (data.ref.startsWith('users')) HL.markers[id] = new User(snap.key, snap.val());
+                if (data.ref.startsWith('scouts')) HL.markers[id] = new Scout(snap.key, snap.val());
+                if (data.ref.startsWith('loot')) HL.markers[id] = new Item(snap.key, snap.val());
 
-            console.log('Marker is discovered: ', id, data);
-        });
+                console.log('Marker is discovered: ', id, data);
+            });
+        }
 	}
 
 	// A marker is removed from geohash
 	onMarkerRemoved(id, data) {
         const HL = window.HL;
-        HL.markers[id].remove()
-		delete HL.markers[id];
 
-        console.log('Marker is removed: ', id, data);
+        if (typeof HL.markers[id] !== 'undefined') {
+            HL.markers[id].remove();
+            delete HL.markers[id];
+
+            console.log('Marker is removed: ', id, data);
+        }
 	}
 
 }

@@ -6,19 +6,16 @@
 const mapboxgl = require('mapbox-gl/dist/mapbox-gl.js');
 
 import config from '../config.js';
-import GeoService from '../services/GeoService';
 
 export default {
     name: 'Map',
     mounted() {
-        mapboxgl.accessToken = config.mapbox.key;
-
-        const geo = new GeoService();
+        mapboxgl.accessToken = config.mapbox.key
 
         const MAP = window.MAP = new mapboxgl.Map({
             container: 'map',
             style: 'mapbox://styles/peterpolman/cjsli3aee5gab1fl9lpwyx2rd',
-            zoom: 19,
+            zoom: 18,
             maxZoom: 21,
             minZoom: 17,
             center: [4.8437, 52.3669],
@@ -39,9 +36,6 @@ export default {
         MAP.on('load', function() {
             const layers = MAP.getStyle().layers;
 
-            geo.getPosition().then((position) => MAP.setCenter(position));
-
-            // var features = MAP.queryRenderedFeatures({ layers: ['water', 'national_park'] });
             MAP.addLayer({
                 'id': '3d-buildings',
                 'source': 'composite',

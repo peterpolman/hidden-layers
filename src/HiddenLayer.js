@@ -1,15 +1,26 @@
+const Geohash = require('latlon-geohash');
 const jsts = require('jsts');
 const THREE = window.THREE;
 
 import firebase from 'firebase/app';
+import MarkerService from './services/MarkerService';
+import SpawnService from './services/SpawnService';
+import GeoService from './services/GeoService';
 
 export default class HiddenLayer {
     constructor() {
         this.uid = firebase.auth().currentUser.uid;
 
+        this.markerService = new MarkerService();
+        this.geoService = new GeoService();
+
         this.id = '3d-objects';
         this.type = 'custom';
         this.renderingMode = '3d';
+
+        this.user = null;
+        this.scout = null;
+        this.wards = [];
 
         this.markers = [];
         this.active = false;
@@ -33,15 +44,13 @@ export default class HiddenLayer {
         this.tb.add(directionalLight);
         this.tb.add(ambientLightLight);
 
-        // Create a plane that covers the world.
         const ne = this.tb.utils.projectToWorld([180, 85]);
         const sw = this.tb.utils.projectToWorld([-180, -85]);
 
+        // Create a plane that covers the world.
         this.planeShape = this.createPlane(ne, sw, 5);
 
-        MAP.on('click', (e) => {
-            this.onClick(e);
-        });
+        MAP.on('click', (e) => this.onClick(e));
     }
 
     onClick(e) {
@@ -92,19 +101,42 @@ export default class HiddenLayer {
         return path;
     }
 
-    discover(uid) {
-        const u = this.markers[uid];
-        const s = this.markers[u.scout];
-        const positions = [
-            this.tb.utils.projectToWorld([u.position.lng, u.position.lat]),
-            this.tb.utils.projectToWorld([s.position.lng, s.position.lat])
-        ];
-        let holes = [], visibility = [];
+    updateFog() {
+        const positionsAreEqual = (p1, p2) => {
+            return (p1.lat === p2.lat) && (p1.lng === p2.lng);
+        }
+        const hashesAreEqual = (h1, h2) => {
+            return (h1 === h2);
+        }
+        let positions = [],
+            holes = [],
+            visibility = [];
 
-        // Creates an array of JSTS holes
-        for (let i in positions) {
-            let hole = this.createHole(1, positions[i]);
+        // Set the positions for user and scout
+        positions[this.user.id] = this.user.position;
+        positions[this.scout.id] = this.scout.position;
+
+        // Loop through the positions that need discovery
+        for (let id in positions) {
+            let p = this.tb.utils.projectToWorld([positions[id].lng, positions[id].lat])
+            let hole = this.createHole(1, p);
             let jstsHole = this.jstsPoly(hole);
+
+            // Check if the positions changed compared to the previous positions
+            if (!positionsAreEqual(this.markerService.positions[id], positions[id]) || !this.markerService.markersLoaded[id]) {
+                const hash = Geohash.encode(positions[id].lat, positions[id].lng, 7);
+
+                // Do soft discovery change visiblity
+                // TODO Update the visibilty of the available objects based on the discovery radius
+
+                // Checks if hash is changed, do a hard discovery
+                if (!hashesAreEqual(this.markerService.hashes[id], hash) || !this.markerService.markersLoaded[id]) {
+                    // Load markers for the new positions and story them
+                    this.markerService.loadNearbyMarkers(id, positions[id], this.markerService.hashes[id]);
+
+                    console.log('Hash change detected! Discover new markers for ', id, positions[id])
+                }
+            }
 
             holes.push(jstsHole);
         }
@@ -172,6 +204,9 @@ export default class HiddenLayer {
         // Handle that click as a destination that is set
         if (typeof this.markers[id] != 'undefined') {
             this.markers[id].onClick();
+        }
+        else if (this.scout.id === id) {
+            this.scout.onClick();
         }
         else {
             if (this.selected) {

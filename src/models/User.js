@@ -1,20 +1,23 @@
 const mapboxgl = require('mapbox-gl/dist/mapbox-gl.js');
+
+import firebase from 'firebase/app';
 import DamagableCharacter from './DamagableCharacter';
 
 export default class User extends DamagableCharacter {
     constructor (id, data) {
         super(id, data);
 
+        this.ref = firebase.database().ref('users2').child(id);
+        this.slug = 'user';
         this.xp = data.exp;
         this.name = data.username;
         this.class = data.userClass;
         this.avatar = data.userClass;
         this.stats = data.stats;
         this.scout = data.scout;
-
         this.marker = null;
-        const markup = this.getInfoMarkup();
-        this.loadInfo(markup);
+
+        this.loadInfo(this.getInfoMarkup());
     }
 
     getInfoMarkup() {

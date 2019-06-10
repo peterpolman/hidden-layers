@@ -6,10 +6,9 @@ export default class BaseCharacter {
         this.id = id;
         this.tb = HL.tb;
         this.world = HL.tb.world;
-        this.ref = firebase.database().ref((data.email != null) ? 'users2' : 'scouts2').child(id);
         this.position = data.position;
 
-        this.loadAtPosition(id, (data.userClass ? data.userClass : 'scout'), data.position);
+        this.loadAtPosition(id, (data.email ? data.userClass : 'scout'), data.position);
     }
 
     // Watch user properties for change and remove events
@@ -63,14 +62,12 @@ export default class BaseCharacter {
     setPosition(position) {
         const HL = window.HL;
         const lngLat = [position.lng, position.lat];
-        const uid = firebase.auth().currentUser.uid;
 
         this.position = position;
         this.marker.setLngLat(lngLat)
         this.mesh.setCoords(lngLat);
 
-        HL.discover(uid);
-        this.tb.repaint();
+        HL.updateFog();
     }
 
     // Remove user from scene and detach listener
