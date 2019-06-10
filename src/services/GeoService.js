@@ -33,6 +33,7 @@ export default class GeoService {
     }
 
     updatePosition(coords) {
+        const HL = window.HL;
         const position = { lat: coords.latitude, lng: coords.longitude };
         const oldHash = Geohash.encode(HL.user.position.lat, HL.user.position.lng, 7);
         const hash = Geohash.encode(position.lat, position.lng, 7);

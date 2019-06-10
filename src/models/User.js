@@ -29,7 +29,7 @@ export default class User extends DamagableCharacter {
     }
 
     discover() {
-        console.log('Start watching hashes!', this.id)
+        const HL = window.HL;
         this.ref.child('hashes').on('child_added', (snap) => {
             HL.markerService.addListener(snap.key);
             console.log("Hash added: ", this.id, snap.val());
@@ -38,6 +38,7 @@ export default class User extends DamagableCharacter {
             HL.markerService.removeListener(snap.key);
             console.log("Hash removed: ", this.id, snap.val());
         });
+        console.log('Start watching hashes!', this.id)
     }
 
     onClick() {

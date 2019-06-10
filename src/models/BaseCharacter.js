@@ -1,7 +1,5 @@
-const Geohash = require('latlon-geohash');
 const mapboxgl = require('mapbox-gl/dist/mapbox-gl.js');
 
-import firebase from 'firebase/app';
 import MarkerService from '../services/MarkerService';
 
 export default class BaseCharacter {

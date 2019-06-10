@@ -14,19 +14,18 @@ export default class SpawnService {
             HL.scout.position
         ]
         // Loop through the positions that have discovery
-        for (let i in positions) {
+        for (let id in positions) {
+            // Calculate the chance to spawn an enemy for all of them
+            const p = Math.random(0,1);
+            const pRate = .1;
+            if (p < pRate) {
+                console.log('Spawn at', id)
+                // Create an enemy
 
-        }
-        // Calculate the chance to spawn an enemy for all of them
-        const p = Math.random(0,1);
-        const pRate = .1;
-        if (p < pRate) {
-            console.log('Spawn')
-            // Create an enemy
+                // Push it in the enemy database
 
-            // Push it in the enemy database
-
-            // Push it in the marker geohash for the current uid
+                // Push it in the marker geohash for the current uid
+            }
         }
     }
 }

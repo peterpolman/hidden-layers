@@ -1,4 +1,3 @@
-const Geohash = require('latlon-geohash');
 const jsts = require('jsts');
 const THREE = window.THREE;
 
@@ -11,6 +10,7 @@ export default class HiddenLayer {
         this.uid = firebase.auth().currentUser.uid;
 
         this.markerService = new MarkerService();
+        this.spawnService = new SpawnService();
         this.geoService = null;
 
         this.id = '3d-objects';

@@ -14,8 +14,6 @@
 </template>
 
 <script>
-const Geohash = require('latlon-geohash');
-
 import firebase from 'firebase/app';
 import Map from './components/Map.vue';
 import Inventory from './components/Inventory.vue';
