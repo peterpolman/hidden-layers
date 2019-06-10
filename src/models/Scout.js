@@ -1,6 +1,6 @@
 const Geohash = require('latlon-geohash');
 const THREE = window.THREE;
-const mapboxgl = require('mapbox-gl/dist/mapbox-gl.js');
+
 import firebase from 'firebase/app';
 import DamagableCharacter from './DamagableCharacter';
 import config from '../config.js';
@@ -14,28 +14,10 @@ export default class Scout extends DamagableCharacter {
         this.marker = null;
         this.indicator = null;
         this.ref = firebase.database().ref('scouts2').child(id);
+        this.userRef = firebase.database().ref('users2').child(data.uid);
         this.markersRef = firebase.database().ref('markers');
-        this.loadInfo();
-    }
 
-    loadInfo() {
-        const MAP = window.MAP;
-        let markup = document.createElement('div');
-        markup.classList.add(`marker-${this.id}`);
-        markup.innerHTML = `
-            <div class="character-wrapper">
-                <div class="character-info">
-                    <strong class="character-name">${this.name}</strong><br>
-                    ${this.hitPointsMarkup}
-                </div>
-            </div>`;
-
-        this.marker = new mapboxgl.Marker({
-            element: markup,
-            offset: [30,40]
-        })
-        .setLngLat([this.position.lng, this.position.lat])
-        .addTo(MAP);
+        this.loadInfo(this.getInfoMarkup());
     }
 
     setDestination(e) {
@@ -73,6 +55,7 @@ export default class Scout extends DamagableCharacter {
                 const oldHash = Geohash.encode(HL.scout.position.lat, HL.scout.position.lng, 7);
                 const hash = Geohash.encode(position.lat, position.lng, 7);
 
+                // Detect hash change for scout
                 if (oldHash !== hash) {
                     // Remove the old record
                     this.markersRef.child(oldHash).child(this.id).remove();
@@ -80,10 +63,16 @@ export default class Scout extends DamagableCharacter {
                         position: position,
                         ref: `scouts2/${this.id}`
                     });
+
+                    // Retrieve new hash set and update the user hashes
+                    this.userRef.update({
+                        hashes: HL.markerService.getUniqueHashes(this.id, position)
+                    });
                 }
-                
+
+                // Update scout position
                 this.ref.update({
-                    position: position
+                    position: position,
                 });
             }
             else {

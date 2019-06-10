@@ -38,18 +38,21 @@ export default class GeoService {
         const hash = Geohash.encode(position.lat, position.lng, 7);
         const uid = firebase.auth().currentUser.uid;
 
-        // Remove the old record if the differ
+        // Remove the old record if they differ
         if (oldHash !== hash) {
             firebase.database().ref('markers').child(oldHash).child(uid).remove();
             firebase.database().ref('markers').child(hash).child(uid).update({
                 position: position,
                 ref: `users2/${uid}`
             });
+
+            HL.user.hashes = HL.markerService.getUniqueHashes(HL.user.id, position);
         }
 
         // Set the new record
         firebase.database().ref(`users2/${uid}`).update({
-            position: position
+            position: position,
+            hashes: HL.user.hashes,
         });
 
         return this.position = position;

@@ -28,14 +28,13 @@ export default {
         return {
             ref: firebase.database().ref('items').child(firebase.auth().currentUser.uid),
             isOpen: false,
-            items: null,
+            items: {},
             imgBackpack: require('../assets/img/backpack.png')
         }
     },
     mounted() {
         this.ref.once('value').then(snap => {
-            this.items = snap.val();
-            console.log('Inventory mounted and items loaded.', this.items)
+            this.items = (snap.val() !== null) ? snap.val() : {};
 
             this.ref.on('child_added', snap => {
                 Vue.set(this.items, snap.key, snap.val());
@@ -49,7 +48,7 @@ export default {
 
             this.ref.on('child_removed', snap => {
                 Vue.delete(this.items, snap.key);
-                console.log('Inventory item remove.', snap.key)
+                console.log('Inventory item removed.', snap.key)
             });
         });
     },

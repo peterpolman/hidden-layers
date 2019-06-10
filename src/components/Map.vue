@@ -15,9 +15,9 @@ export default {
         const MAP = window.MAP = new mapboxgl.Map({
             container: 'map',
             style: 'mapbox://styles/peterpolman/cjsli3aee5gab1fl9lpwyx2rd',
-            zoom: 18,
+            zoom: 16,
             maxZoom: 21,
-            minZoom: 17,
+            minZoom: 16,
             center: [4.8437, 52.3669],
             pitch: 85,
             bearing: 45,

@@ -15,10 +15,10 @@ export default class Item {
         this.markersRef = firebase.database().ref('markers');
 
         this.id = id;
-        this.slug = data.slug;
         this.name = data.name;
         this.amount = data.amount;
         this.position = data.position;
+        this.slug = data.slug;
 
         this.mesh = null;
 

@@ -5,14 +5,13 @@ const THREE = window.THREE;
 import firebase from 'firebase/app';
 import MarkerService from './services/MarkerService';
 import SpawnService from './services/SpawnService';
-import GeoService from './services/GeoService';
 
 export default class HiddenLayer {
     constructor() {
         this.uid = firebase.auth().currentUser.uid;
 
         this.markerService = new MarkerService();
-        this.geoService = new GeoService();
+        this.geoService = null;
 
         this.id = '3d-objects';
         this.type = 'custom';
@@ -102,12 +101,6 @@ export default class HiddenLayer {
     }
 
     updateFog() {
-        const positionsAreEqual = (p1, p2) => {
-            return (p1.lat === p2.lat) && (p1.lng === p2.lng);
-        }
-        const hashesAreEqual = (h1, h2) => {
-            return (h1 === h2);
-        }
         let positions = [],
             holes = [],
             visibility = [];
@@ -121,22 +114,6 @@ export default class HiddenLayer {
             let p = this.tb.utils.projectToWorld([positions[id].lng, positions[id].lat])
             let hole = this.createHole(1, p);
             let jstsHole = this.jstsPoly(hole);
-
-            // Check if the positions changed compared to the previous positions
-            if (!positionsAreEqual(this.markerService.positions[id], positions[id]) || !this.markerService.markersLoaded[id]) {
-                const hash = Geohash.encode(positions[id].lat, positions[id].lng, 7);
-
-                // Do soft discovery change visiblity
-                // TODO Update the visibilty of the available objects based on the discovery radius
-
-                // Checks if hash is changed, do a hard discovery
-                if (!hashesAreEqual(this.markerService.hashes[id], hash) || !this.markerService.markersLoaded[id]) {
-                    // Load markers for the new positions and story them
-                    this.markerService.loadNearbyMarkers(id, positions[id], this.markerService.hashes[id]);
-
-                    console.log('Hash change detected! Discover new markers for ', id, positions[id])
-                }
-            }
 
             holes.push(jstsHole);
         }

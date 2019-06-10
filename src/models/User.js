@@ -1,5 +1,3 @@
-const mapboxgl = require('mapbox-gl/dist/mapbox-gl.js');
-
 import firebase from 'firebase/app';
 import DamagableCharacter from './DamagableCharacter';
 
@@ -17,39 +15,29 @@ export default class User extends DamagableCharacter {
         this.scout = data.scout;
         this.marker = null;
 
-        this.loadInfo(this.getInfoMarkup());
-    }
-
-    getInfoMarkup() {
-        let el = document.createElement('div');
-
-        el.style = {position: 'relative'};
-        el.classList.add(`marker-${this.id}`);
-        el.innerHTML = `
-            <div class="character-wrapper">
-                <div class="character-level">
-                    ${this.xp}
-                </div>
-                <div class="character-info">
-                    <strong class="character-name">${this.name}</strong><br>
-                    ${this.hitPointsMarkup}
-                </div>
+        const xpMarkup = `<div class="character-level">
+                ${this.xp}
             </div>`;
 
-        return el;
+        this.xpMarkup = data.exp ? xpMarkup : '';
+
+        this.loadInfo(this.getInfoMarkup());
+
+        if (this.id === firebase.auth().currentUser.uid) {
+            this.discover();
+        }
     }
 
-    loadInfo(markup) {
-        const MAP = window.MAP;
-
-        if (this.marker === null) {
-            this.marker = new mapboxgl.Marker({
-                    element: markup,
-                    offset: [30,40]
-                })
-                .setLngLat([this.position.lng, this.position.lat])
-                .addTo(MAP);
-        }
+    discover() {
+        console.log('Start watching hashes!', this.id)
+        this.ref.child('hashes').on('child_added', (snap) => {
+            HL.markerService.addListener(snap.key);
+            console.log("Hash added: ", this.id, snap.val());
+        });
+        this.ref.child('hashes').on('child_removed', (snap) => {
+            HL.markerService.removeListener(snap.key);
+            console.log("Hash removed: ", this.id, snap.val());
+        });
     }
 
     onClick() {

@@ -1,4 +1,8 @@
+const Geohash = require('latlon-geohash');
+const mapboxgl = require('mapbox-gl/dist/mapbox-gl.js');
+
 import firebase from 'firebase/app';
+import MarkerService from '../services/MarkerService';
 
 export default class BaseCharacter {
     constructor(id, data) {
@@ -7,6 +11,9 @@ export default class BaseCharacter {
         this.tb = HL.tb;
         this.world = HL.tb.world;
         this.position = data.position;
+        this.hashes = data.hashes;
+        this.markerService = new MarkerService;
+        this.xpMarkup = '';
 
         this.loadAtPosition(id, (data.email ? data.userClass : 'scout'), data.position);
     }
@@ -20,6 +27,9 @@ export default class BaseCharacter {
                 case 'position':
                     this.setPosition(snap.val());
                     this.tb.repaint();
+                    break
+                case 'hashes':
+                    this.hashes = snap.val();
                     break
                 default:
                     console.error("No handler available", snap.key, snap.val());
@@ -70,12 +80,42 @@ export default class BaseCharacter {
         HL.updateFog();
     }
 
-    // Remove user from scene and detach listener
+    getInfoMarkup() {
+        let el = document.createElement('div');
+
+        el.style = {position: 'relative'};
+        el.classList.add(`marker-${this.id}`);
+        el.innerHTML = `
+            <div class="character-wrapper">
+                ${this.xpMarkup}
+                <div class="character-info">
+                    <strong class="character-name">${this.name}</strong><br>
+                    ${this.hitPointsMarkup}
+                </div>
+            </div>`;
+
+        return el;
+    }
+
+    loadInfo(markup) {
+        const MAP = window.MAP;
+
+        if (this.marker === null) {
+            this.marker = new mapboxgl.Marker({
+                    element: markup,
+                    offset: [30,40]
+                })
+                .setLngLat([this.position.lng, this.position.lat])
+                .addTo(MAP);
+        }
+    }
+
+    // Remove unit from scene and detach listener
     remove() {
         const objectInScene = this.world.getObjectByName(this.id);
-        this.world.remove(objectInScene);
-        this.marker.remove();
         this.ref.off();
+        this.marker.remove();
+        this.world.remove(objectInScene);
 
         console.log(`Removed: ${this.id}`)
     }

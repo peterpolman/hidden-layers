@@ -23,6 +23,7 @@ import Profile from './components/Profile.vue';
 import HiddenLayer from './HiddenLayer';
 import User from './models/User';
 import Scout from './models/Scout';
+import GeoService from './services/GeoService';
 
 export default {
     name: 'app',
@@ -57,9 +58,6 @@ export default {
 
                 // Creates my user
                 this.user = HL.user = new User(snap.key, snap.val());
-
-                let hash = Geohash.encode(this.user.position.lat, this.user.position.lng, 7);
-                HL.markerService.hashes[this.user.id] = hash;
                 HL.markerService.positions[this.user.id] = this.user.position;
 
                 // Load the scout data
@@ -67,10 +65,9 @@ export default {
 
                     // Creates my user and discovers for position.
                     this.scout = HL.scout = new Scout(snap.key, snap.val());
-
-                    let hash = Geohash.encode(this.scout.position.lat, this.scout.position.lng, 7);
-                    HL.markerService.hashes[this.scout.id] = hash;
                     HL.markerService.positions[this.scout.id] = this.scout.position;
+
+                    HL.geoService = new GeoService();
 
                     // Start discovery
                     HL.updateFog();
