@@ -57,7 +57,7 @@ export default class SpawnService {
             }
 
             // If less than 3 npcClass in geohash
-            if (counter < 3) {
+            if (counter < 2) {
                 const goblin = {
                     id: this.npcRef.push().key,
                     hitPoints: 100,
