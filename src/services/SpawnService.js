@@ -1,7 +1,5 @@
 const Geohash = require('latlon-geohash');
-
 import firebase from 'firebase/app';
-import Goblin from '../models/Goblin';
 
 export default class SpawnService {
     constructor() {
