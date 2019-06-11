@@ -34,8 +34,8 @@ Threebox.prototype = {
         this.map = map;
 
         // Set up a THREE.js scene
-        this.renderer = new THREE.WebGLRenderer( {
-            alpha: true,
+        this.renderer = new THREE.WebGLRenderer( { 
+            alpha: true, 
             antialias: true,
             canvas: map.getCanvas(),
             context: glContext
@@ -60,10 +60,10 @@ Threebox.prototype = {
         this.raycaster = new THREE.Raycaster();
 
         // apply starter options
-
+        
         this.options = utils._validate(options || {}, defaultOptions);
         if (this.options.defaultLights) this.defaultLights();
-
+        
     },
 
     // Objects
@@ -108,7 +108,7 @@ Threebox.prototype = {
     queryRenderedFeatures: function(point){
 
         var mouse = new THREE.Vector2();
-
+        
         // // scale mouse pixel position to a percentage of the screen's width and height
         mouse.x = ( point.x / this.map.transform.width ) * 2 - 1;
         mouse.y = 1 - ( point.y / this.map.transform.height ) * 2;
@@ -122,14 +122,14 @@ Threebox.prototype = {
     },
 
     update: function() {
-
+        
         if (this.map.repaint) this.map.repaint = false
 
         var timestamp = Date.now();
 
         // Update any animations
         this.objects.animationManager.update(timestamp);
-
+        
         this.renderer.state.reset();
 
         // Render the scene and repaint the map
@@ -169,9 +169,9 @@ Threebox.prototype = {
     },
 
     addAtCoordinate: function(obj, lnglat, options) {
-
+        
         console.warn('addAtCoordinate() has been deprecated. Check out the and threebox.add() Object.setCoords() methods instead.')
-
+        
         obj = this.Object3D({obj:obj});
 
         obj.setCoords(lnglat)
@@ -280,7 +280,7 @@ var utils = {
             -Constants.MERCATOR_A * Constants.DEG2RAD* coords[0] * Constants.PROJECTION_WORLD_SIZE,
             -Constants.MERCATOR_A * Math.log(Math.tan((Math.PI*0.25) + (0.5 * Constants.DEG2RAD * coords[1]) )) * Constants.PROJECTION_WORLD_SIZE
         ];
-
+     
         //z dimension, defaulting to 0 if not provided
 
         if (!coords[2]) projected.push(0)
@@ -392,7 +392,7 @@ var utils = {
         for (key in original) clone[key] = original[key];
         return clone;
     },
-
+    
     // retrieve object parameters from an options object
 
     types: {
@@ -405,11 +405,11 @@ var utils = {
             var degrees = this.applyDefault([r.x, r.y, r.z], currentRotation);
             var radians = utils.radify(degrees);
             return radians;
-
+            
         },
 
         scale: function(s, currentScale){
-            if (typeof s === 'number') return s = [s,s,s];
+            if (typeof s === 'number') return s = [s,s,s]; 
             else return this.applyDefault([s.x, s.y, s.z], currentScale);
         },
 
@@ -425,7 +425,7 @@ var utils = {
     },
 
     _validate: function(userInputs, defaults){
-
+        
         userInputs = userInputs || {};
         var validatedOutput = {};
         utils.extend(validatedOutput, userInputs);
@@ -438,7 +438,7 @@ var utils = {
                     console.error(key + ' is required')
                     return;
                 }
-
+    
                 else validatedOutput[key] = defaults[key]
 
             }
@@ -485,7 +485,7 @@ Validate.prototype = {
             console.error("Coords length must be at least 2")
             return
         }
-
+    
         for (member of input) {
             if (member.constructor !== Number) {
                 console.error("Coords values must be numbers")
@@ -495,7 +495,7 @@ Validate.prototype = {
 
         if (Math.abs(input[1]) > 90) {
             console.error("Latitude must be between -90 and 90")
-            return
+            return                    
         }
 
         return input
@@ -513,7 +513,7 @@ Validate.prototype = {
         for (coord of input){
             if (!scope.Coords(coord)) {
                 console.error("Each coordinate in a line must be a valid Coords type")
-                return
+                return                    
             }
 
         }
@@ -531,7 +531,7 @@ Validate.prototype = {
 
                 if (!['x', 'y', 'z'].includes(key)) {
                     console.error('Rotation parameters must be x, y, or z')
-                    return
+                    return                            
                 }
                 if (input[key].constructor !== Number) {
                     console.error('Individual rotation values must be numbers')
@@ -553,14 +553,14 @@ Validate.prototype = {
         if (input.constructor === Number) {
             input = {x:input, y:input, z: input}
         }
-
+        
         else if (input.constructor === Object) {
 
             for (key of Object.keys(input)){
 
                 if (!['x', 'y', 'z'].includes(key)) {
                     console.error('Scale parameters must be x, y, or z')
-                    return
+                    return                            
                 }
                 if (input[key].constructor !== Number) {
                     console.error('Individual scale values must be numbers')
@@ -589,7 +589,7 @@ var validate = require("../utils/validate.js");
 function AnimationManager(map) {
 
     this.map = map
-    this.enrolledObjects = [];
+    this.enrolledObjects = [];    
     this.previousFrameTime;
 
 };
@@ -623,7 +623,7 @@ AnimationManager.prototype = {
                 var scaling = options.scale || options.scaleX || options.scaleY || options.scaleZ;
 
                 if (rotating) {
-
+                    
                     var r = obj.rotation;
                     options.startRotation = [r.x, r.y, r.z];
 
@@ -643,7 +643,7 @@ AnimationManager.prototype = {
                     options.scalePerMs = options.endState.scale
                         .map(function(scale, index){
                             return (scale-options.startScale[index])/options.duration;
-                        })
+                        })                    
                 }
 
                 if (translating) options.pathCurve = new THREE.CatmullRomCurve3(utils.lnglatsToWorld([obj.coordinates, options.coords]));
@@ -656,7 +656,7 @@ AnimationManager.prototype = {
                 this.animationQueue
                     .push(entry);
 
-                map.repaint = true;
+                map.repaint = true;   
             }
 
             //if no duration set, stop object's existing animations and go to that state immediately
@@ -678,17 +678,12 @@ AnimationManager.prototype = {
         obj.followPath = function (options, cb){
 
             var entry = {
-                type: 'followPath',
+                type: 'followPath', 
                 parameters: utils._validate(options, defaults.followPath)
             };
-
-            console.log(defaults)
-            console.log(new THREE.CatmullRomCurve3(utils.lnglatsToWorld(options.path)));
-            console.log(entry);
-            console.log(options);
-
+                     
             utils.extend(
-                entry.parameters,
+                entry.parameters, 
                 {
                     pathCurve: new THREE.CatmullRomCurve3(
                         utils.lnglatsToWorld(options.path)
@@ -697,13 +692,13 @@ AnimationManager.prototype = {
                     expiration: Date.now() + entry.parameters.duration,
                     cb: cb
                 }
-            );
+            );    
 
             this.animationQueue
                 .push(entry);
-            debugger
-            map.repaint = true;
 
+            map.repaint = true;
+            
             return this;
         };
 
@@ -711,7 +706,7 @@ AnimationManager.prototype = {
 
             var p = options.position; // lnglat
             var r = options.rotation; // radians
-            var s = options.scale; //
+            var s = options.scale; // 
             var w = options.worldCoordinates; //Vector3
             var q = options.quaternion // [axis, angle]
 
@@ -722,11 +717,11 @@ AnimationManager.prototype = {
             }
 
             if (r) this.rotation.set(r[0], r[1], r[2]);
-
+            
             if (s) this.scale.set(s[0], s[1], s[2]);
-
+            
             if (q) this.quaternion.setFromAxisAngle(q[0], q[1]);
-
+            
             if (w) this.position.copy(w);
 
             map.repaint = true
@@ -740,7 +735,7 @@ AnimationManager.prototype = {
         var dimensions = ['X','Y','Z'];
 
         //iterate through objects in queue. count in reverse so we can cull objects without frame shifting
-        for (var a = this.enrolledObjects.length-1; a>=0; a--){
+        for (var a = this.enrolledObjects.length-1; a>=0; a--){   
 
             var object = this.enrolledObjects[a];
 
@@ -896,7 +891,7 @@ CameraSync.prototype = {
         this.state.cameraToCenterDistance = cameraToCenterDistance;
         this.state.cameraTranslateZ = new THREE.Matrix4().makeTranslation(0,0,cameraToCenterDistance);
         this.state.topHalfSurfaceDistance = Math.sin(halfFov) * cameraToCenterDistance / Math.sin(Math.PI - groundAngle - halfFov);
-
+    
         this.updateCamera();
     },
 
@@ -916,7 +911,7 @@ CameraSync.prototype = {
         const farZ = furthestDistance * 1.01;
 
         this.camera.projectionMatrix = utils.makePerspectiveMatrix(this.state.fov, t.width / t.height, 1, farZ);
-
+        
 
         var cameraWorldMatrix = new THREE.Matrix4();
         var cameraTranslateZ = new THREE.Matrix4().makeTranslation(0,0,this.state.cameraToCenterDistance);
@@ -929,12 +924,12 @@ CameraSync.prototype = {
         cameraWorldMatrix
             .premultiply(this.state.cameraTranslateZ)
             .premultiply(rotatePitch)
-            .premultiply(rotateBearing)
+            .premultiply(rotateBearing)   
 
         this.camera.matrixWorld.copy(cameraWorldMatrix);
 
 
-        var zoomPow = t.scale * this.state.worldSizeRatio;
+        var zoomPow = t.scale * this.state.worldSizeRatio; 
 
         // Handle scaling and translation of objects in the map in the world's matrix transform, not the camera
         var scale = new THREE.Matrix4;
@@ -944,14 +939,14 @@ CameraSync.prototype = {
 
         scale
             .makeScale( zoomPow, zoomPow , zoomPow );
-
-
+    
+        
         var x = -this.map.transform.x || -this.map.transform.point.x;
         var y = this.map.transform.y || this.map.transform.point.y;
 
         translateMap
             .makeTranslation(x, y, 0);
-
+        
         rotateMap
             .makeRotationZ(Math.PI);
 
@@ -1012,7 +1007,7 @@ function line(obj){
 		dashed: false,
 		opacity: obj.opacity
 	} );
-
+	
 	matLine.resolution.set( window.innerWidth, window.innerHeight );
 	matLine.isMaterial = true;
 	matLine.transparent = true;
@@ -1999,7 +1994,7 @@ function loadObj(options, cb){
             if(--remaining === 0) this.loaded = true;
         }
 
-
+        
 
         // TODO: Support formats other than OBJ/MTL
         const objLoader = new OBJLoader();
@@ -2014,7 +2009,7 @@ function loadObj(options, cb){
                 materials.preload();
                 objLoader.setMaterials( materials );
             }
-
+            
             objLoader.load(options.obj, obj => {
 
             	var r = utils.types.rotation(options, [0, 0, 0]);
@@ -2032,7 +2027,7 @@ function loadObj(options, cb){
                 cb(userScaleGroup);
 
             }, () => (null), error => {
-                console.error("Could not load model file.");
+                console.error("Could not load model file.");    
             } );
 
         };
@@ -3368,7 +3363,7 @@ Objects.prototype = {
         line.options = options || {};
         line.position.copy(normalized.position)
 
-  		return line
+  		return line  
 	},
 
 
@@ -3388,8 +3383,8 @@ Objects.prototype = {
 
 			if (!obj.coordinates) obj.coordinates = [0,0,0];
 
-	    	// Bestow this mesh with animation superpowers and keeps track of its movements in the global animation queue
-			root.animationManager.enroll(obj);
+	    	// Bestow this mesh with animation superpowers and keeps track of its movements in the global animation queue			
+			root.animationManager.enroll(obj); 
 			obj.setCoords = function(lnglat){
 
 		        /** Place the given object on the map, centered around the provided longitude and latitude
@@ -3405,7 +3400,7 @@ Objects.prototype = {
 
 				obj.coordinates = lnglat;
 	        	obj.set({position:lnglat})
-
+		        
 
 		        return obj;
 
@@ -3439,12 +3434,12 @@ Objects.prototype = {
 		}
 
 		obj.duplicate = function(a) {
-			var dupe = obj.clone();
+			var dupe = obj.clone(); 
 			dupe.userData = obj.userData;
 			root._addMethods(dupe);
 			return dupe
 		}
-
+	
 		return obj
 	},
 
@@ -3484,7 +3479,7 @@ Objects.prototype = {
 			material: 'MeshBasicMaterial'
 		},
 
-		tube: {
+		tube: {                
 			geometry: null,
             radius: 1,
             sides:6,
@@ -3509,7 +3504,7 @@ Objects.prototype = {
         },
 
         Object3D: {
-        	obj: null,
+        	obj: null, 
 			units: 'scene'
         }
 	},
@@ -3578,7 +3573,7 @@ tube.prototype = {
 		var plane = new THREE.Mesh( geometry, m );
 		// world.add( plane );
 
-		var geom = new THREE.Geometry();
+		var geom = new THREE.Geometry(); 
 		var lastElbow = false;
 
 
@@ -3622,10 +3617,10 @@ tube.prototype = {
 				.normalize();
 
 			if (i === 0) midpointToLookAt = forearm;
-
+			
 			else if (i === spine.length - 1) midpointToLookAt = humerus;
 
-
+						
 			// if first point in input line, rotate and translate it to position
 			if (!lastElbow) {
 
@@ -3684,9 +3679,9 @@ tube.prototype = {
             var l = obj.radius;
             var a = (i+0.5) / count * Math.PI;
 
-            crossSection.vertices.push(
-            	new THREE.Vector3 (
-            		-Math.sin( 2 * a ),
+            crossSection.vertices.push( 
+            	new THREE.Vector3 ( 
+            		-Math.sin( 2 * a ), 
             		Math.cos( 2 * a ),
             		0
             	)
@@ -3718,7 +3713,7 @@ tube.prototype = {
 					var triangle1 = new THREE.Face3(t1, b1, b2);
 					var triangle2 = new THREE.Face3(t1, b2, t2);
 					geom.faces.push(triangle1, triangle2)
-				}
+				}				
 			}
 		}
 

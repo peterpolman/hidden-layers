@@ -14,7 +14,7 @@ export default {
 
         const MAP = window.MAP = new mapboxgl.Map({
             container: 'map',
-            style: 'mapbox://styles/peterpolman/cjsli3aee5gab1fl9lpwyx2rd',
+            style: require('../assets/style.json'),
             zoom: 16,
             maxZoom: 21,
             minZoom: 16,
@@ -32,40 +32,6 @@ export default {
                 .setHTML('You discovered some water! Add it to your resources.')
                 .addTo(MAP);
         });
-
-        MAP.on('load', function() {
-            const layers = MAP.getStyle().layers;
-
-            MAP.addLayer({
-                'id': '3d-buildings',
-                'source': 'composite',
-                'source-layer': 'building',
-                'filter': ['==', 'extrude', 'true'],
-                'type': 'fill-extrusion',
-                'minzoom': 15,
-                'paint': {
-                    'fill-extrusion-color': '#EFEFEF',
-                    'fill-extrusion-height': [
-                        "interpolate", ["linear"],
-                        ["zoom"],
-                        15, 0,
-                        15.05, ["get", "height"]
-                    ],
-                    'fill-extrusion-base': [
-                        "interpolate", ["linear"],
-                        ["zoom"],
-                        15, 0,
-                        15.05, ["get", "min_height"]
-                    ],
-                    'fill-extrusion-opacity': .6
-                }
-            }, layers[layers.length-1].id);
-        });
-
-        // let tag = document.createElement('SCRIPT');
-        // tag.type = "text/javascript";
-        // tag.src = `https://maps.googleapis.com/maps/api/js?key=${config.google.key}&libraries=places,directions`;
-        // document.body.appendChild(tag);
     }
 }
 </script>

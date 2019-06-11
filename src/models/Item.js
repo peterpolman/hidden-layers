@@ -104,12 +104,11 @@ export default class Item {
         this.tb.repaint();
     }
 
-    // Remove user from scene and detach listener
+    // Remove loot from scene and detach listener
     remove() {
         const objectInScene = this.world.getObjectByName(this.id);
         this.world.remove(objectInScene);
 
-        this.lootRef.remove();
         this.lootRef.off();
         this.tb.repaint();
 
@@ -138,6 +137,8 @@ export default class Item {
 
             // Remove from marker database
             this.markersRef.child(hash).child(this.id).remove()
+            // Remove from loot database
+            this.lootRef.remove();
         })
     }
 }

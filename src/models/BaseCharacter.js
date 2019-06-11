@@ -1,7 +1,5 @@
 const mapboxgl = require('mapbox-gl/dist/mapbox-gl.js');
 
-import MarkerService from '../services/MarkerService';
-
 export default class BaseCharacter {
     constructor(id, data) {
         const HL = window.HL;
@@ -10,21 +8,19 @@ export default class BaseCharacter {
         this.world = HL.tb.world;
         this.position = data.position;
         this.hashes = data.hashes;
-        this.markerService = new MarkerService;
         this.xpMarkup = '';
 
-        this.loadAtPosition(id, (data.email ? data.userClass : 'scout'), data.position);
+        this.loadAtPosition(id, (data.userClass ? data.userClass :  'scout'), data.position);
     }
 
     // Watch user properties for change and remove events
     watch() {
         console.log('Start watching!', this.id)
         this.ref.on('child_changed', (snap) => {
-            // console.log("Property changed: ", this.id, snap.val());
             switch(snap.key) {
                 case 'position':
                     this.setPosition(snap.val());
-                    this.tb.repaint();
+                    // this.tb.repaint();
                     break
                 case 'hashes':
                     this.hashes = snap.val();
@@ -60,6 +56,7 @@ export default class BaseCharacter {
 
             this.tb.add(this.mesh);
             this.tb.repaint();
+
             this.watch();
 
             console.log('Object added to world: ', id, this.mesh)

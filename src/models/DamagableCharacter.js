@@ -1,6 +1,6 @@
 import BaseCharacter from './BaseCharacter';
 
-export default class User extends BaseCharacter {
+export default class DamagableCharacter extends BaseCharacter {
     constructor (id, data) {
         super(id, data);
 

@@ -13,7 +13,7 @@ export default class HiddenLayer {
         this.spawnService = new SpawnService();
         this.geoService = null;
 
-        this.id = '3d-objects';
+        this.id = 'custom_layer';
         this.type = 'custom';
         this.renderingMode = '3d';
 

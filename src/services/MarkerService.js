@@ -4,6 +4,7 @@ import firebase from 'firebase/app';
 
 import User from '../models/User.js';
 import Scout from '../models/Scout.js';
+import Goblin from '../models/Goblin.js';
 import Item from '../models/Item.js';
 
 export default class MarkerService {
@@ -28,6 +29,7 @@ export default class MarkerService {
             let hash = Geohash.encode(snap.val().position.lat, snap.val().position.lng, 7);
             this.markersRef.child(hash).child(snap.key).set({
                 position: snap.val().position,
+                race: 'human',
                 ref: `users2/${snap.key}`
             });
         });
@@ -36,6 +38,7 @@ export default class MarkerService {
             let hash = Geohash.encode(snap.val().position.lat, snap.val().position.lng, 7);
             this.markersRef.child(hash).child(snap.key).set({
                 position: snap.val().position,
+                race: 'wolf',
                 ref: `scouts2/${snap.key}`
             });
         });
@@ -44,7 +47,17 @@ export default class MarkerService {
             let hash = Geohash.encode(snap.val().position.lat, snap.val().position.lng, 7);
             this.markersRef.child(hash).child(snap.key).set({
                 position: snap.val().position,
+                race: 'loot',
                 ref: `loot/${snap.key}`
+            });
+        });
+
+        this.db.ref(`npc`).on('child_added', (snap) => {
+            let hash = Geohash.encode(snap.val().position.lat, snap.val().position.lng, 7);
+            this.markersRef.child(hash).child(snap.key).set({
+                position: snap.val().position,
+                race: snap.val().race,
+                ref: `npc/${snap.key}`
             });
         });
     }
@@ -113,9 +126,13 @@ export default class MarkerService {
 
             // Statically get all data for this marker once
             this.db.ref(data.ref).once('value').then((snap) => {
-                if (data.ref.startsWith('users')) HL.markers[id] = new User(snap.key, snap.val());
-                if (data.ref.startsWith('scouts')) HL.markers[id] = new Scout(snap.key, snap.val());
-                if (data.ref.startsWith('loot')) HL.markers[id] = new Item(snap.key, snap.val());
+                const isOfTypeAndExists = (data, type) => {
+                    return (data.ref.startsWith(type) && snap.val() !== null)
+                }
+                if (isOfTypeAndExists(data, 'users')) HL.markers[id] = new User(snap.key, snap.val());
+                if (isOfTypeAndExists(data, 'scouts')) HL.markers[id] = new Scout(snap.key, snap.val());
+                if (isOfTypeAndExists(data, 'loot')) HL.markers[id] = new Item(snap.key, snap.val());
+                if (isOfTypeAndExists(data, 'npc')) HL.markers[id] = new Goblin(snap.key, snap.val());
 
                 console.log('Marker is discovered: ', id, data);
             });

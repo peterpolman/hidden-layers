@@ -40,19 +40,44 @@ export default {
     },
     mounted() {
         const MAP = window.MAP;
+        const usersRef = firebase.database().ref('users2');
+        const scoutsRef = firebase.database().ref('scouts2');
+        const uid = firebase.auth().currentUser.uid;
 
         MAP.on('load', () => {
-            const usersRef = firebase.database().ref('users2');
-            const scoutsRef = firebase.database().ref('scouts2');
-            const uid = firebase.auth().currentUser.uid;
+            const HL = window.HL = new HiddenLayer();
+            const layers = MAP.getStyle().layers;
+
+            MAP.addLayer({
+                'id': '3d-buildings',
+                'source': 'composite',
+                'source-layer': 'building',
+                'filter': ['==', 'extrude', 'true'],
+                'type': 'fill-extrusion',
+                'minzoom': 15,
+                'paint': {
+                    'fill-extrusion-color': '#EFEFEF',
+                    'fill-extrusion-height': [
+                        "interpolate", ["linear"],
+                        ["zoom"],
+                        15, 0,
+                        15.05, ["get", "height"]
+                    ],
+                    'fill-extrusion-base': [
+                        "interpolate", ["linear"],
+                        ["zoom"],
+                        15, 0,
+                        15.05, ["get", "min_height"]
+                    ],
+                    'fill-extrusion-opacity': .45
+                }
+            }, layers[layers.length-1].id);
+
 
             // Load the user data
             usersRef.child(uid).once('value').then(snap => {
-                // This will also start the geoService and markerService;
-                const HL = window.HL = new HiddenLayer();
-
                 // Add to layer array before buildings.
-                MAP.addLayer(HL, '3d-buildings');
+                MAP.addLayer(HL, layers[layers.length-1].id);
 
                 // Creates my user
                 this.user = HL.user = new User(snap.key, snap.val());
@@ -69,6 +94,7 @@ export default {
 
                     // Start discovery
                     HL.updateFog();
+
                     console.log("Initial discovery started!");
                 });
             });

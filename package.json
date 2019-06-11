@@ -13,7 +13,7 @@
         "firebase": "^6.0.2",
         "jsts": "^2.0.4",
         "latlon-geohash": "^1.1.0",
-        "mapbox-gl": "^0.54.0",
+        "mapbox-gl": "^1.0.0",
         "three": "^0.104.0",
         "vue": "^2.6.10",
         "vue-router": "^3.0.6"
