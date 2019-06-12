@@ -9,13 +9,16 @@ export default class GeoService {
             maximumAge: 1000,
             timeout: 30000
         };
-        this.watchPosition();
+        this.watchter = null;
+    }
+
+    stopWatching() {
+        return navigator.geolocation.clearWatch(this.watcher);
     }
 
     getPosition() {
         return new Promise((resolve, reject) => {
             navigator.geolocation.getCurrentPosition(function(r) {
-                this.updatePosition(r.coords);
                 resolve(r.coords);
             }, (err) => {
                 reject(err);
@@ -24,7 +27,7 @@ export default class GeoService {
     }
 
     watchPosition() {
-        return navigator.geolocation.watchPosition(
+        return this.watcher = navigator.geolocation.watchPosition(
             (r) => {
                 this.updatePosition(r.coords);
             }, (err) => {

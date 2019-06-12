@@ -92,6 +92,7 @@ export default {
                     HL.markerService.positions[this.scout.id] = this.scout.position;
 
                     HL.geoService = new GeoService();
+                    HL.geoService.watchPosition();
 
                     // Start discovery
                     HL.updateFog();
@@ -118,12 +119,15 @@ export default {
 html,
 body {
     margin: 0;
-    height: 100%;
     font-family: 'Avenir', Helvetica, Arial, sans-serif;
-    background: #292929;
+    background: #3f2d42;
     color: white;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+}
+
+*:focus {
+    outline: #fdc539 auto 5px !important;
 }
 
 h1 {
@@ -179,6 +183,7 @@ h2 {
     text-transform: uppercase;
     border-radius: 2px;
     background: white;
+    cursor: pointer;
 }
 
 .btn-default {
@@ -228,7 +233,7 @@ h2 {
 
 .form {
     display: block;
-    max-width: 220px;
+    width: 220px;
     margin: auto;
 }
 
@@ -236,16 +241,17 @@ h2 {
     width: 100%;
 }
 
-.input-text {
+input.input-text {
     box-sizing: border-box;
     width: 100%;
-    border: 1px solid #EFEFEF;
+    border: 1px solid #fdc539;
     border-radius: 5px;
     padding: .7rem;
     font-size: 1rem;
     display: block;
     margin-bottom: .5rem;
-    color: black;
+    color: white;
+    background-color: rgba(0,0,0,0.5);
     font-weight: bold;
     box-shadow: 0 0px 15px rgba(0,0,0,.75);
 }
@@ -270,4 +276,103 @@ p  a {
 .align-center {
     text-align: center;
 }
+
+input[type="radio"],
+input[type="checkbox"] {
+	position: absolute;
+	left: -9999px;
+	opacity: 0;
+}
+
+input[type="radio"] + label,
+input[type="checkbox"] + label {
+	cursor: pointer;
+	user-select: none;
+	padding-left: calc(25px + .5rem);
+	padding-right: .5rem;
+	line-height: 24px;
+	position: relative;
+	color: white;
+	transition: .2s color ease;
+    font-weight: bold;
+    display: block;
+    margin-bottom: .5rem;
+}
+
+input[type="radio"] + label:before,
+input[type="checkbox"] + label:before {
+	content: '';
+	display: block;
+    width: 16px;
+    height: 16px;
+    border: 3px solid rgba(255,255,255,.5);
+	background: transparent;
+	position: absolute;
+	left: 0;
+	top: 0;
+	border-radius: 3px;
+	transform: 0.2s border-color ease;
+}
+
+input[type="radio"] + label:after,
+input[type="checkbox"] + label:after {
+    content: '';
+	display: block;
+	position: absolute;
+	height: 10px;
+	width: 10px;
+	background-color: rgba(255,255,255,.5);
+	top: 6px;
+	left: 6px;
+	transition: 0.2s background-color ease;
+}
+
+input[type="radio"]:checked:disabled + label,
+input[type="checkbox"]:checked:disabled + label {
+    background: transparent;
+    border: none;
+    cursor: not-allowed;
+    color: rgba(255,255,255,.5);
+}
+
+input[type="radio"]:checked + label,
+input[type="checkbox"]:checked + label {
+	color: white;
+	font-weight: bold;
+}
+
+input[type="radio"]:checked + label:before,
+input[type="checkbox"]:checked + label:before {
+    border-color: #fdc539;
+}
+
+input[type="radio"]:checked + label:after,
+input[type="checkbox"]:checked + label:after {
+    background-color: #fdc539;
+}
+
+
+@media (min-width: 1024px) {
+    input[type="radio"] + label,
+    input[type="checkbox"] + label {
+        display: inline-block;
+        margin-bottom: 0;
+        margin-right: 1rem;
+    }
+
+    .form {
+        width: 360px;
+    }
+
+    .flex-md {
+        height: 100vh;
+        width: 100vw;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+    }
+}
+
+
 </style>

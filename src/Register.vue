@@ -1,21 +1,22 @@
 <template>
-    <div class="row">
-        <form class="form" v-on:submit.prevent="register">
+    <div class="row flex-md">
+        <div class="loader" v-if="loading">Loading...</div>
+        <form class="form" v-on:submit.prevent="register" v-if="!loading">
             <h1>Nice to meet you!</h1>
             <h2>Authentication</h2>
             <div class="form-item">
-                <input type="text" v-model="email" class="input-text" placeholder="E-mail">
+                <input required type="text" v-model="email" class="input-text" placeholder="E-mail">
             </div>
             <div class="form-item">
-                <input type="text" v-model="password" class="input-text" placeholder="******">
+                <input required type="password" v-model="password" class="input-text" placeholder="******">
             </div>
             <div class="form-item">
-                <input type="text" v-model="passwordVerify" class="input-text" placeholder="******">
+                <input required type="password" v-model="passwordVerify" class="input-text" placeholder="******">
             </div>
 
             <h2>Personal</h2>
             <div class="form-item">
-                <input type="text" v-model="userName" class="input-text" placeholder="Username">
+                <input required type="text" v-model="userName" class="input-text" placeholder="Username">
             </div>
 
             <h2>Hero Race</h2>
@@ -43,6 +44,7 @@
 <script>
 import firebase from 'firebase/app';
 import 'firebase/auth';
+import GeoService from './services/GeoService';
 
 export default {
     name: 'register',
@@ -53,7 +55,8 @@ export default {
             passwordVerify: '',
             userName: '',
             userRace: 'human',
-            userClass: '',
+            userClass: 'knight',
+            loading: false,
         }
     },
     mounted() {
@@ -61,43 +64,46 @@ export default {
     },
     methods: {
         register: function() {
-            const options = {
-                enableHighAccuracy: true,
-                maximumAge: 1000,
-                timeout: 30000
+            this.loading = true;
+            if (this.password === this.passwordVerify) {
+                const geoService = new GeoService();
+                geoService.getPosition()
+                    .then((position) => this.createAccount(position))
+                    .catch((err) => alert(err));
             }
-            this.alert = "Processing location data."
-            navigator.geolocation.getCurrentPosition(this.createAccount, this.error, options);
-        },
-        error(err) {
-            if (typeof err != 'undefined') {
-                this.alert = 'Error during processing location data.'
+            else {
+                alert("Your passwords do not match.");
             }
         },
         createAccount(position) {
-            firebase.auth().createUserWithEmailAndPassword(this.email, this.password)
-                .then((r) => {
-                    const data = {
-                        uid: r.user.uid,
-                        email: r.user.email,
-                        hitPoints: 100,
-                        position: {
-                            lat: position.coords.latitude,
-                            lng: position.coords.longitude
-                        },
-                        userClass: this.userClass,
-                        username: this.username,
-                    }
-                    new UserController(r.user.uid).createUser(r.user.uid, data)
-                    this.$router.replace('/')
-                })
-                .catch((err) => {
-                    if (typeof err != 'undefined') {
-                        this.alert = "Error during account registration."
-                        console.log(err)
-                        alert(err)
-                    }
-                })
+            this.loading = false;
+            return alert("Account creation is temporarily disabled. Send an e-mail to peter@peterpolman.nl to apply for the waiting list.");
+
+            // firebase.auth().createUserWithEmailAndPassword(this.email, this.password)
+            //     .then((r) => {
+            //         const user = {
+            //             uid: r.user.uid,
+            //             email: r.user.email,
+            //             hitPoints: 100,
+            //             exp: 0,
+            //             race: this.userRace,
+            //             class: this.userClass,
+            //             name: this.userName,
+            //             position: {
+            //                 lat: position.latitude,
+            //                 lng: position.longitude
+            //             },
+            //         }
+            //         firebase.database().ref('users2').child(user.uid).set(user);
+            //         this.loading = false;
+            //         this.$router.replace('/')
+            //     })
+            //     .catch((err) => {
+            //         if (typeof err != 'undefined') {
+            //             alert("Error during account registration.")
+            //         }
+            //         this.loading = false;
+            //     })
         }
     }
 }
