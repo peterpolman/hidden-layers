@@ -50,6 +50,7 @@ export default {
     name: 'register',
     data: function() {
         return {
+            disabled: true,
             email: '',
             password: '',
             passwordVerify: '',
@@ -77,33 +78,31 @@ export default {
         },
         createAccount(position) {
             this.loading = false;
-            return alert("Account creation is temporarily disabled. Send an e-mail to peter@peterpolman.nl to apply for the waiting list.");
-
-            // firebase.auth().createUserWithEmailAndPassword(this.email, this.password)
-            //     .then((r) => {
-            //         const user = {
-            //             uid: r.user.uid,
-            //             email: r.user.email,
-            //             hitPoints: 100,
-            //             exp: 0,
-            //             race: this.userRace,
-            //             class: this.userClass,
-            //             name: this.userName,
-            //             position: {
-            //                 lat: position.latitude,
-            //                 lng: position.longitude
-            //             },
-            //         }
-            //         firebase.database().ref('users2').child(user.uid).set(user);
-            //         this.loading = false;
-            //         this.$router.replace('/')
-            //     })
-            //     .catch((err) => {
-            //         if (typeof err != 'undefined') {
-            //             alert("Error during account registration.")
-            //         }
-            //         this.loading = false;
-            //     })
+            return (this.disabled) ? alert("Account creation is temporarily disabled. Send an e-mail to peter@peterpolman.nl to apply for the waiting list.") : firebase.auth().createUserWithEmailAndPassword(this.email, this.password)
+                .then((r) => {
+                    const user = {
+                        uid: r.user.uid,
+                        email: r.user.email,
+                        hitPoints: 100,
+                        exp: 0,
+                        race: this.userRace,
+                        class: this.userClass,
+                        name: this.userName,
+                        position: {
+                            lat: position.latitude,
+                            lng: position.longitude
+                        },
+                    }
+                    firebase.database().ref('users2').child(user.uid).set(user);
+                    this.loading = false;
+                    this.$router.replace('/')
+                })
+                .catch((err) => {
+                    if (typeof err != 'undefined') {
+                        alert("Error during account registration.")
+                    }
+                    this.loading = false;
+                })
         }
     }
 }
