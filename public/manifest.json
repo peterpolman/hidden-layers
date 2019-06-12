@@ -1,8 +1,8 @@
 {
   "name": "Hidden Layers",
   "short_name": "Hidden Layers",
-  "theme_color": "#127756",
-  "background_color": "#127756",
+  "theme_color": "#fdc539",
+  "background_color": "3f2d42",
   "display": "standalone",
   "orientation": "portrait",
   "Scope": "/",

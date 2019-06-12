@@ -9,20 +9,30 @@ import config from '../config.js';
 
 export default {
     name: 'Map',
+    data() {
+        return {
+            map: null,
+        }
+    },
     mounted() {
         mapboxgl.accessToken = config.mapbox.key
+
+        // HACK For cleanup purposes
+        // if (typeof window.MAP != 'undefined') {
+        //     location.reload(true);
+        // }
 
         const MAP = window.MAP = new mapboxgl.Map({
             container: 'map',
             style: require('../assets/style.json'),
-            zoom: 16,
+            zoom: 19,
             maxZoom: 21,
             minZoom: 16,
             center: [4.8437, 52.3669],
             pitch: 85,
             bearing: 45,
-            antialias: true,
-            doubleClickZoom: true,
+            antialias: false,
+            doubleClickZoom: false,
             pitchWithRotate: false
         });
 

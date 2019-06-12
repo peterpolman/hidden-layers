@@ -15,17 +15,15 @@ export default class User extends DamagableCharacter {
         this.scout = data.scout;
         this.marker = null;
 
-        const xpMarkup = `<div class="character-level">
-                ${this.xp}
-            </div>`;
-
-        this.xpMarkup = data.exp ? xpMarkup : '';
-
-        this.loadInfo(this.getInfoMarkup());
+        this.setInfo();
 
         if (this.id === firebase.auth().currentUser.uid) {
             this.discover();
         }
+    }
+
+    getXpMarkup() {
+        return `<div class="character-level">${this.xp}</div>`
     }
 
     discover() {
@@ -42,6 +40,6 @@ export default class User extends DamagableCharacter {
     }
 
     onClick() {
-        alert(`Hi ${this.name}!`);
+        console.log(`Hi ${this.name}!`);
     }
 }

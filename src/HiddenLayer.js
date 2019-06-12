@@ -179,18 +179,34 @@ export default class HiddenLayer {
         const target = object.parent.parent;
         const id = target.userData.id;
 
+        // Hides the marker of the last clicked object
+        if (
+            this.selectedTarget != null &&
+            this.selectedTarget.marker != null &&
+            this.selectedTarget.race === 'goblin'
+        ) {
+            this.selectedTarget.marker.remove();
+            this.selectedTarget.marker = null;
+        }
+
         // Mind that the fog of war can also be clicked but is not in the marker list
         // Handle that click as a destination that is set
-        if (typeof this.markers[id] != 'undefined') {
-            this.markers[id].onClick();
+        if (typeof this.markers[id] !== 'undefined') {
+            this.selectedTarget = this.markers[id];
+            this.selectedTarget.onClick();
         }
+        // Click on my scout if it is mine
         else if (this.scout.id === id) {
-            this.scout.onClick();
+            this.selected = this.scout;
+            this.selected.onClick();
         }
-        else {
-            if (this.selected) {
-                this.selected.onMapClickWhenSelected(e);
-            }
+        // Click on my scout if it is mine
+        else if (this.user.id === id) {
+            this.selected = this.user;
+            this.selected.onClick();
+        }
+        else if (this.selected != null) {
+            this.selected.onMapClickWhenSelected(e);
         }
 
         console.log('Casted ray hit: ', object);

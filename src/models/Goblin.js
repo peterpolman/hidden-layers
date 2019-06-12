@@ -7,6 +7,7 @@ export default class Goblin extends DamagableCharacter {
         super(id, data);
 
         this.name = 'Goblin';
+        this.race = 'goblin';
         this.ref = firebase.database().ref('npc').child(id);
         this.marker = null;
         this.greetings = [
@@ -43,18 +44,15 @@ export default class Goblin extends DamagableCharacter {
             "Go, go!",
             "Make sense!"
         ]
-        this.loadInfo(this.getInfoMarkup());
     }
 
     onClick() {
         const HL = window.HL;
-        
-        if (HL.selected !== null && HL.selected.slug === 'sword') {
-            alert(`${Math.floor(Math.random() * 10)} damage. AUTSCH!!`);
-        }
-        else {
-            const message = `Goblin: ${this.greetings[Math.floor(Math.random() * this.greetings.length)]}`;
-            alert(message);
-        }
+        const message = `Goblin: ${this.greetings[Math.floor(Math.random() * this.greetings.length)]}`;
+
+        this.use(HL.selected);
+        this.setInfo();
+
+        console.log(message)
     }
 }

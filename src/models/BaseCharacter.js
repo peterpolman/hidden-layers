@@ -20,11 +20,13 @@ export default class BaseCharacter {
             switch(snap.key) {
                 case 'position':
                     this.setPosition(snap.val());
-                    // this.tb.repaint();
                     break
                 case 'hashes':
                     this.hashes = snap.val();
                     break
+                case 'hitPoints':
+                    this.setHitPoints(snap.val());
+                    break;
                 default:
                     console.error("No handler available", snap.key, snap.val());
             }
@@ -65,8 +67,8 @@ export default class BaseCharacter {
 
     // Set the position of the objects in the world scene
     setPosition(position) {
-        const HL = window.HL;
         const lngLat = [position.lng, position.lat];
+        const HL = window.HL;
 
         this.position = position;
         this.marker.setLngLat(lngLat)
@@ -75,51 +77,48 @@ export default class BaseCharacter {
         HL.updateFog();
     }
 
-    getInfoMarkup() {
+    setInfo() {
+        const MAP = window.MAP;
         let el = document.createElement('div');
 
         el.style = {position: 'relative'};
         el.classList.add(`marker-${this.id}`);
         el.innerHTML = `
             <div class="character-wrapper">
-                ${this.xpMarkup}
+                ${(this.xp != null) ? this.getXpMarkup() : ''}
                 <div class="character-info">
                     <strong class="character-name">${this.name}</strong><br>
-                    ${this.hitPointsMarkup}
+                    ${this.getHitPointsMarkup()}
                 </div>
             </div>`;
 
-        return el;
-    }
-
-    loadInfo(markup) {
-        const MAP = window.MAP;
-
-        if (this.marker === null) {
-            this.marker = new mapboxgl.Marker({
-                    element: markup,
-                    offset: [30,40]
-                })
-                .setLngLat([this.position.lng, this.position.lat])
-                .addTo(MAP);
+        if (this.marker !== null) {
+            this.marker.remove();
+            this.marker = null;
         }
+
+        this.marker = new mapboxgl.Marker({
+                element: el,
+                offset: [30,40],
+            })
+            .setLngLat([this.position.lng, this.position.lat])
+            .addTo(MAP);
     }
 
     // Remove unit from scene and detach listener
     remove() {
+        const HL = window.HL;
         const objectInScene = this.world.getObjectByName(this.id);
+        if (this.marker != null) this.marker.remove();
         this.ref.off();
-        this.marker.remove();
         this.world.remove(objectInScene);
+        delete HL.markers[this.id];
 
         console.log(`Removed: ${this.id}`)
     }
 
 
     onClick() {
-        const HL = window.HL;
 
-        HL.selectedTarget = this;
-        alert(`This is ${this.name}`);
     }
 }
