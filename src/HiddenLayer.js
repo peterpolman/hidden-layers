@@ -25,7 +25,9 @@ export default class HiddenLayer {
         this.active = false;
         this.tb = null;
         this.fog = null;
+
         this.selected = null;
+        this.selectedTarget = null;
     }
 
     onAdd(map, mbxContext) {

@@ -6,7 +6,7 @@ import 'firebase/auth';
 import App from './App.vue';
 import Home from './Home.vue';
 import Login from './Login.vue';
-// import Register from './Register.vue';
+import Register from './Register.vue';
 
 import config from './config.js';
 
@@ -45,7 +45,7 @@ const routes = [
     }, {
         name: 'register',
         path: '/register',
-        // component: Register
+        component: Register
     }
 ];
 

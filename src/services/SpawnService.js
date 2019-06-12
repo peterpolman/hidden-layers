@@ -5,7 +5,7 @@ export default class SpawnService {
     constructor() {
         // Start spawn timer and trigger method every 1 sec or so
         clearInterval(this.spawnTimer);
-        this.spawnTimer = setInterval(this.onTimerUpdate.bind(this), 1000);
+        this.spawnTimer = setInterval(this.onTimerUpdate.bind(this), 10000);
         this.markersRef = firebase.database().ref('markers');
         this.npcRef = firebase.database().ref('npc');
     }

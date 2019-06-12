@@ -46,8 +46,8 @@ export default class Item {
         obj = (obj != 'sword' && obj != 'potion' && obj != 'gold') ? 'dummy' : obj;
 
         return this.tb.loadObj({
-            obj: `./models/items/${obj}.obj`,
-            mtl: `./models/items/${obj}.mtl`
+            obj: `./objects/items/${obj}.obj`,
+            mtl: `./objects/items/${obj}.mtl`
         }, (object) => {
             // Remove existing objects with same id
             const objectInScene = this.world.getObjectByName(id);

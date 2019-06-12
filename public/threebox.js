@@ -3285,7 +3285,7 @@ OBJLoader.prototype = {
 
                 }
 
-                material.shading = sourceMaterial.smooth ? THREE.SmoothShading : THREE.FlatShading;
+                material.flatShading = sourceMaterial.smooth ? THREE.SmoothShading : THREE.FlatShading;
 
                 createdMaterials.push(material);
 
@@ -3327,6 +3327,7 @@ OBJLoader.prototype = {
 };
 
 module.exports = exports = OBJLoader;
+
 },{"../../three.js":16}],13:[function(require,module,exports){
 var utils = require("../utils/utils.js");
 var material = require("../utils/material.js");

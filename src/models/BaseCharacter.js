@@ -36,8 +36,8 @@ export default class BaseCharacter {
 
     loadAtPosition(id, obj, position) {
         return this.tb.loadObj({
-            obj: `./models/${obj}/${obj}.obj`,
-            mtl: `./models/${obj}/${obj}.mtl`
+            obj: `./objects/${obj}/${obj}.obj`,
+            mtl: `./objects/${obj}/${obj}.mtl`
         }, (object) => {
             // Remove existing objects with same id
             const objectInScene = this.world.getObjectByName(id);
@@ -117,6 +117,9 @@ export default class BaseCharacter {
 
 
     onClick() {
+        const HL = window.HL;
+
+        HL.selectedTarget = this;
         alert(`This is ${this.name}`);
     }
 }

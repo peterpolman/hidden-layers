@@ -9,6 +9,7 @@
             class="ui-profile" />
         <div class="ui-actions">
             <button v-on:click="reload()" class="btn btn-default">Reload</button>
+            <button v-on:click="logout()" class="btn btn-default">Logout</button>
         </div>
     </div>
 </template>
@@ -101,8 +102,13 @@ export default {
         });
     },
     methods: {
+        logout() {
+            firebase.auth().signOut().then(() => {
+                this.$router.replace('login')
+            })
+        },
         reload() {
-            location.reload(true);
+            return location.reload(true);
         }
     }
 }
@@ -114,8 +120,31 @@ body {
     margin: 0;
     height: 100%;
     font-family: 'Avenir', Helvetica, Arial, sans-serif;
+    background: #292929;
+    color: white;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+}
+
+h1 {
+    font-weight: bold;
+    color: #fdc539;
+    text-transform: uppercase;
+    font-size: 1.2rem;
+    text-shadow: 1px 1px 0px rgba(0,0,0,.75);
+    text-align: center;
+    border-bottom: 1px solid #EFEFEF;
+    padding-bottom: .5rem;
+    margin-bottom: 1rem;
+    width: 100%;
+}
+
+h2 {
+    margin-top: 2rem;
+    font-weight: bold;
+    color: #fdc539;
+    font-size: 1rem;
+    text-shadow: 1px 1px 0px rgba(0,0,0,.75);
 }
 
 .ui-wrapper {
@@ -184,5 +213,61 @@ body {
     border-bottom-right-radius: 2px;
 }
 
+.row {
 
+}
+
+.flex {
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.form {
+    display: block;
+    max-width: 220px;
+    margin: auto;
+}
+
+.form-item {
+    width: 100%;
+}
+
+.input-text {
+    box-sizing: border-box;
+    width: 100%;
+    border: 1px solid #EFEFEF;
+    border-radius: 5px;
+    padding: .7rem;
+    font-size: 1rem;
+    display: block;
+    margin-bottom: .5rem;
+    color: black;
+    font-weight: bold;
+    box-shadow: 0 0px 15px rgba(0,0,0,.75);
+}
+
+.btn-primary {
+    margin-top: 1rem;
+    background-color: #fdc539;
+    padding: .7rem 1rem;
+    font-size: 1rem;
+    color: #292929;
+    font-weight: bold;
+    display: block;
+    border: 0;
+    width: 100%;
+    box-shadow: 0 0px 15px rgba(0,0,0,.75);
+}
+
+p  a {
+    color: #fdc539;
+}
+
+.align-center {
+    text-align: center;
+}
 </style>
