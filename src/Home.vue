@@ -374,5 +374,24 @@ input[type="checkbox"]:checked + label:after {
     }
 }
 
+.character-hit {
+    color: white;
+    font-weight: bold;
+    position: absolute;
+    bottom: 50px;
+    left: 50%;
+    margin-left: -10px;
+    width: 20px;
+    font-size: 16px;
+    text-align: center;
+    transition: all 1.5s ease-in-out;
+}
 
+.character-hit.dmg {
+    color: red;
+}
+
+.character-hit.heal {
+    color: rgb(140, 198, 62);
+}
 </style>

@@ -77,12 +77,13 @@ export default class BaseCharacter {
         HL.updateFog();
     }
 
-    setInfo() {
+    setInfo(hit = null, isDamage = null) {
         const MAP = window.MAP;
         let el = document.createElement('div');
 
         el.style = {position: 'relative'};
         el.classList.add(`marker-${this.id}`);
+        el.id = `marker-${this.id}`;
         el.innerHTML = `
             <div class="character-wrapper">
                 ${(this.xp != null) ? this.getXpMarkup() : ''}
@@ -103,15 +104,37 @@ export default class BaseCharacter {
             })
             .setLngLat([this.position.lng, this.position.lat])
             .addTo(MAP);
+
+        if (hit !== null) {
+            var marker = document.getElementById(`marker-${this.id}`);
+            var markup = document.createElement('div');
+            markup.classList.add('character-hit');
+            markup.classList.add(isDamage ? 'dmg' : 'heal');
+            markup.innerHTML = hit;
+
+            marker.appendChild(markup)
+
+            clearTimeout(this.timeout);
+            this.timeout = setTimeout(() => {
+                if (this.hitPoints > 0) this.setInfo()
+            }, 500)
+        }
     }
 
     // Remove unit from scene and detach listener
     remove() {
         const HL = window.HL;
         const objectInScene = this.world.getObjectByName(this.id);
-        if (this.marker != null) this.marker.remove();
+
+        if (this.marker != null) {
+            this.marker.remove();
+            this.marker = null;
+        }
+
         this.ref.off();
         this.world.remove(objectInScene);
+        HL.tb.repaint();
+
         delete HL.markers[this.id];
 
         console.log(`Removed: ${this.id}`)

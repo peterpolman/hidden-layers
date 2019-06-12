@@ -18,43 +18,35 @@ export default class DamagableCharacter extends BaseCharacter {
     }
 
     setHitPoints(hitPoints) {
-        if (this.hitPoints < hitPoints) {
-            console.log('You got healed!');
-        }
-        else {
-            console.log('You got damaged!');
-        }
         this.hitPoints = hitPoints;
-        this.setInfo();
     }
 
     hit(damage) {
-        const died = (this.hitPoints - damage <= 0);
-        const id = this.id;
-
-        if (!died) {
+        // Check if goblin should die
+        if ((this.hitPoints - damage) > 0) {
             this.ref.update({ hitPoints: this.hitPoints - damage });
+            this.setInfo(damage, true);
         }
         else {
-            this.die(id);
+            this.ref.update({ hitPoints: 0 });
+            this.setInfo(damage, true);
+            this.die();
         }
     }
 
     heal(heal) {
         const hitPointsMax = 100;
-        const healed = (this.hitPoints + heal > hitPointsMax);
-        const hitPoints = (!healed) ? this.hitPoints + heal : hitPointsMax;
+        const fullyHealed = (this.hitPoints + heal > hitPointsMax);
+        const hitPoints = (!fullyHealed) ? this.hitPoints + heal : hitPointsMax;
 
-        if (!healed) {
-            this.ref.update({ hitPoints: hitPoints });
-        }
-
+        this.ref.update({ hitPoints: hitPoints });
+        this.setInfo(heal, false);
     }
 
     use(item) {
-        if (item !== null) {
-            let damage, heal;
+        let damage, heal;
 
+        if (item !== null) {
             switch(item.slug) {
                 case 'sword':
                     damage = Math.floor(Math.random() * 10);
@@ -67,8 +59,7 @@ export default class DamagableCharacter extends BaseCharacter {
                     this.heal(heal)
 
                     // TODO Deduct a potion
-
-                    console.log(`${damage} damage. ${this.hitPoints} left. AUTSCH!!`);
+                    console.log(`${heal} hitpoints healed. ${this.hitPoints} left.`);
                     break;
                 default:
                     console.log(`You can not hit with ${item.name}...`)
@@ -78,8 +69,12 @@ export default class DamagableCharacter extends BaseCharacter {
     }
 
     // Remove from database and scene
-    die (id) {
+    die () {
         const HL = window.HL;
+        const id = this.id;
+
+        HL.selectedTarget = null;
         HL.markerService.removeMarker(id)
+        this.ref.remove();
     }
 }

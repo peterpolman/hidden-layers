@@ -120,7 +120,6 @@ export default class MarkerService {
     removeMarker(id) {
         const HL = window.HL;
         let hash = Geohash.encode(HL.markers[id].position.lat, HL.markers[id].position.lng, 7);
-        this.onMarkerRemoved(id, hash);
         this.markersRef.child(hash).child(id).remove();
     }
 
@@ -151,7 +150,6 @@ export default class MarkerService {
         const HL = window.HL;
         if (typeof HL.markers[id] !== 'undefined') {
             HL.markers[id].remove();
-            delete HL.markers[id];
             delete this.listeners[hash][id];
             console.log('Marker is removed: ', id);
         }
