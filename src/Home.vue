@@ -217,6 +217,10 @@ h2 {
     border: 0;
 }
 
+.btn-image.active {
+    background-color: #fdc539;
+}
+
 .btn-image small {
     position: absolute;
     font-size: 8px;

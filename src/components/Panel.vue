@@ -4,7 +4,7 @@
         <ul>
             <li :key="item.key" v-for="item in items">
                 <button
-                v-bind:class="`btn btn-image btn-${item.slug}`"
+                v-bind:class="`btn btn-image btn-${item.slug} ${(active !== null && active.slug === item.slug) ? 'active' : ''}`"
                 v-bind:style="`background-image: url(${img[item.slug]});`"
                 v-on:click="onItemClick(item)">
                     <small>{{ item.amount }}</small>
@@ -22,6 +22,7 @@ export default {
     props: ['items'],
     data() {
         return {
+            active: null,
             img: {
                 tools: require('../assets/img/tools.png'),
                 ward: require('../assets/img/ward-1.png'),
@@ -33,20 +34,36 @@ export default {
         }
     },
     mounted() {
-
+        window.addEventListener('selected.click', this.onSelectedClick)
     },
     methods: {
+        onSelectedClick(data) {
+            const HL = window.HL;
+            if (data.detail.id !== null && this.active === null) {
+                HL.selected = new Item(data.detail.id, data.detail);
+                this.active = HL.selected;
+            }
+            else if (this.active.slug === data.detail.slug) {
+                HL.selected = null;
+                this.active = null;
+            }
+            else {
+                this.active = data.detail;
+            }
+        },
         onItemClick(item) {
             const HL = window.HL;
             const data = {
-                id: firebase.database().ref('loot').push().key,
-                slug: item.slug,
-                name: item.name,
-                amount: item.amount,
-                position: {}
-            }
+                detail: {
+                    id: firebase.database().ref('loot').push().key,
+                    slug: item.slug,
+                    name: item.name,
+                    amount: item.amount,
+                    position: {}
+                }
+            };
 
-            HL.selected = new Item(data.id, data);
+            return this.onSelectedClick(data)
         }
     }
 }

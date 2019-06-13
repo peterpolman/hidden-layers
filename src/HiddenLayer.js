@@ -181,6 +181,13 @@ export default class HiddenLayer {
         return window.dispatchEvent(event);
     }
 
+    selectItem(id) {
+        const data = { detail: { id: id } };
+        const event = new CustomEvent('selected.click', data);
+
+        return window.dispatchEvent(event);
+    }
+
     handleObjectClick(e, object) {
         // Select parent of parent which contains the userData
         const target = object.parent.parent;
@@ -213,7 +220,7 @@ export default class HiddenLayer {
             this.selectedTarget = this.user;
         }
         else if (this.selected != null) {
-            this.selectedTarget.onMapClickWhenSelected(e);
+            this.selected.onMapClickWhenSelected(e);
         }
 
         this.selectedTarget.onClick();
@@ -224,6 +231,9 @@ export default class HiddenLayer {
     handleMapClick(e) {
         if (this.selected !== null) {
             this.selected.onMapClickWhenSelected(e);
+        }
+        else {
+            this.selectItem(null);
         }
         console.log('Map click at', e);
     }
