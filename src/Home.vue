@@ -7,6 +7,9 @@
             v-bind:user="user"
             v-bind:scout="scout"
             class="ui-profile" />
+        <Target
+            class="ui-target" />
+
         <div class="ui-actions">
             <button v-on:click="reload()" class="btn btn-default">Reload</button>
             <button v-on:click="logout()" class="btn btn-default">Logout</button>
@@ -19,6 +22,7 @@ import firebase from 'firebase/app';
 import Map from './components/Map.vue';
 import Inventory from './components/Inventory.vue';
 import Profile from './components/Profile.vue';
+import Target from './components/Target.vue';
 import HiddenLayer from './HiddenLayer';
 import User from './models/User';
 import Scout from './models/Scout';
@@ -29,10 +33,12 @@ export default {
     components: {
         Map,
         Inventory,
-        Profile
+        Profile,
+        Target,
     },
     data() {
         return {
+            target: null,
             user: null,
             scout: null,
             items: null,
@@ -159,7 +165,7 @@ h2 {
 
 .ui-actions {
     position: fixed;
-    top: .5rem;
+    top: 1rem;
     right: .5rem;
     width: auto;
 }
@@ -174,6 +180,12 @@ h2 {
     position: fixed;
     right: .5rem;
     bottom: .5rem;
+}
+
+.ui-target {
+    position: fixed;
+    left: 190px;
+    top: .5rem;
 }
 
 .btn {

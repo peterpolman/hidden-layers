@@ -174,10 +174,19 @@ export default class HiddenLayer {
         return circlePath;
     }
 
+    selectTarget(id) {
+        const data = { detail: { id: id } };
+        const event = new CustomEvent('target.click', data);
+
+        return window.dispatchEvent(event);
+    }
+
     handleObjectClick(e, object) {
         // Select parent of parent which contains the userData
         const target = object.parent.parent;
         const id = target.userData.id;
+
+        this.selectTarget(id);
 
         // Hides the marker of the last clicked object
         if (
@@ -192,28 +201,28 @@ export default class HiddenLayer {
         // Mind that the fog of war can also be clicked but is not in the marker list
         // Handle that click as a destination that is set
         if (typeof this.markers[id] !== 'undefined') {
+
             this.selectedTarget = this.markers[id];
-            this.selectedTarget.onClick();
         }
         // Click on my scout if it is mine
         else if (this.scout.id === id) {
-            this.selected = this.scout;
-            this.selected.onClick();
+            this.selectedTarget = this.scout;
         }
         // Click on my scout if it is mine
         else if (this.user.id === id) {
-            this.selected = this.user;
-            this.selected.onClick();
+            this.selectedTarget = this.user;
         }
         else if (this.selected != null) {
-            this.selected.onMapClickWhenSelected(e);
+            this.selectedTarget.onMapClickWhenSelected(e);
         }
+
+        this.selectedTarget.onClick();
 
         console.log('Casted ray hit: ', object);
     }
 
     handleMapClick(e) {
-        if (this.selected) {
+        if (this.selected !== null) {
             this.selected.onMapClickWhenSelected(e);
         }
         console.log('Map click at', e);

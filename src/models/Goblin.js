@@ -8,6 +8,7 @@ export default class Goblin extends DamagableCharacter {
 
         this.name = 'Goblin';
         this.race = 'goblin';
+        this.class = 'goblin';
         this.ref = firebase.database().ref('npc').child(id);
         this.marker = null;
         this.greetings = [
