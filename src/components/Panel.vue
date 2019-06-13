@@ -39,6 +39,7 @@ export default {
     methods: {
         onSelectedClick(data) {
             const HL = window.HL;
+            
             if (data.detail.id !== null && this.active === null) {
                 HL.selected = new Item(data.detail.id, data.detail);
                 this.active = HL.selected;
@@ -52,7 +53,6 @@ export default {
             }
         },
         onItemClick(item) {
-            const HL = window.HL;
             const data = {
                 detail: {
                     id: firebase.database().ref('loot').push().key,
