@@ -179,13 +179,13 @@ h2 {
 .ui-inventory {
     position: fixed;
     right: .5rem;
-    bottom: .5rem;
+    bottom: 4.5rem;
 }
 
 .ui-target {
     position: fixed;
-    left: 190px;
-    top: .5rem;
+    left: .5rem;
+    bottom: .5rem;
 }
 
 .btn {

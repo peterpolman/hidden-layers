@@ -16,12 +16,14 @@
 <script>
 import firebase from 'firebase/app';
 import Item from '../models/Item';
+import EventService from '../services/EventService';
 
 export default {
     name: 'Panel',
     props: ['items'],
     data() {
         return {
+            ea: new EventService(),
             active: null,
             img: {
                 tools: require('../assets/img/tools.png'),
@@ -34,23 +36,21 @@ export default {
         }
     },
     mounted() {
-        window.addEventListener('selected.click', this.onSelectedClick)
+        this.ea.listen('selected.click', this.onSelectedClick)
     },
     methods: {
         onSelectedClick(data) {
             const HL = window.HL;
-            
-            if (data.detail.id !== null && this.active === null) {
-                HL.selected = new Item(data.detail.id, data.detail);
-                this.active = HL.selected;
-            }
-            else if (this.active.slug === data.detail.slug) {
-                HL.selected = null;
-                this.active = null;
+            const item = data.detail;
+
+            // TODO check if this is actually true when null is casted to the event
+            if (item.slug !== null) {
+                this.active = HL.selectedItem = new Item(item.id, item);
             }
             else {
-                this.active = data.detail;
+                this.active = null;
             }
+
         },
         onItemClick(item) {
             const data = {

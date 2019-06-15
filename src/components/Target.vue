@@ -13,10 +13,13 @@
 </template>
 
 <script>
+import EventService from '../services/EventService';
+
 export default {
     name: 'Target',
     data() {
         return {
+            ea: new EventService(),
             target: null,
             img: {
                 knight: require('../assets/img/knight-1.png'),
@@ -28,12 +31,13 @@ export default {
         }
     },
     mounted() {
-        window.addEventListener('target.click', this.onTargetClick)
+        this.ea.listen('target.click', this.onTargetClick)
     },
     methods: {
         onTargetClick(data) {
             const id = data.detail.id;
             const HL = window.HL;
+
             this.target = HL.markers[id];
         },
         locate(position) {

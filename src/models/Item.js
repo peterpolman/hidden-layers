@@ -22,7 +22,9 @@ export default class Item {
 
         this.mesh = null;
 
-        this.loadAtPosition(id, data.slug, data.position);
+        if (data.position !== null) {
+            this.loadAtPosition(id, data.slug, data.position);
+        }
     }
 
     // Watch user properties for change and remove events
@@ -71,9 +73,9 @@ export default class Item {
         });
     }
 
-    onMapClickWhenSelected(e) {
+    drop(e) {
         const HL = window.HL;
-        const item = HL.selected
+        const item = HL.selectedItem;
         const hash = Geohash.encode(e.lngLat.lat, e.lngLat.lng, 7);
 
         // Set the item in the loot database
@@ -92,8 +94,6 @@ export default class Item {
 
         // Remove the item from the inventory of the owner
         this.itemsRef.child(item.slug).remove();
-
-        HL.selected = null;
     }
 
     // Set the position of the objects in the world scene
@@ -114,7 +114,6 @@ export default class Item {
 
         console.log(`Removed: ${this.id}`)
     }
-
 
     onClick() {
         const hash = Geohash.encode(this.position.lat, this.position.lng, 7);

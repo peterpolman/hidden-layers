@@ -46,25 +46,23 @@ export default class DamagableCharacter extends BaseCharacter {
     use(item) {
         let damage, heal;
 
-        if (item !== null) {
-            switch(item.slug) {
-                case 'sword':
-                    damage = Math.floor(Math.random() * 10);
-                    this.hit(damage)
+        switch(item.slug) {
+            case 'sword':
+                damage = Math.floor(Math.random() * 10);
+                this.hit(damage)
 
-                    console.log(`${damage} damage. ${this.hitPoints} left. AUTSCH!!`);
-                    break;
-                case 'potion':
-                    heal = 20;
-                    this.heal(heal)
+                console.log(`${damage} damage. ${this.hitPoints} left. AUTSCH!!`);
+                break;
+            case 'potion':
+                heal = 20;
+                this.heal(heal)
 
-                    // TODO Deduct a potion
-                    console.log(`${heal} hitpoints healed. ${this.hitPoints} left.`);
-                    break;
-                default:
-                    console.log(`You can not hit with ${item.name}...`)
-                    break
-            }
+                // TODO Deduct a potion
+                console.log(`${heal} hitpoints healed. ${this.hitPoints} left.`);
+                break;
+            default:
+                console.log(`You can not hit with ${item.name}...`)
+                break
         }
     }
 

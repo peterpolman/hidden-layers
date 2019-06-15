@@ -13,6 +13,8 @@ export default class Scout extends DamagableCharacter {
         this.name = data.name;
         this.marker = null;
         this.indicator = null;
+        this.race = 'wolf';
+        this.class = 'wolf';
         this.ref = firebase.database().ref('scouts2').child(id);
         this.userRef = firebase.database().ref('users2').child(data.uid);
         this.markersRef = firebase.database().ref('markers');

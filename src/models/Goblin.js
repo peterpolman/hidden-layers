@@ -51,8 +51,11 @@ export default class Goblin extends DamagableCharacter {
         const HL = window.HL;
         const message = `Goblin: ${this.greetings[Math.floor(Math.random() * this.greetings.length)]}`;
 
-        this.use(HL.selected);
-
-        console.log(message)
+        if (HL.selectedItem !== null) {
+            this.use(HL.selectedItem);
+        }
+        else {
+            console.log(message);
+        }
     }
 }

@@ -4,6 +4,7 @@ const THREE = window.THREE;
 import firebase from 'firebase/app';
 import MarkerService from './services/MarkerService';
 import SpawnService from './services/SpawnService';
+import EventService from './services/EventService';
 
 export default class HiddenLayer {
     constructor() {
@@ -11,6 +12,7 @@ export default class HiddenLayer {
 
         this.markerService = new MarkerService();
         this.spawnService = new SpawnService();
+        this.ea = new EventService();
         this.geoService = null;
 
         this.id = 'custom_layer';
@@ -26,7 +28,7 @@ export default class HiddenLayer {
         this.tb = null;
         this.fog = null;
 
-        this.selected = null;
+        this.selectedItem = null;
         this.selectedTarget = null;
     }
 
@@ -60,7 +62,7 @@ export default class HiddenLayer {
         var intersectionExists = typeof intersect == "object"
 
         // if intersect exists, highlight it
-        if (intersect) {
+        if (intersect && intersect.object.name !== this.fog.name) {
             var object = intersect.object;
             this.handleObjectClick(e, object);
         }
@@ -175,17 +177,13 @@ export default class HiddenLayer {
     }
 
     selectTarget(id) {
-        const data = { detail: { id: id } };
-        const event = new CustomEvent('target.click', data);
-
-        return window.dispatchEvent(event);
+        const data = { id: id };
+        return  this.ea.dispatch('target.click', data)
     }
 
-    selectItem(id) {
-        const data = { detail: { id: id } };
-        const event = new CustomEvent('selected.click', data);
-
-        return window.dispatchEvent(event);
+    selectItem(slug) {
+        const data = { slug: slug };
+        return this.ea.dispatch('selected.click', data)
     }
 
     handleObjectClick(e, object) {
@@ -193,47 +191,44 @@ export default class HiddenLayer {
         const target = object.parent.parent;
         const id = target.userData.id;
 
-        this.selectTarget(id);
-
-        // Hides the marker of the last clicked object
-        if (
-            this.selectedTarget != null &&
-            this.selectedTarget.marker != null &&
-            this.selectedTarget.race === 'goblin'
-        ) {
-            this.selectedTarget.marker.remove();
-            this.selectedTarget.marker = null;
+        if (this.user.id === id) {
+            this.user.onClick();
         }
-
-        // Mind that the fog of war can also be clicked but is not in the marker list
-        // Handle that click as a destination that is set
-        if (typeof this.markers[id] !== 'undefined') {
-
-            this.selectedTarget = this.markers[id];
-        }
-        // Click on my scout if it is mine
         else if (this.scout.id === id) {
-            this.selectedTarget = this.scout;
+            this.scout.onClick();
         }
-        // Click on my scout if it is mine
-        else if (this.user.id === id) {
-            this.selectedTarget = this.user;
+        else if (typeof HL.markers[id].amount == 'undefined') {
+            this.selectTarget(id);
+            this.selectedTarget = HL.markers[id];
+
+            this.selectItem(null);
+            this.selectedItem = null;
+
+            HL.markers[id].onClick();
         }
-        else if (this.selected != null) {
-            this.selected.onMapClickWhenSelected(e);
+        else if (HL.markers[id].amount > 0) {
+            this.selectTarget(null);
+            this.selectedTarget = null;
+
+            this.selectItem(null);
+            this.selectedItem = null;
+
+            HL.markers[id].onClick();
         }
 
-        this.selectedTarget.onClick();
-
-        console.log('Casted ray hit: ', object);
+        console.log('Object click at ', object);
     }
 
     handleMapClick(e) {
-        if (this.selected !== null) {
-            this.selected.onMapClickWhenSelected(e);
+        if (this.selectedItem !== null) {
+            this.selectedItem.drop(e);
         }
         else {
+            this.selectTarget(null);
+            this.selectedTarget = null;
+
             this.selectItem(null);
+            this.selectedItem = null;
         }
         console.log('Map click at', e);
     }
