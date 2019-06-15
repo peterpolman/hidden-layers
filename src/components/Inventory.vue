@@ -9,7 +9,19 @@
         <Panel
             v-if="isOpen"
             v-bind:items="items"
-            class="" />
+            class="panel panel-default panel-inventory" />
+        <div class="panel panel-default panel-equiped">
+            <ul>
+                <li>
+                    <button
+                    v-if="item"
+                    v-bind:class="`btn btn-image btn-${item.slug}`"
+                    v-bind:style="`background-image: url(${img[item.slug]});`"
+                    v-on:click="onItemClick(item)">
+                    </button>
+                </li>
+            </ul>
+        </div>
     </div>
 </template>
 
@@ -29,7 +41,16 @@ export default {
             ref: firebase.database().ref('items').child(firebase.auth().currentUser.uid),
             isOpen: false,
             items: {},
-            imgBackpack: require('../assets/img/backpack.png')
+            item: null,
+            imgBackpack: require('../assets/img/backpack.png'),
+            img: {
+                tools: require('../assets/img/tools.png'),
+                ward: require('../assets/img/ward-1.png'),
+                gold: require('../assets/img/coin.png'),
+                potion: require('../assets/img/potion.png'),
+                sword: require('../assets/img/woodSword.png'),
+                discover: require('../assets/img/discover.png'),
+            }
         }
     },
     mounted() {
@@ -53,6 +74,16 @@ export default {
         });
     },
     methods: {
+        onItemClick() {
+            const HL = window.HL;
+
+            if (HL.selectedTarget !== null) {
+                HL.selectedTarget.use(HL.selectedItem);
+            }
+            else {
+                HL.user.use(HL.selectedItem);
+            }
+        },
         toggleInventoryOpen() {
             return this.isOpen = !this.isOpen;
         }
@@ -62,16 +93,33 @@ export default {
 
 <style scoped>
     .btn-toggle {
-        bottom: 10px;
-        right: 0;
         background-size: contain;
         box-shadow: rgba(0, 0, 0, 0.3) 0 1px 4px -1px;
+        right: 5px;
+        bottom: 80px;
     }
 
-    .panel {
+    .panel-inventory {
         position: absolute;
-        right: calc(40px + 20px);
+        right: calc(40px + 25px);
+        bottom: 70px;
+    }
+
+    .panel-equiped {
+        position: absolute;
+        right: 0;
         bottom: 0;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+    }
+
+    .panel-equiped ul,
+    .panel-equiped ul li,
+    .panel-equiped ul li .btn {
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
     }
 
 </style>

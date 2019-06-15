@@ -1,21 +1,17 @@
 <template>
-    <div
-        class="panel panel-default">
-        <ul>
-            <li :key="item.key" v-for="item in items">
-                <button
-                v-bind:class="`btn btn-image btn-${item.slug} ${(active !== null && active.slug === item.slug) ? 'active' : ''}`"
-                v-bind:style="`background-image: url(${img[item.slug]});`"
-                v-on:click="onItemClick(item)">
-                    <small>{{ item.amount }}</small>
-                </button>
-            </li>
-        </ul>
-    </div>
+    <ul>
+        <li :key="item.key" v-for="item in items">
+            <button
+            v-bind:class="`btn btn-image btn-${item.slug} ${(active !== null && active.slug === item.slug) ? 'active' : ''}`"
+            v-bind:style="`background-image: url(${img[item.slug]});`"
+            v-on:click="onItemClick(item)">
+                <small>{{ item.amount }}</small>
+            </button>
+        </li>
+    </ul>
 </template>
 <script>
 import firebase from 'firebase/app';
-import Item from '../models/Item';
 import EventService from '../services/EventService';
 
 export default {
@@ -36,6 +32,9 @@ export default {
         }
     },
     mounted() {
+        const HL = window.HL;
+
+        this.active = HL.selectedItem;
         this.ea.listen('selected.click', this.onSelectedClick)
     },
     methods: {
@@ -43,12 +42,15 @@ export default {
             const HL = window.HL;
             const item = data.detail;
 
-            // TODO check if this is actually true when null is casted to the event
-            if (item.slug !== null) {
-                this.active = HL.selectedItem = new Item(item.id, item);
+            if (this.active && item.slug === this.active.slug) {
+                this.$parent.item = this.active = HL.selectedItem = null;
+            }
+            else if (item.slug !== null) {
+                this.$parent.item = this.active = HL.selectedItem = item;
+
             }
             else {
-                this.active = null;
+                this.$parent.item = this.active = null;
             }
 
         },
@@ -68,33 +70,3 @@ export default {
     }
 }
 </script>
-<style scoped>
-    .panel {
-        border-radius: 2px;
-        margin: auto;
-        display: block;
-        background: rgba(0,0,0,0.4);
-        box-shadow: rgba(0, 0, 0, 0.3) 0 1px 4px -1px;
-        padding: 5px;
-    }
-
-    .panel ul {
-        margin: 0;
-        list-style: none;
-        padding: 0;
-        display: flex;
-        min-width: 50px;
-        min-height: 50px;
-    }
-
-    .panel li {
-        margin: 5px;
-        border-radius: 2px;
-        width: 40px;
-        height: 40px;
-        background-color: rgba(0,0,0,0.5);
-        display: inline-block;
-        flex: 0 40px;
-    }
-
-</style>

@@ -5,6 +5,7 @@ import firebase from 'firebase/app';
 import MarkerService from './services/MarkerService';
 import SpawnService from './services/SpawnService';
 import EventService from './services/EventService';
+import Item from './models/Item';
 
 export default class HiddenLayer {
     constructor() {
@@ -187,7 +188,7 @@ export default class HiddenLayer {
     }
 
     handleObjectClick(e, object) {
-        // Select parent of parent which contains the userData
+        const HL = window.HL;
         const target = object.parent.parent;
         const id = target.userData.id;
 
@@ -201,17 +202,10 @@ export default class HiddenLayer {
             this.selectTarget(id);
             this.selectedTarget = HL.markers[id];
 
-            this.selectItem(null);
-            this.selectedItem = null;
-
             HL.markers[id].onClick();
         }
         else if (HL.markers[id].amount > 0) {
-            this.selectTarget(null);
-            this.selectedTarget = null;
-
-            this.selectItem(null);
-            this.selectedItem = null;
+            this.reset();
 
             HL.markers[id].onClick();
         }
@@ -219,17 +213,22 @@ export default class HiddenLayer {
         console.log('Object click at ', object);
     }
 
+    reset() {
+        this.selectTarget(null);
+        this.selectedTarget = null;
+
+        this.selectItem(null);
+        this.selectedItem = null;
+    }
+
     handleMapClick(e) {
         if (this.selectedItem !== null) {
+            this.selectedItem = new Item(this.selectedItem.id, this.selectedItem);
             this.selectedItem.drop(e);
         }
-        else {
-            this.selectTarget(null);
-            this.selectedTarget = null;
 
-            this.selectItem(null);
-            this.selectedItem = null;
-        }
+        this.reset();
+
         console.log('Map click at', e);
     }
 

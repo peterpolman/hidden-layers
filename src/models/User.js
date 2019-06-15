@@ -39,6 +39,11 @@ export default class User extends DamagableCharacter {
         console.log('Start watching hashes!', this.id)
     }
 
+    die() {
+        alert('You are lucky to be alive!');
+        this.heal(100);
+    }
+
     onClick() {
         console.log(`Hi ${this.name}!`);
     }

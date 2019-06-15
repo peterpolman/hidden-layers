@@ -133,7 +133,7 @@ body {
 }
 
 *:focus {
-    outline: #fdc539 auto 5px !important;
+    outline: none;
 }
 
 h1 {
@@ -178,8 +178,8 @@ h2 {
 
 .ui-inventory {
     position: fixed;
-    right: .5rem;
-    bottom: 4.5rem;
+    right: 10px;
+    bottom: 10px;
 }
 
 .ui-target {
@@ -217,7 +217,8 @@ h2 {
     border: 0;
 }
 
-.btn-image.active {
+.btn-image.active,
+.btn-image:active {
     background-color: #fdc539;
 }
 
@@ -234,8 +235,31 @@ h2 {
     border-bottom-right-radius: 2px;
 }
 
-.row {
+.panel {
+    border-radius: 2px;
+    margin: auto;
+    display: flex;
+    background: rgba(0,0,0,0.4);
+    box-shadow: rgba(0, 0, 0, 0.3) 0 1px 4px -1px;
+    padding: 5px;
+}
 
+.panel ul {
+    margin: 0;
+    list-style: none;
+    padding: 0;
+    min-width: 50px;
+    min-height: 50px;
+}
+
+.panel li {
+    margin: 5px;
+    border-radius: 2px;
+    width: 40px;
+    height: 40px;
+    background-color: rgba(0,0,0,0.5);
+    display: block;
+    flex: 0 40px;
 }
 
 .flex {
