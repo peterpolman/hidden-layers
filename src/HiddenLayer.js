@@ -9,6 +9,8 @@ import Fog from './Fog';
 
 export default class HiddenLayer {
     constructor() {
+        const MAP = window.MAP;
+
         this.uid = firebase.auth().currentUser.uid;
 
         this.markerService = new MarkerService();
@@ -54,6 +56,7 @@ export default class HiddenLayer {
 
                 MAP.on('click', (e) => this.onClick(e));
             }.bind(this),
+            // eslint-disable-next-line
             render: function(gl, matrix){
                 this.tb.update();
             }.bind(this)

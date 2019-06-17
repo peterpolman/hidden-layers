@@ -1,4 +1,5 @@
 const jsts = require('jsts');
+const THREE = window.THREE;
 
 export default class Fog {
     constructor(tb, ne, sw, x) {

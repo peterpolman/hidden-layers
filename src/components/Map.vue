@@ -3,6 +3,8 @@
 </template>
 
 <script>
+const mapboxgl = window.mapboxgl;
+
 import config from '../config.js';
 import GeoService from '../services/GeoService';
 

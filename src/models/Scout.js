@@ -95,7 +95,7 @@ export default class Scout extends DamagableCharacter {
         this.indicator.position.z = -0.05;
     }
 
-    onClick() {
+    setIndicator() {
         const lngLat = [this.position.lng, this.position.lat];
         let geometry = new THREE.CylinderGeometry( 3, 3, .03, 16 );
         let material = new THREE.MeshLambertMaterial({color: 0x0000FF, transparent: true, opacity: 0.25, side: THREE.DoubleSide});
@@ -109,8 +109,27 @@ export default class Scout extends DamagableCharacter {
 
         this.tb.add(this.indicator);
         this.tb.repaint();
+    }
 
-        console.log('Selected scout', this.name);
+    die() {
+        alert('Your scout is lucky to be alive!');
+        this.heal(100);
+    }
+
+    onClick() {
+        const HL = window.HL;
+
+        if (this.uid == firebase.auth().currentUser.uid) {
+            this.setIndicator();
+        }
+
+        if (HL.selectedItem !== null) {
+            this.use(HL.selectedItem);
+        }
+        else {
+            console.log('Selected scout', this.name);
+        }
+
     }
 
 }

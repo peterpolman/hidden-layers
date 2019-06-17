@@ -1,3 +1,5 @@
+const mapboxgl = window.mapboxgl;
+
 export default class BaseCharacter {
     constructor(id, data) {
         const HL = window.HL;
@@ -72,7 +74,11 @@ export default class BaseCharacter {
         this.marker.setLngLat(lngLat)
         this.mesh.setCoords(lngLat);
 
-        HL.fog.updateFog(HL.markerService.positions);
+        var positions = []
+        positions[HL.user.id] = HL.user.position;
+        positions[this.id] = this.position;
+
+        HL.fog.updateFog(positions);
     }
 
     setInfo(hit = null, isDamage = null) {
