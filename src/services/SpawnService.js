@@ -63,7 +63,7 @@ export default class SpawnService {
                     hitPoints: 300,
                     position: position,
                     race: race,
-                    level: 3,
+                    level: level,
                 }
 
                 // Set in npc database
