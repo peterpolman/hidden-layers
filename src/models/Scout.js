@@ -112,7 +112,7 @@ export default class Scout extends DamagableCharacter {
     }
 
     die() {
-        alert('Your scout is lucky to be alive!');
+        alert(`${this.name} is lucky to be alive!`);
         this.heal(100);
     }
 
@@ -126,10 +126,6 @@ export default class Scout extends DamagableCharacter {
         if (HL.selectedItem !== null) {
             this.use(HL.selectedItem);
         }
-        else {
-            console.log('Selected scout', this.name);
-        }
-
     }
 
 }

@@ -36,9 +36,11 @@ export default {
             bearing: 45,
             antialias: false,
             doubleClickZoom: false,
-            pitchWithRotate: false,
+            pitchWithRotate: true,
             touchZoomRotate: false,
             scrollZoom: false,
+            boxZoom: false,
+            dragRotate: true,
         });
 
         geoService.getPosition().then((p) => {

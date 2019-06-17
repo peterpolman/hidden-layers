@@ -39,7 +39,7 @@ export default class User extends DamagableCharacter {
     }
 
     die() {
-        alert('You are lucky to be alive!');
+        alert(`${this.name} is lucky to be alive!`);
         this.heal(100);
     }
 
