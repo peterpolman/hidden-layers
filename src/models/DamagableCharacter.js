@@ -82,6 +82,8 @@ export default class DamagableCharacter extends BaseCharacter {
         const amountXP = Math.floor(Math.random() * 10) + 20;
         const amountGold = Math.floor(Math.random() * 20) + 1;
 
+        this.stopDefending();
+
         HL.selectItem(null);
         HL.selectedItem = null;
 

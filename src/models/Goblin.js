@@ -64,16 +64,20 @@ export default class Goblin extends DamagableCharacter {
 
     fight() {
         const HL = window.HL;
-        const damage = Math.floor(Math.random() * 10) + (this.level * 2);
+        const damage = Math.floor(Math.random() * 10) + (this.level * 1);
 
         HL.user.hit(damage)
     }
 
     defend() {
-        window.clearInterval(this.timer);
         if (this.defendTimer === null) {
-            this.defendTimer = window.setInterval(this.fight, 1000)
+            this.defendTimer = window.setInterval(this.fight.bind(this), 1000)
         }
+    }
+
+    stopDefending(){
+        window.clearInterval(this.defendTimer);
+        this.defendTimer = null;
     }
 
     onClick() {
@@ -81,6 +85,7 @@ export default class Goblin extends DamagableCharacter {
 
         if (HL.selectedItem !== null) {
             this.use(HL.selectedItem);
+            this.defend();
         }
         else {
             console.info(`Goblin: ${this.greetings[Math.floor(Math.random() * this.greetings.length)]}`);

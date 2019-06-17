@@ -65,7 +65,7 @@ export default class HiddenLayer {
                         const p = this.markers[id].mesh.position;
                         const dUser = this.distanceVector(u, p);
                         const dScout = this.distanceVector(s, p);
-                        const visible = (dUser < 2 || dScout < 1)
+                        const visible = (dUser < 2 || dScout < 1.5)
 
                         this.markers[id].hide(visible);
                     }
