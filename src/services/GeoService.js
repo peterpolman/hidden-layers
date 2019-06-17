@@ -9,7 +9,7 @@ export default class GeoService {
             maximumAge: 1000,
             timeout: 30000
         };
-        this.watchter = null;
+        this.watcher = null;
     }
 
     stopWatching() {
@@ -47,14 +47,14 @@ export default class GeoService {
             firebase.database().ref('markers').child(oldHash).child(uid).remove();
             firebase.database().ref('markers').child(hash).child(uid).update({
                 position: position,
-                ref: `users2/${uid}`
+                ref: `users/${uid}`
             });
 
             HL.user.hashes = HL.markerService.getUniqueHashes(HL.user.id, position);
         }
 
         // Set the new record
-        firebase.database().ref(`users2/${uid}`).update({
+        firebase.database().ref(`users/${uid}`).update({
             position: position,
             hashes: HL.user.hashes,
         });

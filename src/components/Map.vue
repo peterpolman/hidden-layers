@@ -18,9 +18,9 @@ export default {
         mapboxgl.accessToken = config.mapbox.key
 
         // HACK For cleanup purposes
-        // if (typeof window.MAP != 'undefined') {
-        //     location.reload(true);
-        // }
+        if (typeof window.MAP != 'undefined') {
+            location.reload(true);
+        }
 
         const MAP = window.MAP = new mapboxgl.Map({
             container: 'map',

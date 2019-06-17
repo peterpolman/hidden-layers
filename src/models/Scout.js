@@ -15,8 +15,8 @@ export default class Scout extends DamagableCharacter {
         this.indicator = null;
         this.race = 'wolf';
         this.class = 'wolf';
-        this.ref = firebase.database().ref('scouts2').child(id);
-        this.userRef = firebase.database().ref('users2').child(data.uid);
+        this.ref = firebase.database().ref('scouts').child(id);
+        this.userRef = firebase.database().ref('users').child(data.uid);
         this.markersRef = firebase.database().ref('markers');
 
         this.setInfo();
@@ -63,7 +63,7 @@ export default class Scout extends DamagableCharacter {
                     this.markersRef.child(oldHash).child(this.id).remove();
                     this.markersRef.child(hash).child(this.id).update({
                         position: position,
-                        ref: `scouts2/${this.id}`
+                        ref: `scouts/${this.id}`
                     });
 
                     // Retrieve new hash set and update the user hashes

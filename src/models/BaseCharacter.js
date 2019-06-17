@@ -10,7 +10,7 @@ export default class BaseCharacter {
         this.hashes = data.hashes;
         this.xpMarkup = '';
 
-        this.loadAtPosition(id, (data.userClass ? data.userClass :  'scout'), data.position);
+        this.loadAtPosition(id, ((data.race === 'human') ? data.class : data.race), data.position);
     }
 
     // Watch user properties for change and remove events

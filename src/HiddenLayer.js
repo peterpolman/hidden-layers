@@ -196,6 +196,7 @@ export default class HiddenLayer {
             this.user.onClick();
         }
         else if (this.scout.id === id) {
+            this.selectedTarget = this.scout;
             this.scout.onClick();
         }
         else if (typeof HL.markers[id].amount == 'undefined') {
@@ -225,6 +226,10 @@ export default class HiddenLayer {
         if (this.selectedItem !== null) {
             this.selectedItem = new Item(this.selectedItem.id, this.selectedItem);
             this.selectedItem.drop(e);
+        }
+
+        if (this.selectedTarget && this.selectedTarget.id == this.scout.id) {
+            this.selectedTarget.onMapClickWhenSelected(e);
         }
 
         this.reset();

@@ -42,13 +42,12 @@ export default {
             user: null,
             scout: null,
             items: null,
-            spawnSerice: null,
         }
     },
     mounted() {
         const MAP = window.MAP;
-        const usersRef = firebase.database().ref('users2');
-        const scoutsRef = firebase.database().ref('scouts2');
+        const usersRef = firebase.database().ref('users');
+        const scoutsRef = firebase.database().ref('scouts');
         const uid = firebase.auth().currentUser.uid;
 
         MAP.on('load', () => {

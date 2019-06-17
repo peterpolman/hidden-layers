@@ -45,12 +45,14 @@
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import GeoService from './services/GeoService';
+import MarkerService from './services/MarkerService';
+const Geohash = require('latlon-geohash');
 
 export default {
     name: 'register',
     data: function() {
         return {
-            disabled: true,
+            disabled: false,
             email: '',
             password: '',
             passwordVerify: '',
@@ -77,32 +79,68 @@ export default {
             }
         },
         createAccount(position) {
-            this.loading = false;
-            return (this.disabled) ? alert("Account creation is temporarily disabled. Send an e-mail to peter@peterpolman.nl to apply for the waiting list.") : firebase.auth().createUserWithEmailAndPassword(this.email, this.password)
-                .then((r) => {
-                    const user = {
-                        uid: r.user.uid,
-                        email: r.user.email,
-                        hitPoints: 100,
-                        exp: 0,
-                        race: this.userRace,
-                        class: this.userClass,
-                        name: this.userName,
-                        position: {
+            if (this.disabled) {
+                alert("Account creation is temporarily disabled. Send an e-mail to peter@peterpolman.nl to apply for the waiting list.");
+            }
+            else {
+                firebase.auth().createUserWithEmailAndPassword(this.email, this.password)
+                    .then((r) => {
+                        const scout = {
+                            id: firebase.database().ref('scouts').push().key,
+                            uid: r.user.uid,
+                            hitPoints: 100,
+                            name: `${this.userName}'s scout`,
+                            race: 'wolf',
+                            position: {
+                                lat: position.latitude + 0.00001,
+                                lng: position.longitude + 0.00001,
+                            },
+                        }
+                        const markerService = new MarkerService();
+                        const hashes = markerService.getUniqueHashes(r.user.id, {
                             lat: position.latitude,
                             lng: position.longitude
-                        },
-                    }
-                    firebase.database().ref('users2').child(user.uid).set(user);
-                    this.loading = false;
-                    this.$router.replace('/')
-                })
-                .catch((err) => {
-                    if (typeof err != 'undefined') {
-                        alert("Error during account registration.")
-                    }
-                    this.loading = false;
-                })
+                        });
+                        const user = {
+                            hashes: hashes,
+                            scout: scout.id,
+                            uid: r.user.uid,
+                            email: r.user.email,
+                            hitPoints: 100,
+                            exp: 0,
+                            race: this.userRace,
+                            class: this.userClass,
+                            name: this.userName,
+                            position: {
+                                lat: position.latitude,
+                                lng: position.longitude
+                            },
+                        }
+                        const hash = Geohash.encode(user.position.lat, user.position.lng, 7);
+
+                        firebase.database().ref('users').child(user.uid).set(user);
+                        firebase.database().ref('scouts').child(scout.id).set(scout);
+                        firebase.database().ref('markers').child(hash).child(user.uid).set({
+                            position: user.position,
+                            race: 'human',
+                            ref: `users/${user.uid}`
+                        });
+                        firebase.database().ref('markers').child(hash).child(scout.id).set({
+                            position: scout.position,
+                            race: 'wolf',
+                            ref: `scouts/${scout.id}`
+                        });
+
+                        this.loading = false;
+                        this.$router.replace('/');
+                    })
+                    .catch((err) => {
+                        if (typeof err != 'undefined') {
+                            alert("Error during account registration.")
+                        }
+                        this.loading = false;
+                    })
+            }
         }
     }
 }

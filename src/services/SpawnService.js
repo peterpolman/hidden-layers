@@ -62,7 +62,6 @@ export default class SpawnService {
                     id: this.npcRef.push().key,
                     hitPoints: 100,
                     position: position,
-                    userClass: race,
                     race: race,
                 }
 

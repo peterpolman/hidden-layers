@@ -5,13 +5,12 @@ export default class User extends DamagableCharacter {
     constructor (id, data) {
         super(id, data);
 
-        this.ref = firebase.database().ref('users2').child(id);
+        this.ref = firebase.database().ref('users').child(id);
         this.slug = 'user';
-        this.xp = data.exp;
-        this.name = data.username;
-        this.class = data.userClass;
-        this.avatar = data.userClass;
-        this.stats = data.stats;
+        this.xp = data.experiencePoints;
+        this.name = data.name;
+        this.class = data.class;
+        this.avatar = data.class;
         this.scout = data.scout;
         this.marker = null;
 
