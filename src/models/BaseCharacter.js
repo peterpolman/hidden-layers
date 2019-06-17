@@ -27,6 +27,9 @@ export default class BaseCharacter {
                 case 'hitPoints':
                     this.setHitPoints(snap.val());
                     break;
+                case 'experiencePoints':
+                    this.setExperiencePoints(snap.val());
+                    break;
                 default:
                     console.error("No handler available", snap.key, snap.val());
             }
@@ -76,7 +79,7 @@ export default class BaseCharacter {
 
         var positions = []
         positions[HL.user.id] = HL.user.position;
-        positions[this.id] = this.position;
+        positions[HL.scout.id] = HL.scout.position;
 
         HL.fog.updateFog(positions);
     }

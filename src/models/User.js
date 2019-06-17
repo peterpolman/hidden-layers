@@ -13,6 +13,7 @@ export default class User extends DamagableCharacter {
         this.avatar = data.class;
         this.scout = data.scout;
         this.marker = null;
+        this.level = data.level;
 
         this.setInfo();
 
@@ -21,8 +22,22 @@ export default class User extends DamagableCharacter {
         }
     }
 
+    updateExperience(amount) {
+        const HL = window.HL;
+        const xp = HL.user.xp + amount;
+
+        // Check for level up
+
+        // Gain xp for killing
+        HL.user.ref.child('experiencePoints').set(xp)
+    }
+
+    setExperiencePoints(xp) {
+        this.xp = xp;
+    }
+
     getXpMarkup() {
-        return `<div class="character-level">${this.xp}</div>`
+        return `<div class="character-level">${this.level}</div>`
     }
 
     discover() {

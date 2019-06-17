@@ -117,7 +117,7 @@ export default class HiddenLayer {
         else if (HL.markers[id].amount > 0) {
             this.reset();
 
-            HL.markers[id].onClick();
+            HL.markers[id].pickup();
         }
 
         console.log('Object click at ', object);
@@ -134,7 +134,8 @@ export default class HiddenLayer {
     handleMapClick(e) {
         if (this.selectedItem !== null) {
             this.selectedItem = new Item(this.selectedItem.id, this.selectedItem);
-            this.selectedItem.drop(e);
+            this.selectedItem.drop(e.lngLat);
+            this.selectedItem.removeFromInventory();
         }
 
         if (this.selectedTarget && this.selectedTarget.id == this.scout.id) {

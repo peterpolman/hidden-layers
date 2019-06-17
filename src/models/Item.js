@@ -73,27 +73,27 @@ export default class Item {
         });
     }
 
-    drop(e) {
-        const HL = window.HL;
-        const item = HL.selectedItem;
-        const hash = Geohash.encode(e.lngLat.lat, e.lngLat.lng, 7);
+    drop(position) {
+        const hash = Geohash.encode(position.lat, position.lng, 7);
 
         // Set the item in the loot database
         this.lootRef.update({
-            id: item.id,
-            slug: item.slug,
-            name: item.name,
-            amount: item.amount,
-            position: e.lngLat
+            id: this.id,
+            slug: this.slug,
+            name: this.name,
+            amount: this.amount,
+            position: position
         });
 
-        this.markersRef.child(hash).child(item.id).set({
-            position: e.lngLat,
-            ref: `loot/${item.id}`,
+        this.markersRef.child(hash).child(this.id).set({
+            position: position,
+            ref: `loot/${this.id}`,
         });
+    }
 
+    removeFromInventory() {
         // Remove the item from the inventory of the owner
-        this.itemsRef.child(item.slug).remove();
+        this.itemsRef.child(this.slug).remove();
     }
 
     // Set the position of the objects in the world scene
@@ -115,7 +115,7 @@ export default class Item {
         console.log(`Removed: ${this.id}`)
     }
 
-    onClick() {
+    pickup() {
         const hash = Geohash.encode(this.position.lat, this.position.lng, 7);
 
         this.itemsRef.child(this.slug).once('value').then((snap) => {

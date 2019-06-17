@@ -95,30 +95,32 @@ export default {
 
 <style scoped>
     .btn-toggle {
+        position: absolute;
         background-size: contain;
         box-shadow: rgba(0, 0, 0, 0.3) 0 1px 4px -1px;
-        right: 7px;
-        bottom: 90px;
+        right: 2px;
+        bottom: 75px;
     }
 
     .panel-inventory {
         position: absolute;
         right: calc(40px + 25px);
-        bottom: 80px;
+        bottom: 65px;
     }
 
     .panel-equiped {
-        position: absolute;
+        position: relative;
         right: 0;
         bottom: 0;
         border-radius: 50%;
-        width: 60px;
-        height: 60px;
+        width: 50px;
+        height: 50px;
     }
 
     .panel-equiped ul,
     .panel-equiped ul li,
     .panel-equiped ul li .btn {
+        margin: 0;
         border-radius: 50%;
         width: 50px;
         height: 50px;

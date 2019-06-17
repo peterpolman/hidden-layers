@@ -36,7 +36,7 @@ export default {
             bearing: 45,
             antialias: false,
             doubleClickZoom: false,
-            pitchWithRotate: true,
+            pitchWithRotate: false,
             touchZoomRotate: false,
             scrollZoom: false,
             boxZoom: false,

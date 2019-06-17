@@ -4,6 +4,7 @@ export default class DamagableCharacter extends BaseCharacter {
     constructor (id, data) {
         super(id, data);
 
+        this.attacker = data.attacker;
         this.hitPoints = (data.hitPoints < 0) ? 0 : data.hitPoints;
     }
 
@@ -70,6 +71,8 @@ export default class DamagableCharacter extends BaseCharacter {
     die () {
         const HL = window.HL;
         const id = this.id;
+        const amountXP = Math.floor(Math.random() * 10);
+        const amountGold = Math.floor(Math.random() * 20) + 1;
 
         HL.selectItem(null);
         HL.selectedItem = null;
@@ -79,5 +82,12 @@ export default class DamagableCharacter extends BaseCharacter {
 
         HL.markerService.removeMarker(id)
         this.ref.remove();
+
+        HL.user.updateExperience(amountXP);
+
+        // Drop loot if applicable
+        if (this.dropLoot) {
+            this.dropLoot(amountGold);
+        }
     }
 }

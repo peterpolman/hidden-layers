@@ -1,6 +1,7 @@
 import DamagableCharacter from './DamagableCharacter';
 
 import firebase from 'firebase/app';
+import Item from './Item';
 
 export default class Goblin extends DamagableCharacter {
     constructor(id, data) {
@@ -47,15 +48,26 @@ export default class Goblin extends DamagableCharacter {
         ]
     }
 
+    dropLoot(amount) {
+        const gold = {
+            id: firebase.database().ref('loot').push().key,
+            slug: 'gold',
+            name: 'Gold',
+            amount: amount,
+            position: this.position,
+        }
+        const item = new Item(gold.id, gold);
+        item.drop(this.position);
+    }
+
     onClick() {
         const HL = window.HL;
-        const message = `Goblin: ${this.greetings[Math.floor(Math.random() * this.greetings.length)]}`;
 
         if (HL.selectedItem !== null) {
             this.use(HL.selectedItem);
         }
         else {
-            console.log(message);
+            console.log(`Goblin: ${this.greetings[Math.floor(Math.random() * this.greetings.length)]}`);
         }
     }
 }

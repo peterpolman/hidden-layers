@@ -3,7 +3,7 @@
         <div class="character-wrapper">
             <div class="character-picture" v-on:click="locate(user.position)">
                 <img v-bind:src="img[user.class]" alt="" />
-                <small>{{user.xp}}</small>
+                <small>{{user.level}}</small>
             </div>
             <div class="character-info">
                 <strong class="character-name">{{user.name}}</strong><br>
@@ -18,7 +18,7 @@
         <div class="character-wrapper">
             <div class="character-picture character-picture-s" v-on:click="locate(scout.position)">
                 <img v-bind:src="img['wolf']" alt="" />
-                <small>{{user.xp}}</small>
+                <small>{{user.level}}</small>
             </div>
         </div>
     </div>

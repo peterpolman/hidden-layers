@@ -46,7 +46,8 @@ export default class MarkerService {
                     race: snap.val()[id].race,
                     class: snap.val()[id].class,
                     name: snap.val()[id].name,
-                    position: snap.val()[id].position
+                    position: snap.val()[id].position,
+                    level: 1
                 })
             }
         });
