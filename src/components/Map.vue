@@ -36,14 +36,15 @@ export default {
             bearing: 45,
             antialias: false,
             doubleClickZoom: false,
-            pitchWithRotate: false
+            pitchWithRotate: false,
+            touchZoomRotate: false,
+            scrollZoom: false,
         });
 
         geoService.getPosition().then((p) => {
             MAP.setCenter([p.longitude, p.latitude]);
         });
 
-        MAP.scrollZoom.disable();
         MAP.on('click', 'water', function (e) {
             new mapboxgl.Popup()
                 .setLngLat(e.lngLat)
