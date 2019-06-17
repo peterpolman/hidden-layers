@@ -7,6 +7,7 @@ export default class BaseCharacter {
         this.tb = HL.tb;
         this.world = HL.tb.world;
         this.position = data.position;
+        this.level = data.level;
         this.hashes = data.hashes;
         this.xpMarkup = '';
 
@@ -29,6 +30,9 @@ export default class BaseCharacter {
                     break;
                 case 'experiencePoints':
                     this.setExperiencePoints(snap.val());
+                    break;
+                case 'level':
+                    this.setLevel(snap.val());
                     break;
                 default:
                     console.error("No handler available", snap.key, snap.val());

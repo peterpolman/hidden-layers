@@ -10,6 +10,7 @@ export default class Goblin extends DamagableCharacter {
         this.name = 'Goblin';
         this.race = 'goblin';
         this.class = 'goblin';
+        this.level = data.level;
         this.ref = firebase.database().ref('npc').child(id);
         this.marker = null;
         this.greetings = [
@@ -67,7 +68,7 @@ export default class Goblin extends DamagableCharacter {
             this.use(HL.selectedItem);
         }
         else {
-            console.log(`Goblin: ${this.greetings[Math.floor(Math.random() * this.greetings.length)]}`);
+            console.info(`Goblin: ${this.greetings[Math.floor(Math.random() * this.greetings.length)]}`);
         }
     }
 }

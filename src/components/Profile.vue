@@ -8,10 +8,10 @@
             <div class="character-info">
                 <strong class="character-name">{{user.name}}</strong><br>
                 <div class="bar-wrapper character-hp">
-                    <div class="bar bar-l" v-bind:style="`background-color: ${(user.hitPoints > 50 ) ? '#8CC63E' : (user.hitPoints > 25) ? '#FFBB33' : '#ED1C24'}; width: ${user.hitPoints}%;`"></div>
+                    <div class="bar bar-l" v-bind:style="`background-color: ${((user.hitPoints / (user.level*100) * 100) > 50 ) ? '#8CC63E' : ((user.hitPoints / (user.level*100) * 100) > 25) ? '#FFBB33' : '#ED1C24'}; width: ${(user.hitPoints / (user.level*100) * 100)}%;`"></div>
                 </div>
                 <div class="bar-wrapper character-xp">
-                    <div class="bar bar-l" v-bind:style="`background-color: #FFD700; width: ${user.xp}%;`"></div>
+                    <div class="bar bar-l" v-bind:style="`background-color: #FFD700; width: ${(user.xp / (user.level*100) * 100)}%;`"></div>
                 </div>
             </div>
         </div>

@@ -24,12 +24,26 @@ export default class User extends DamagableCharacter {
 
     updateExperience(amount) {
         const HL = window.HL;
-        const xp = HL.user.xp + amount;
+        const newXP = HL.user.xp + amount;
+        const maxXP = this.level*100;
 
-        // Check for level up
+        // Check for level up and gain xp for killing
+        if (newXP >= maxXP) {
+            const diff = maxXP - newXP;
+            HL.user.ref.child('experiencePoints').set(diff)
+            HL.user.ref.child('level').set(this.level + 1)
 
-        // Gain xp for killing
-        HL.user.ref.child('experiencePoints').set(xp)
+            HL.user.getXpMarkup();
+            HL.user.setInfo();
+        }
+        else {
+            HL.user.ref.child('experiencePoints').set(newXP)
+        }
+
+    }
+
+    setLevel(level) {
+        this.level = level;
     }
 
     setExperiencePoints(xp) {

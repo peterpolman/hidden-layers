@@ -4,39 +4,47 @@ export default class DamagableCharacter extends BaseCharacter {
     constructor (id, data) {
         super(id, data);
 
-        this.attacker = data.attacker;
         this.hitPoints = (data.hitPoints < 0) ? 0 : data.hitPoints;
     }
 
     getHitPointsMarkup() {
-        const color = (this.hitPoints > 50 ) ? '#8CC63E' : (this.hitPoints > 25) ? '#FFBB33' : '#ED1C24';
+        const color = ((this.hitPoints / (this.level*100) * 100) > 50 )
+            ? '#8CC63E'
+            : ((this.hitPoints / (this.level*100) * 100) > 25)
+                ? '#FFBB33'
+                : '#ED1C24';
+
         return (this.hitPoints > 0)
             ? `
             <div class="bar-wrapper character-hp">
-                <div class="bar" style="background-color: ${color}; width: ${this.hitPoints}%;"></div>
+                <div class="bar" style="background-color: ${color}; width: ${(this.hitPoints / (this.level*100) * 100)}%;"></div>
             </div>`
             : '';
     }
 
     setHitPoints(hitPoints) {
         this.hitPoints = hitPoints;
+        this.getHitPointsMarkup();
+        this.setInfo();
     }
 
     hit(damage) {
         // Check if goblin should die
         if ((this.hitPoints - damage) > 0) {
             this.ref.update({ hitPoints: this.hitPoints - damage });
+            this.getHitPointsMarkup();
             this.setInfo(damage, true);
         }
         else {
             this.ref.update({ hitPoints: 0 });
+            this.getHitPointsMarkup();
             this.setInfo(damage, true);
             this.die();
         }
     }
 
     heal(heal) {
-        const hitPointsMax = 100;
+        const hitPointsMax = (this.level*100);
         const fullyHealed = (this.hitPoints + heal > hitPointsMax);
         const hitPoints = (!fullyHealed) ? this.hitPoints + heal : hitPointsMax;
 
@@ -49,7 +57,7 @@ export default class DamagableCharacter extends BaseCharacter {
 
         switch(item.slug) {
             case 'sword':
-                damage = Math.floor(Math.random() * 10);
+                damage = Math.floor(Math.random() * 10) * this.level;
                 this.hit(damage)
 
                 console.log(`${damage} damage. ${this.hitPoints} left. AUTSCH!!`);
@@ -71,7 +79,7 @@ export default class DamagableCharacter extends BaseCharacter {
     die () {
         const HL = window.HL;
         const id = this.id;
-        const amountXP = Math.floor(Math.random() * 10);
+        const amountXP = Math.floor(Math.random() * 10) + 20;
         const amountGold = Math.floor(Math.random() * 20) + 1;
 
         HL.selectItem(null);

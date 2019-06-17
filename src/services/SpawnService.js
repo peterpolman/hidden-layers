@@ -26,7 +26,7 @@ export default class SpawnService {
                 const bounds = Geohash.bounds(hash);
                 const position = this.randomPosition(bounds);
 
-                this.spawnNpc(hash, position, 'goblin')
+                this.spawnNpc(hash, position, 'goblin', 3)
             }
         }
     }
@@ -43,7 +43,7 @@ export default class SpawnService {
         };
     }
 
-    spawnNpc(hash, position, race) {
+    spawnNpc(hash, position, race, level) {
         // Check how many enemies for this Geohash
         // Set in markers database
         this.markersRef.child(hash).once('value').then(snap => {
@@ -60,9 +60,10 @@ export default class SpawnService {
             if (counter < 2) {
                 const goblin = {
                     id: this.npcRef.push().key,
-                    hitPoints: 100,
+                    hitPoints: 300,
                     position: position,
                     race: race,
+                    level: 3,
                 }
 
                 // Set in npc database
