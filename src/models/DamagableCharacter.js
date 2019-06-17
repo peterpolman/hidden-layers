@@ -33,7 +33,7 @@ export default class DamagableCharacter extends BaseCharacter {
         if ((this.hitPoints - damage) > 0) {
             this.ref.update({ hitPoints: this.hitPoints - damage });
             this.getHitPointsMarkup();
-            this.setInfo(damage, true);
+            this.setInfo((damage > 0) ? damage : 'miss', true);
         }
         else {
             this.ref.update({ hitPoints: 0 });
@@ -57,7 +57,7 @@ export default class DamagableCharacter extends BaseCharacter {
 
         switch(item.slug) {
             case 'sword':
-                damage = Math.floor(Math.random() * 10) * this.level;
+                damage = Math.floor(Math.random() * 10) + (this.level * 2);
                 this.hit(damage)
 
                 console.log(`${damage} damage. ${this.hitPoints} left. AUTSCH!!`);

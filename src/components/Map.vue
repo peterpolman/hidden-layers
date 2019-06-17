@@ -32,7 +32,7 @@ export default {
             maxZoom: 21,
             minZoom: 16,
             center: [4.8437, 52.3669],
-            pitch: 85,
+            pitch: 75,
             bearing: 45,
             antialias: false,
             doubleClickZoom: false,

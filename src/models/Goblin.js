@@ -13,6 +13,7 @@ export default class Goblin extends DamagableCharacter {
         this.level = data.level;
         this.ref = firebase.database().ref('npc').child(id);
         this.marker = null;
+        this.defendTimer = null;
         this.greetings = [
             "I got what you need.",
             "Got the best deals anywheres.",
@@ -59,6 +60,20 @@ export default class Goblin extends DamagableCharacter {
         }
         const item = new Item(gold.id, gold);
         item.drop(this.position);
+    }
+
+    fight() {
+        const HL = window.HL;
+        const damage = Math.floor(Math.random() * 10) + (this.level * 2);
+
+        HL.user.hit(damage)
+    }
+
+    defend() {
+        window.clearInterval(this.timer);
+        if (this.defendTimer === null) {
+            this.defendTimer = window.setInterval(this.fight, 1000)
+        }
     }
 
     onClick() {

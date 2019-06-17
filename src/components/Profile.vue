@@ -18,7 +18,7 @@
         <div class="character-wrapper">
             <div class="character-picture character-picture-s" v-on:click="locate(scout.position)">
                 <img v-bind:src="img['wolf']" alt="" />
-                <small>{{user.level}}</small>
+                <small>{{scout.level}}</small>
             </div>
         </div>
     </div>

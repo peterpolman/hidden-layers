@@ -35,13 +35,15 @@ export default class Fog {
     }
 
     updateFog(positions) {
+        const HL = window.HL;
         let holes = [],
             visibility = [];
 
         // Loop through the positions that need discovery
         for (let id in positions) {
             let p = this.tb.utils.projectToWorld([positions[id].lng, positions[id].lat])
-            let hole = this.createHole(1, p);
+            let size = (HL.user.id === id) ? 2 : 1;
+            let hole = this.createHole(size, p);
             let jstsHole = this.jstsPoly(hole);
 
             holes.push(jstsHole);

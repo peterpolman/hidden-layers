@@ -58,11 +58,31 @@ export default class HiddenLayer {
             }.bind(this),
             // eslint-disable-next-line
             render: function(gl, matrix){
+                for (let id in this.markers) {
+                    if (this.markers[id].mesh !== null) {
+                        const u = this.user.mesh.position;
+                        const s = this.scout.mesh.position;
+                        const p = this.markers[id].mesh.position;
+                        const dUser = this.distanceVector(u, p);
+                        const dScout = this.distanceVector(s, p);
+                        const visible = (dUser < 2 || dScout < 1)
+
+                        this.markers[id].hide(visible);
+                    }
+                }
                 this.tb.update();
             }.bind(this)
         }
         // Add to layer array before buildings.
         MAP.addLayer(layer, layers[layers.length-1].id);
+    }
+
+    distanceVector( v1, v2 ) {
+        var dx = v1.x - v2.x;
+        var dy = v1.y - v2.y;
+        var dz = v1.z - v2.z;
+
+        return Math.sqrt( dx * dx + dy * dy + dz * dz );
     }
 
     onClick(e) {

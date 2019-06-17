@@ -10,8 +10,22 @@ export default class BaseCharacter {
         this.level = data.level;
         this.hashes = data.hashes;
         this.xpMarkup = '';
+        this.mesh = null;
 
         this.loadAtPosition(id, ((data.race === 'human') ? data.class : data.race), data.position);
+    }
+
+    hide(visible) {
+        this.mesh.visible = visible;
+
+        if (this.marker != null) {
+            if (visible) {
+                this.setInfo();
+            }
+            else {
+                this.marker.remove();
+            }
+        }
     }
 
     // Watch user properties for change and remove events
@@ -69,6 +83,7 @@ export default class BaseCharacter {
             this.watch();
 
             console.log('Object added to world: ', id, this.mesh)
+            console.log('Object is visible', id, this.mesh.visible)
         });
     }
 
@@ -150,7 +165,6 @@ export default class BaseCharacter {
 
         console.log(`Removed: ${this.id}`)
     }
-
 
     onClick() {
 

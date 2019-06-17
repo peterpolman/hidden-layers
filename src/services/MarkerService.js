@@ -24,7 +24,7 @@ export default class MarkerService {
     // TEMP: Should be removed when data is migrated.
     rebuildMarkerDatabase() {
         this.markersRef.remove();
-
+        firebase.database().ref(`scouts`).remove();
         firebase.database().ref(`users`).once('value').then(snap => {
             for (let id in snap.val()) {
                 let hash = Geohash.encode(snap.val()[id].position.lat, snap.val()[id].position.lng, 7);
@@ -36,47 +36,64 @@ export default class MarkerService {
 
                 firebase.database().ref(`users`).child(id).remove();
 
+                const scoutID = firebase.database().ref('scouts').push().key;
+
                 firebase.database().ref(`users`).child(id).set({
                     hashes: snap.val()[id].hashes,
-                    scout: snap.val()[id].scout,
                     uid: snap.val()[id].uid,
                     email: snap.val()[id].email,
-                    hitPoints: snap.val()[id].hitPoints,
-                    experiencePoints: snap.val()[id].experiencePoints,
                     race: snap.val()[id].race,
                     class: snap.val()[id].class,
                     name: snap.val()[id].name,
                     position: snap.val()[id].position,
-                    level: 1
+                    hitPoints: 100,
+                    scout: scoutID,
+                    experiencePoints: 0,
+                    level: 1,
                 })
-            }
-        });
 
-        firebase.database().ref(`scouts`).once('value').then(snap => {
-            for (let id in snap.val()) {
-                let hash = Geohash.encode(snap.val()[id].position.lat, snap.val()[id].position.lng, 7);
-                firebase.database().ref('markers').child(hash).child(id).set({
-                    position: snap.val()[id].position,
-                    race: 'wolf',
-                    ref: `scouts/${id}`
-                });
-
-                firebase.database().ref(`scouts`).child(id).remove();
-
-                firebase.database().ref(`scouts`).child(id).set({
-                    id: id,
+                const scout = {
+                    id: scoutID,
                     uid: snap.val()[id].uid,
-                    hitPoints: snap.val()[id].hitPoints,
-                    name: snap.val()[id].name,
-                    position: snap.val()[id].position,
+                    hitPoints: 100,
+                    name: `${snap.val()[id].name}'s scout`,
                     race: 'wolf',
-                })
-
-                firebase.database().ref(`users`).child(snap.val()[id].uid).update({
-                    scout: id
-                });
+                    level: 1,
+                    position: {
+                        lat: snap.val()[id].position.lat + 0.0001,
+                        lng: snap.val()[id].position.lng + 0.0001,
+                    },
+                }
+                firebase.database().ref(`scouts`).child(scout.id).set(scout);
             }
         });
+        //
+        // firebase.database().ref(`scouts`).once('value').then(snap => {
+        //     for (let id in snap.val()) {
+        //         let hash = Geohash.encode(snap.val()[id].position.lat, snap.val()[id].position.lng, 7);
+        //         firebase.database().ref('markers').child(hash).child(id).set({
+        //             position: snap.val()[id].position,
+        //             race: 'wolf',
+        //             ref: `scouts/${id}`
+        //         });
+        //
+        //         firebase.database().ref(`scouts`).child(id).remove();
+        //
+        //         firebase.database().ref(`scouts`).child(id).set({
+        //             id: id,
+        //             uid: snap.val()[id].uid,
+        //             hitPoints: snap.val()[id].hitPoints,
+        //             name: snap.val()[id].name,
+        //             position: snap.val()[id].position,
+        //             race: 'wolf',
+        //             level: snap.val()[id].level,
+        //         })
+        //
+        //         firebase.database().ref(`users`).child(snap.val()[id].uid).update({
+        //             scout: id
+        //         });
+        //     }
+        // });
 
         firebase.database().ref(`loot`).on('child_added', (snap) => {
             let hash = Geohash.encode(snap.val().position.lat, snap.val().position.lng, 7);

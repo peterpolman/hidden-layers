@@ -27,6 +27,10 @@ export default class Item {
         }
     }
 
+    hide(visible) {
+        this.mesh.visible = visible;
+    }
+
     // Watch user properties for change and remove events
     watch() {
         this.lootRef.on('child_changed', (snap) => {
