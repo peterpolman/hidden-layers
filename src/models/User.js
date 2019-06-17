@@ -28,11 +28,11 @@ export default class User extends DamagableCharacter {
     discover() {
         const HL = window.HL;
         this.ref.child('hashes').on('child_added', (snap) => {
-            HL.markerService.addListener(snap.key);
+            HL.markerService.addHashListener(snap.key);
             console.log("Hash added: ", this.id, snap.val());
         });
         this.ref.child('hashes').on('child_removed', (snap) => {
-            HL.markerService.removeListener(snap.key);
+            HL.markerService.removeHashListener(snap.key);
             console.log("Hash removed: ", this.id, snap.val());
         });
         console.log('Start watching hashes!', this.id)

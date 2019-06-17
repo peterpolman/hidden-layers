@@ -71,7 +71,12 @@ export default class DamagableCharacter extends BaseCharacter {
         const HL = window.HL;
         const id = this.id;
 
+        HL.selectItem(null);
+        HL.selectedItem = null;
+
+        HL.selectTarget(null);
         HL.selectedTarget = null;
+
         HL.markerService.removeMarker(id)
         this.ref.remove();
     }

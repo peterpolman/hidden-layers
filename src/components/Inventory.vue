@@ -10,6 +10,7 @@
             v-if="isOpen"
             v-bind:items="items"
             class="panel panel-default panel-inventory" />
+
         <div class="panel panel-default panel-equiped">
             <ul>
                 <li>
@@ -22,6 +23,7 @@
                 </li>
             </ul>
         </div>
+
     </div>
 </template>
 
@@ -95,14 +97,14 @@ export default {
     .btn-toggle {
         background-size: contain;
         box-shadow: rgba(0, 0, 0, 0.3) 0 1px 4px -1px;
-        right: 5px;
-        bottom: 80px;
+        right: 7px;
+        bottom: 90px;
     }
 
     .panel-inventory {
         position: absolute;
         right: calc(40px + 25px);
-        bottom: 70px;
+        bottom: 80px;
     }
 
     .panel-equiped {

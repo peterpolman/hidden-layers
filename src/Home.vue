@@ -79,28 +79,26 @@ export default {
                 }
             }, layers[layers.length-1].id);
 
+            let positions = [];
 
             // Load the user data
             usersRef.child(uid).once('value').then(snap => {
-                // Add to layer array before buildings.
-                MAP.addLayer(HL, layers[layers.length-1].id);
-
-                // Creates my user
+                // // Creates my user
                 this.user = HL.user = new User(snap.key, snap.val());
-                HL.markerService.positions[this.user.id] = this.user.position;
+                positions[this.user.id] = HL.markerService.positions[this.user.id] = this.user.position;
 
                 // Load the scout data
                 scoutsRef.child(this.user.scout).once('value').then(snap => {
 
                     // Creates my user and discovers for position.
                     this.scout = HL.scout = new Scout(snap.key, snap.val());
-                    HL.markerService.positions[this.scout.id] = this.scout.position;
+                    positions[this.scout.id] = HL.markerService.positions[this.scout.id] = this.scout.position;
 
                     HL.geoService = new GeoService();
                     HL.geoService.watchPosition();
 
                     // Start discovery
-                    HL.updateFog();
+                    HL.fog.updateFog(positions);
 
                     console.log("Initial discovery started!");
                 });

@@ -1,5 +1,3 @@
-const mapboxgl = require('mapbox-gl/dist/mapbox-gl.js');
-
 export default class BaseCharacter {
     constructor(id, data) {
         const HL = window.HL;
@@ -37,7 +35,7 @@ export default class BaseCharacter {
     }
 
     loadAtPosition(id, obj, position) {
-        return this.tb.loadObj({
+        this.tb.loadObj({
             obj: `./objects/${obj}/${obj}.obj`,
             mtl: `./objects/${obj}/${obj}.mtl`
         }, (object) => {
@@ -74,7 +72,7 @@ export default class BaseCharacter {
         this.marker.setLngLat(lngLat)
         this.mesh.setCoords(lngLat);
 
-        HL.updateFog();
+        HL.fog.updateFog(HL.markerService.positions);
     }
 
     setInfo(hit = null, isDamage = null) {

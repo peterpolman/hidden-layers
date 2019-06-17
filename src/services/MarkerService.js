@@ -120,7 +120,7 @@ export default class MarkerService {
         return uniques(hashes)
     }
 
-    addListener(hash) {
+    addHashListener(hash) {
         const isNotMine = key => {
             const HL = window.HL;
             const isNotMyUser = (HL.user.id !== key);
@@ -142,7 +142,7 @@ export default class MarkerService {
         );
     }
 
-    removeListener(hash) {
+    removeHashListener(hash) {
         // Remove all markers for this geohash
         for (let id in this.listeners[hash]) {
             this.onMarkerRemoved(id, hash)

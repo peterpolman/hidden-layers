@@ -3,9 +3,8 @@
 </template>
 
 <script>
-const mapboxgl = require('mapbox-gl/dist/mapbox-gl.js');
-
 import config from '../config.js';
+import GeoService from '../services/GeoService';
 
 export default {
     name: 'Map',
@@ -15,6 +14,8 @@ export default {
         }
     },
     mounted() {
+        const geoService = new GeoService();
+
         mapboxgl.accessToken = config.mapbox.key
 
         // HACK For cleanup purposes
@@ -36,10 +37,15 @@ export default {
             pitchWithRotate: false
         });
 
+        geoService.getPosition().then((p) => {
+            MAP.setCenter([p.longitude, p.latitude]);
+        });
+
+        MAP.scrollZoom.disable();
         MAP.on('click', 'water', function (e) {
             new mapboxgl.Popup()
                 .setLngLat(e.lngLat)
-                .setHTML('You discovered some water! Add it to your resources.')
+                .setHTML('<strong style="color: black;">You discovered some water! Add it to your resources.</strong>')
                 .addTo(MAP);
         });
     }
