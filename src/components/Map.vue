@@ -25,9 +25,10 @@ export default {
             location.reload(true);
         }
 
+        const hours = new Date().getHours();
         const MAP = window.MAP = new mapboxgl.Map({
             container: 'map',
-            style: require('../assets/style.json'),
+            style: (hours > 7 && hours < 17) ? require('../assets/style.json') : require('../assets/style-dark.json'),
             zoom: 19,
             maxZoom: 21,
             minZoom: 16,
@@ -48,10 +49,11 @@ export default {
         });
 
         MAP.on('click', 'water', function (e) {
-            new mapboxgl.Popup()
-                .setLngLat(e.lngLat)
-                .setHTML('<strong style="color: black;">You discovered some water! Add it to your resources.</strong>')
-                .addTo(MAP);
+            console.log('You clicked water', e)
+            // new mapboxgl.Popup()
+            //     .setLngLat(e.lngLat)
+            //     .setHTML('<strong style="color: black;">You discovered some water! Add it to your resources.</strong>')
+            //     .addTo(MAP);
         });
     }
 }

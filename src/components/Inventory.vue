@@ -2,7 +2,7 @@
     <div>
         <button
             class="btn btn-image btn-toggle"
-            v-bind:style="`background-image: url(${imgBackpack});`"
+            v-bind:style="`background-image: url(${(isOpen) ? imgBackpackOpen : imgBackpack});`"
             v-on:click="toggleInventoryOpen()">
             Inventory
         </button>
@@ -45,6 +45,7 @@ export default {
             items: {},
             item: null,
             imgBackpack: require('../assets/img/backpack.png'),
+            imgBackpackOpen: require('../assets/img/backpack_open.png'),
             img: {
                 tools: require('../assets/img/tools.png'),
                 ward: require('../assets/img/ward-1.png'),
@@ -96,7 +97,7 @@ export default {
 <style scoped>
     .btn-toggle {
         position: absolute;
-        background-size: contain;
+        background-size: 85% 85%;
         box-shadow: rgba(0, 0, 0, 0.3) 0 1px 4px -1px;
         right: 2px;
         bottom: 75px;

@@ -155,7 +155,7 @@ export default class HiddenLayer {
     }
 
     handleMapClick(e) {
-        if (this.selectedItem !== null) {
+        if (this.selectedItem !== null && this.selectedTarget === null) {
             const p = this.tb.utils.projectToWorld([e.lngLat.lng, e.lngLat.lat]);
             const dUser = this.distanceVector(this.user.mesh.position, p);
 
@@ -167,10 +167,15 @@ export default class HiddenLayer {
                 this.reset();
             }
         }
-
-        if (this.selectedTarget && this.selectedTarget.id == this.scout.id) {
+        else if (this.selectedTarget && this.selectedTarget.id == this.scout.id) {
             this.selectedTarget.onMapClickWhenSelected(e);
-            this.reset();
+
+            this.selectItem(null);
+            this.selectedItem = null;
+        }
+        else {
+            this.selectTarget(null);
+            this.selectedTarget = null;
         }
 
         console.log('Map click at', e);

@@ -53,7 +53,7 @@ export default class Scout extends DamagableCharacter {
         const path = new THREE.CatmullRomCurve3(latLngPath)
         const timeProgress = ((data.now - data.start) / data.options.duration);
 
-        if (timeProgress < 1) {
+        if ((timeProgress < 1) && (typeof path !== 'undefined')) {
             const point = path.getPointAt(timeProgress);
             const lngLat = this.tb.utils.unprojectFromWorld(point);
             const position = { lng: lngLat[0], lat: lngLat[1] };
