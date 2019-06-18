@@ -1,8 +1,10 @@
 const mapboxgl = window.mapboxgl;
+import EventService from '../services/EventService';
 
 export default class BaseCharacter {
     constructor(id, data) {
         const HL = window.HL;
+        this.ea = new EventService(),
         this.id = id;
         this.tb = HL.tb;
         this.world = HL.tb.world;

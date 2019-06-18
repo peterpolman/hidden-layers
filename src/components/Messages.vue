@@ -2,23 +2,28 @@
     <div class="panel panel-default panel-messages" ref="messageWrapper">
         <ul class="list" v-if="stream">
             <li class="list-item" :key="message.key" v-for="message in stream">
-                <p><span class="message-date">[{{message.date}}] </span><strong>{{message.name}}</strong> {{ message.content }}</p>
+                <p>
+                    <span class="message-date">[{{message.date}}] </span>
+                    <strong>{{message.name}}: </strong>
+                    <span v-bind:class="`message-${message.type}`">{{ message.content }}</span>
+                </p>
             </li>
         </ul>
     </div>
 </template>
 <script>
 import firebase from 'firebase/app';
+import EventService from '../services/EventService';
 
 export default {
     name: 'Messages',
     props: ['messages'],
     data() {
         return {
-            publicMessages: [],
-            privateMessages: [],
+            ea: new EventService(),
             stream: [],
-            messagesPublicRef: firebase.database().ref('messages').child('public'),
+            timer: null,
+            messagesPublicRef: firebase.database().ref('messages').child('public').limitToLast(50),
             messagesPrivateRef: firebase.database().ref('messages').child(firebase.auth().currentUser.uid),
         }
     },
@@ -44,7 +49,8 @@ export default {
             this.stream.push(message);
             this.stream.sort((a, b) => (a.timestamp > b.timestamp) ? 1 : -1)
 
-            window.setTimeout(() => {
+            window.clearTimeout(this.timer);
+            this.timer = window.setTimeout(() => {
                 this.$refs.messageWrapper.scrollTop = this.$refs.messageWrapper.scrollHeight;
                 console.log(`Message added to ${type}`, message);
             }, 50);
@@ -113,6 +119,18 @@ export default {
     .message-date {
         color: #999999;
         font-weight: normal;
+    }
+    .message-danger {
+        color: rgb(231, 54, 54);
+    }
+    .message-warning {
+        color: rgb(247, 238, 109);
+    }
+    .message-success {
+        color: rgb(3, 218, 83);
+    }
+    .message-info {
+        color: rgb(121, 199, 244);
     }
     .panel-input {
         position: fixed;

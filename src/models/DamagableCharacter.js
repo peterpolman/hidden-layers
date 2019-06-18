@@ -1,4 +1,5 @@
 import BaseCharacter from './BaseCharacter';
+import firebase from 'firebase/app';
 
 export default class DamagableCharacter extends BaseCharacter {
     constructor (id, data) {
@@ -98,6 +99,12 @@ export default class DamagableCharacter extends BaseCharacter {
         // Drop loot if applicable
         if (this.dropLoot) {
             this.dropLoot(amountGold);
+
+            this.ea.dispatch('message.send', {
+                type: 'danger',
+                content: `Killed a goblin. ${amountGold} gold is dropped!`,
+                uid: firebase.auth().currentUser.uid,
+            });
         }
     }
 }

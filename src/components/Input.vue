@@ -15,11 +15,13 @@
 
 <script>
 import firebase from 'firebase/app';
+import EventService from '../services/EventService';
 
 export default {
     name: 'Messages',
     data() {
         return {
+            ea: new EventService(),
             isOpen: false,
             imgChat: require('../assets/img/chat.png'),
             message: "",
@@ -40,6 +42,8 @@ export default {
                 this.isOpen = false;
             }
         };
+
+        this.ea.listen('message.send', this.onReceive)
     },
     methods: {
         toggleChatOpen() {
@@ -47,6 +51,13 @@ export default {
             if (this.isOpen) {
                 this.$nextTick(() => this.$refs.messageInput.focus())
             }
+        },
+        onReceive(data) {
+            let message = data.detail;
+            message['timestamp'] = firebase.database.ServerValue.TIMESTAMP,
+            message['id'] = this.messagesPublicRef.push().key,
+
+            this.messagesPublicRef.child(message.id).set(message);
         },
         onSubmit() {
             if (this.message !== "") {

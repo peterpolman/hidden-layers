@@ -4,7 +4,6 @@ import DamagableCharacter from './DamagableCharacter';
 export default class User extends DamagableCharacter {
     constructor (id, data) {
         super(id, data);
-
         this.ref = firebase.database().ref('users').child(id);
         this.slug = 'user';
         this.xp = data.experiencePoints;
@@ -19,6 +18,11 @@ export default class User extends DamagableCharacter {
 
         if (this.id === firebase.auth().currentUser.uid) {
             this.discover();
+            this.ea.dispatch('message.send', {
+                type: 'info',
+                content: "Entered the world!",
+                uid: firebase.auth().currentUser.uid,
+            });
         }
     }
 
@@ -35,6 +39,12 @@ export default class User extends DamagableCharacter {
 
             HL.user.getXpMarkup();
             HL.user.setInfo();
+
+            this.ea.dispatch('message.send', {
+                type: 'success',
+                content: `Gained a level. Congrats!`,
+                uid: firebase.auth().currentUser.uid,
+            });
         }
         else {
             HL.user.ref.child('experiencePoints').set(newXP)
@@ -73,6 +83,12 @@ export default class User extends DamagableCharacter {
     }
 
     onClick() {
-        console.log(`Hi ${this.name}!`);
+        if (this.id !== firebase.auth().currentUser.uid) {
+            this.ea.dispatch('message.send', {
+                type: 'warning',
+                content: `Hi ${this.name}!`,
+                uid: firebase.auth().currentUser.uid,
+            });
+        }
     }
 }
