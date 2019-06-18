@@ -28,7 +28,7 @@ export default {
         const hours = new Date().getHours();
         const MAP = window.MAP = new mapboxgl.Map({
             container: 'map',
-            style: (hours > 7 && hours < 17) ? require('../assets/style.json') : require('../assets/style-dark.json'),
+            style: (hours > 7 && hours < 19) ? require('../assets/style.json') : require('../assets/style-dark.json'),
             zoom: 19,
             maxZoom: 21,
             minZoom: 16,
