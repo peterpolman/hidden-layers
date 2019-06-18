@@ -7,6 +7,7 @@ export default class BaseCharacter {
         this.tb = HL.tb;
         this.world = HL.tb.world;
         this.position = data.position;
+        this.race = data.race;
         this.level = data.level;
         this.hashes = data.hashes;
         this.xpMarkup = '';
@@ -47,6 +48,11 @@ export default class BaseCharacter {
                     break;
                 case 'level':
                     this.setLevel(snap.val());
+                    break;
+                case 'route':
+                    if (snap.val().options) {
+                        this.travelTo(snap.val());
+                    }
                     break;
                 default:
                     console.error("No handler available", snap.key, snap.val());
@@ -89,8 +95,8 @@ export default class BaseCharacter {
 
     // Set the position of the objects in the world scene
     setPosition(position) {
-        const lngLat = [position.lng, position.lat];
         const HL = window.HL;
+        const lngLat = [position.lng, position.lat];
 
         this.position = position;
         this.marker.setLngLat(lngLat)

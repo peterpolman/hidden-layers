@@ -75,7 +75,7 @@ export default class Goblin extends DamagableCharacter {
         }
     }
 
-    stopDefending(){
+    stopDefending() {
         window.clearInterval(this.defendTimer);
         this.defendTimer = null;
     }

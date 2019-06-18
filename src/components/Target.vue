@@ -1,5 +1,5 @@
 <template>
-    <div class="character-wrapper" v-if="target && target.class">
+    <div class="character-wrapper" v-if="target">
         <div class="character-picture" v-on:click="locate(target.position)">
             <img v-bind:src="img[target.class]" alt="" />
             <small>{{target.level}}</small>
@@ -36,10 +36,7 @@ export default {
     },
     methods: {
         onTargetClick(data) {
-            const id = data.detail.id;
-            const HL = window.HL;
-
-            this.target = HL.markers[id];
+            this.target = data.detail;
         },
         locate(position) {
             const MAP = window.MAP;

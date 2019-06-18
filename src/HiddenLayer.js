@@ -106,8 +106,7 @@ export default class HiddenLayer {
         }
     }
 
-    selectTarget(id) {
-        const data = { id: id };
+    selectTarget(data) {
         return  this.ea.dispatch('target.click', data)
     }
 
@@ -125,16 +124,18 @@ export default class HiddenLayer {
             this.user.onClick();
         }
         else if (this.scout.id === id) {
+            this.selectTarget(this.scout);
             this.selectedTarget = this.scout;
+
             this.scout.onClick();
         }
-        else if (typeof HL.markers[id].amount == 'undefined') {
-            this.selectTarget(id);
+        else if (typeof HL.markers[id].race !== 'undefined') {
+            this.selectTarget(HL.markers[id]);
             this.selectedTarget = HL.markers[id];
 
             HL.markers[id].onClick();
         }
-        else if (HL.markers[id].amount > 0) {
+        else if (typeof HL.markers[id].race === 'undefined') {
             this.reset();
 
             HL.markers[id].pickup();
@@ -149,21 +150,29 @@ export default class HiddenLayer {
 
         this.selectItem(null);
         this.selectedItem = null;
+
+        this.tb.repaint();
     }
 
     handleMapClick(e) {
         if (this.selectedItem !== null) {
-            this.selectedItem = new Item(this.selectedItem.id, this.selectedItem);
-            this.selectedItem.drop(e.lngLat);
-            this.selectedItem.removeFromInventory();
+            const p = this.tb.utils.projectToWorld([e.lngLat.lng, e.lngLat.lat]);
+            const dUser = this.distanceVector(this.user.mesh.position, p);
+
+            // Check for distance to user.
+            if (dUser < 2) {
+                this.selectedItem = new Item(this.selectedItem.id, this.selectedItem);
+                this.selectedItem.drop(e.lngLat);
+                this.selectedItem.removeFromInventory();
+                this.reset();
+            }
         }
 
         if (this.selectedTarget && this.selectedTarget.id == this.scout.id) {
             this.selectedTarget.onMapClickWhenSelected(e);
+            this.reset();
         }
-
-        this.reset();
-
+        
         console.log('Map click at', e);
     }
 

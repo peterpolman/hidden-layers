@@ -34,28 +34,44 @@ export default class Scout extends DamagableCharacter {
                         path: data.routes[0].geometry.coordinates,
                         duration: data.routes[0].duration * 60
                     }
-                    this.travelTo(options, destination);
+
+                    firebase.database().ref('scouts').child(this.id).update({
+                        route: {
+                            now: firebase.database.ServerValue.TIMESTAMP,
+                            start: firebase.database.ServerValue.TIMESTAMP,
+                            options: options,
+                        }
+                    })
                 })
             }
         });
     }
 
-    travelTo(options, destination) {
+    travelTo(data) {
         const HL = window.HL;
-        const path = new THREE.CatmullRomCurve3(this.tb.utils.lnglatsToWorld(options.path))
-        let offset = 0;
+        const latLngPath = this.tb.utils.lnglatsToWorld(data.options.path);
+        const path = new THREE.CatmullRomCurve3(latLngPath)
+        const timeProgress = ((data.now - data.start) / data.options.duration);
 
-        clearInterval(this.timer);
-        this.moveIndicator(destination);
+        if (timeProgress < 1) {
+            const point = path.getPointAt(timeProgress);
+            const lngLat = this.tb.utils.unprojectFromWorld(point);
+            const position = { lng: lngLat[0], lat: lngLat[1] };
+            const oldHash = Geohash.encode(this.position.lat, this.position.lng, 7);
+            const hash = Geohash.encode(position.lat, position.lng, 7);
+            const tangent = path.getTangentAt(timeProgress).normalize();
+            const axis = new THREE.Vector3(0,0,0);
+            const up = new THREE.Vector3(0,1,0);
+            const radians = Math.acos(up.dot(tangent));
 
-        this.timer = setInterval(() => {
-            offset += 0.01;
-            if (offset < 1) {
-                const point = path.getPointAt(offset);
-                const lngLat = this.tb.utils.unprojectFromWorld(point);
-                const position = { lng: lngLat[0], lat: lngLat[1] };
-                const oldHash = Geohash.encode(HL.scout.position.lat, HL.scout.position.lng, 7);
-                const hash = Geohash.encode(position.lat, position.lng, 7);
+            axis.crossVectors(up, tangent).normalize();
+
+            // Point the object in the right direction
+            this.mesh._setObject({ quaternion: [axis, radians] });
+
+            // Clears existing timer starts a new one
+            window.clearTimeout(this.timer);
+            this.timer = window.setTimeout(() => {
 
                 // Detect hash change for scout
                 if (oldHash !== hash) {
@@ -72,43 +88,22 @@ export default class Scout extends DamagableCharacter {
                     });
                 }
 
-                // Update scout position
-                this.ref.update({
-                    position: position,
-                });
-            }
-            else {
-                HL.selected = null;
-                this.world.remove(this.indicator);
-                this.tb.repaint();
-                clearInterval(this.timer);
-            }
-        }, 100)
+                // Update the scout position and route progress in time
+                this.ref.update({ position: position });
+                this.ref.child('route').update({ now: firebase.database.ServerValue.TIMESTAMP });
+            }, 30);
+        }
+        else {
+            HL.selected = null;
+            this.world.remove(this.indicator);
+            this.ref.child('route').remove();
+            this.tb.repaint();
+            window.clearTimeout(this.timer);
+        }
     }
 
     onMapClickWhenSelected(e) {
         this.setDestination(e);
-    }
-
-    moveIndicator(lngLat) {
-        this.indicator.setCoords(lngLat);
-        this.indicator.position.z = -0.05;
-    }
-
-    setIndicator() {
-        const lngLat = [this.position.lng, this.position.lat];
-        let geometry = new THREE.CylinderGeometry( 3, 3, .03, 16 );
-        let material = new THREE.MeshLambertMaterial({color: 0x0000FF, transparent: true, opacity: 0.25, side: THREE.DoubleSide});
-        let cylinder = new THREE.Mesh( geometry, material );
-
-        this.world.remove(this.indicator);
-
-        this.indicator = this.tb.Object3D({obj: cylinder, units:'meters', scale: 1})
-        this.indicator.rotateX(THREE.Math.degToRad(90));
-        this.moveIndicator(lngLat);
-
-        this.tb.add(this.indicator);
-        this.tb.repaint();
     }
 
     die() {
@@ -118,10 +113,6 @@ export default class Scout extends DamagableCharacter {
 
     onClick() {
         const HL = window.HL;
-
-        if (this.uid == firebase.auth().currentUser.uid) {
-            this.setIndicator();
-        }
 
         if (HL.selectedItem !== null) {
             this.use(HL.selectedItem);
