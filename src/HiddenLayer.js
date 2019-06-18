@@ -172,7 +172,7 @@ export default class HiddenLayer {
             this.selectedTarget.onMapClickWhenSelected(e);
             this.reset();
         }
-        
+
         console.log('Map click at', e);
     }
 

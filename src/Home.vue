@@ -1,15 +1,15 @@
 <template>
     <div>
+        <Messages class="ui-messages"/>
         <Map />
-        <Inventory class="ui-inventory" />
         <Profile
             v-if="user && scout"
             v-bind:user="user"
             v-bind:scout="scout"
             class="ui-profile" />
-        <Target
-            class="ui-target" />
-
+        <Target class="ui-target" />
+        <Input class="ui-input"/>
+        <Inventory class="ui-inventory" />
         <div class="ui-actions">
             <button v-on:click="reload()" class="btn btn-default">Reload</button>
             <button v-on:click="logout()" class="btn btn-default">Logout</button>
@@ -27,6 +27,8 @@ import HiddenLayer from './HiddenLayer';
 import User from './models/User';
 import Scout from './models/Scout';
 import GeoService from './services/GeoService';
+import Messages from './components/Messages';
+import Input from './components/Input';
 
 export default {
     name: 'app',
@@ -35,6 +37,8 @@ export default {
         Inventory,
         Profile,
         Target,
+        Messages,
+        Input,
     },
     data() {
         return {
@@ -154,22 +158,52 @@ h2 {
     text-shadow: 1px 1px 0px rgba(0,0,0,.75);
 }
 
-.ui-wrapper {
+.container {
     position: fixed;
-    top: .5rem;
-    left: .5rem;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+
+.ui-input {
+    position: fixed;
+    right: 10px;
+    bottom: 130px;
+}
+
+.ui-input .message-form {
+    display: block;
+    position: fixed;
+    width: 100%;
+    max-width: 300px;
+    bottom: 50%;
+    left: 50%;
+    margin-top: -20px;
+    margin-left: -150px;
+}
+
+.ui-messages {
+    position: fixed;
+    top: 0;
+    height: 50px;
+    width: 100%;
+}
+
+.ui-messages + #map {
+    top: 50px;
 }
 
 .ui-actions {
     position: fixed;
-    top: 1rem;
+    top: calc(50px + .5rem);
     right: .5rem;
     width: auto;
 }
 
 .ui-profile {
     position: fixed;
-    top: .5rem;
+    top: calc(50px + .5rem);
     left: .5rem;
 }
 
