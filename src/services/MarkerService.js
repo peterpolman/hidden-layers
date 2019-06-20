@@ -185,6 +185,7 @@ export default class MarkerService {
             // Statically get all data for this marker once
             this.db.ref(data.ref).once('value').then((snap) => {
                 const isOfTypeAndExists = (data, type) => {
+                    if (snap.val() == null) this.markersRef.child(hash).child(id).remove();
                     return (data.ref.startsWith(type) && snap.val() !== null)
                 }
                 if (isOfTypeAndExists(data, 'users')) HL.markers[id] = new User(snap.key, snap.val());

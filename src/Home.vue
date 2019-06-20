@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="container">
         <Messages class="ui-messages"/>
         <Map />
         <Profile
@@ -125,6 +125,7 @@ export default {
 <style>
 html,
 body {
+    height: 100%;
     margin: 0;
     font-family: 'Avenir', Helvetica, Arial, sans-serif;
     background: #3f2d42;
@@ -294,7 +295,7 @@ h2 {
 }
 
 .flex {
-    height: 100vh;
+    height: 100%;
     width: 100vw;
     display: flex;
     align-items: center;

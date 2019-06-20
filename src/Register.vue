@@ -1,5 +1,5 @@
 <template>
-    <div class="row flex-md">
+    <div class="row">
         <div class="loader" v-if="loading">Loading...</div>
         <form class="form" v-on:submit.prevent="register" v-if="!loading">
             <h1>Nice to meet you!</h1>
@@ -35,7 +35,15 @@
                 <label for="class-wizard">Wizard</label>
             </div>
 
-            <button class="btn btn-primary" type="submit">Create account</button>
+            <h2>Position</h2>
+            <div class="form-item" v-if="position">
+                Lat: <strong>{{position.latitude}}</strong><br>
+                Lng: <strong>{{position.longitude}}</strong>
+            </div>
+            <div class="form-item" v-if="!position">
+                Trying to get your position...
+            </div>
+            <button v-bind:disabled="!position" class="btn btn-primary" type="submit">Create account</button>
             <p class="align-center">or go back to <router-link to="/login">Login</router-link></p>
         </form>
     </div>
@@ -55,6 +63,7 @@ export default {
             email: '',
             password: '',
             passwordVerify: '',
+            position: null,
             userName: '',
             userRace: 'human',
             userClass: 'knight',
@@ -62,16 +71,19 @@ export default {
         }
     },
     mounted() {
-
+        const geoService = new GeoService();
+        geoService.getPosition()
+            .then((position) => {
+                this.position = position;
+            })
+            .catch((err) => alert(err));
     },
     methods: {
         register: function() {
             this.loading = true;
             if (this.password === this.passwordVerify) {
-                const geoService = new GeoService();
-                geoService.getPosition()
-                    .then((position) => this.createAccount(position))
-                    .catch((err) => alert(err));
+                const position = this.position;
+                this.createAccount(position);
             }
             else {
                 alert("Your passwords do not match.");
@@ -143,3 +155,10 @@ export default {
     }
 }
 </script>
+
+<style>
+    .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+</style>
