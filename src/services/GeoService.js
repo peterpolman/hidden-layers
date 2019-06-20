@@ -19,9 +19,10 @@ export default class GeoService {
     getPosition() {
         return new Promise((resolve, reject) => {
             navigator.geolocation.getCurrentPosition(function(r) {
+                debugger
                 resolve(r.coords);
-            }, (err) => {
-                reject(err);
+            }, () => {
+                reject("Unable to get your position.");
             }, this.options);
         })
     }
