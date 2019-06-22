@@ -77,16 +77,33 @@ export default {
         });
     },
     methods: {
-        onItemClick() {
+        onItemClick(item) {
             const HL = window.HL;
 
             if (HL.selectedTarget !== null) {
-                HL.selectedTarget.use(HL.selectedItem);
 
+                HL.selectedTarget.use(item);
+
+                // Defend if applicable
                 if (HL.selectedTarget.defend) HL.selectedTarget.defend();
             }
             else {
-                HL.user.use(HL.selectedItem);
+                HL.user.use(item);
+            }
+
+            if (item.slug === 'potion') this.deduct(item);
+
+        },
+        deduct(item) {
+            const newAmount = this.items[item.slug].amount - 1;
+            // Remove an item
+            if (newAmount > 0) {
+                this.ref.child(item.slug).child('amount').set(newAmount)
+            }
+            else {
+                this.ref.child(item.slug).remove();
+                HL.selectItem(null);
+                HL.selectedItem = null;
             }
         },
         toggleInventoryOpen() {
