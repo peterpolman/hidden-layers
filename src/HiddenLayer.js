@@ -121,6 +121,9 @@ export default class HiddenLayer {
         const id = target.userData.id;
 
         if (this.user.id === id) {
+            this.selectTarget(null);
+            this.selectedTarget = null;
+            
             this.user.onClick();
         }
         else if (this.scout.id === id) {

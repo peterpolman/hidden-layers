@@ -82,6 +82,8 @@ export default {
 
             if (HL.selectedTarget !== null) {
                 HL.selectedTarget.use(HL.selectedItem);
+
+                if (HL.selectedTarget.defend) HL.selectedTarget.defend();
             }
             else {
                 HL.user.use(HL.selectedItem);

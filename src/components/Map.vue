@@ -35,7 +35,7 @@ export default {
             center: [4.8437, 52.3669],
             pitch: 75,
             bearing: 45,
-            antialias: false,
+            antialias: true,
             doubleClickZoom: false,
             pitchWithRotate: false,
             touchZoomRotate: false,

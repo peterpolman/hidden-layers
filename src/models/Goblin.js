@@ -58,8 +58,31 @@ export default class Goblin extends DamagableCharacter {
             amount: amount,
             position: this.position,
         }
-        const item = new Item(gold.id, gold);
-        item.drop(this.position);
+        new Item(gold.id, gold).drop(this.position);
+
+        // See if something else drops
+        if (Math.floor(Math.random() * 10) > 5) {
+            const potion = {
+                id: firebase.database().ref('loot').push().key,
+                slug: 'potion',
+                name: 'Potion',
+                amount: 1,
+                position: this.position,
+            }
+            new Item(potion.id, potion).drop(this.position)
+        }
+
+        // See if something else drops
+        if (Math.floor(Math.random() * 10) > 5) {
+            const sword = {
+                id: firebase.database().ref('loot').push().key,
+                slug: 'sword',
+                name: 'Wooden Sword',
+                amount: 1,
+                position: this.position,
+            }
+            new Item(sword.id, sword).drop(this.position);
+        }
     }
 
     fight() {

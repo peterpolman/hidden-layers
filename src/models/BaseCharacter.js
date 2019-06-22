@@ -21,6 +21,8 @@ export default class BaseCharacter {
     hide(visible) {
         this.mesh.visible = visible;
 
+        if (this.stopDefending) this.stopDefending();
+
         if (this.marker != null) {
             if (visible) {
                 this.setInfo();

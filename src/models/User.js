@@ -34,10 +34,14 @@ export default class User extends DamagableCharacter {
         // Check for level up and gain xp for killing
         if (newXP >= maxXP) {
             const diff = maxXP - newXP;
-            HL.user.ref.child('experiencePoints').set(diff)
-            HL.user.ref.child('level').set(this.level + 1)
+            const newLevel = this.level + 1;
+            const percCurrentHP = this.hitPoints / (this.level * 100);
+            const newHP = percCurrentHP * (newLevel * 100);
 
-            HL.user.getXpMarkup();
+            HL.user.ref.child('hitPoints').set(newHP)
+            HL.user.ref.child('level').set(newLevel)
+            HL.user.ref.child('experiencePoints').set(diff)
+
             HL.user.setInfo();
 
             this.ea.dispatch('message.send', {
@@ -78,8 +82,10 @@ export default class User extends DamagableCharacter {
     }
 
     die() {
+        const hitPointsMax = (this.level * 100);
+        this.heal(hitPointsMax);
+        
         console.info(`${this.name} is lucky to be alive!`);
-        this.heal(100);
     }
 
     onClick() {

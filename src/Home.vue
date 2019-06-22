@@ -87,15 +87,30 @@ export default {
 
             // Load the user data
             usersRef.child(uid).once('value').then(snap => {
+                let data = snap.val();
                 // // Creates my user
-                this.user = HL.user = new User(snap.key, snap.val());
+                this.user = HL.user = new User(snap.key, data);
                 positions[this.user.id] = HL.markerService.positions[this.user.id] = this.user.position;
 
                 // Load the scout data
                 scoutsRef.child(this.user.scout).once('value').then(snap => {
+                    let data = snap.val();
+
+                    // If the wolf does not exist, reset it in the db
+                    if (data == null) {
+                        data = {
+                            position: this.user.position,
+                            hitPoints: 100,
+                            level: 1,
+                            race: 'wolf',
+                            name: `${this.user.name}'s scout`,
+                            uid: this.user.id,
+                        }
+                        scoutsRef.child(this.user.scout).set(data);
+                    }
 
                     // Creates my user and discovers for position.
-                    this.scout = HL.scout = new Scout(snap.key, snap.val());
+                    this.scout = HL.scout = new Scout(snap.key, data);
                     positions[this.scout.id] = HL.markerService.positions[this.scout.id] = this.scout.position;
 
                     HL.geoService = new GeoService();

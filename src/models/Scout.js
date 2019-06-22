@@ -18,6 +18,7 @@ export default class Scout extends DamagableCharacter {
         this.ref = firebase.database().ref('scouts').child(id);
         this.userRef = firebase.database().ref('users').child(data.uid);
         this.markersRef = firebase.database().ref('markers');
+        this.defendTimer = null
 
         this.setInfo();
     }
@@ -100,6 +101,24 @@ export default class Scout extends DamagableCharacter {
             this.tb.repaint();
             window.clearTimeout(this.timer);
         }
+    }
+
+    fight() {
+        // const HL = window.HL;
+        // const damage = Math.floor(Math.random() * 10) + (this.level * 1);
+        //
+        // HL.user.hit(damage)
+    }
+
+    defend() {
+        // if (this.defendTimer === null) {
+        //     this.defendTimer = window.setInterval(this.fight.bind(this), 1000)
+        // }
+    }
+
+    stopDefending() {
+        // window.clearInterval(this.defendTimer);
+        // this.defendTimer = null;
     }
 
     onMapClickWhenSelected(e) {
