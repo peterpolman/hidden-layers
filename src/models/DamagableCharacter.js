@@ -81,7 +81,6 @@ export default class DamagableCharacter extends BaseCharacter {
         const HL = window.HL;
         const id = this.id;
         const amountXP = Math.floor(Math.random() * 10) + 20;
-        const amountGold = Math.floor(Math.random() * 20) + 1;
 
         this.stopDefending();
 
@@ -98,6 +97,8 @@ export default class DamagableCharacter extends BaseCharacter {
 
         // Drop loot if applicable
         if (this.dropLoot) {
+            const amountGold = Math.floor(Math.random() * 10) + 1;
+
             this.dropLoot(amountGold);
 
             this.ea.dispatch('message.send', {

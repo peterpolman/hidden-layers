@@ -33,7 +33,7 @@ export default class User extends DamagableCharacter {
 
         // Check for level up and gain xp for killing
         if (newXP >= maxXP) {
-            const diff = maxXP - newXP;
+            const diff = Math.abs(maxXP - newXP);
             const newLevel = this.level + 1;
             const percCurrentHP = this.hitPoints / (this.level * 100);
             const newHP = percCurrentHP * (newLevel * 100);
@@ -84,7 +84,7 @@ export default class User extends DamagableCharacter {
     die() {
         const hitPointsMax = (this.level * 100);
         this.heal(hitPointsMax);
-        
+
         console.info(`${this.name} is lucky to be alive!`);
     }
 
