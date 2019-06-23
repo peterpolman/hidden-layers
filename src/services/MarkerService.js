@@ -37,13 +37,13 @@ export default class MarkerService {
     // TEMP: Should be removed when data is migrated.
     rebuildMarkerDatabase() {
         this.markersRef.remove();
-        // firebase.database().ref(`scouts`).remove();
+
         firebase.database().ref(`users`).once('value').then(snap => {
             for (let id in snap.val()) {
                 let hash = Geohash.encode(snap.val()[id].position.lat, snap.val()[id].position.lng, 7);
                 firebase.database().ref('markers').child(hash).child(id).set({
                     position: snap.val()[id].position,
-                    race: 'human',
+                    race: snap.val().race,
                     ref: `users/${id}`
                 });
             }
@@ -54,7 +54,7 @@ export default class MarkerService {
                 let hash = Geohash.encode(snap.val()[id].position.lat, snap.val()[id].position.lng, 7);
                 firebase.database().ref('markers').child(hash).child(id).set({
                     position: snap.val()[id].position,
-                    race: 'wolf',
+                    race: snap.val().race,
                     ref: `scouts/${id}`
                 });
             }

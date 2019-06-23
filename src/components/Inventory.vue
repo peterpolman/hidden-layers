@@ -95,6 +95,7 @@ export default {
 
         },
         deduct(item) {
+            const HL = window.HL;
             const newAmount = this.items[item.slug].amount - 1;
             // Remove an item
             if (newAmount > 0) {

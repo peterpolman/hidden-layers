@@ -97,7 +97,7 @@ export default {
                     let data = snap.val();
 
                     // If the wolf does not exist, reset it in the db
-                    if (data == null) {
+                    if (data === null) {
                         data = {
                             position: this.user.position,
                             hitPoints: 100,

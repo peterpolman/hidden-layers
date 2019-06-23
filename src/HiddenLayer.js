@@ -38,16 +38,11 @@ export default class HiddenLayer {
             onAdd: function(map, mbxContext){
                 const Threebox = window.Threebox;
                 const directionalLight = new THREE.DirectionalLight(0xFFFFFF, 0.65);
-                const ambientLightLight = new THREE.AmbientLight(0xFFFFFF, 1);
+                const ambientLight = new THREE.AmbientLight(0xFFFFFF, 1);
 
-                this.tb = new Threebox(
-                    map,
-                    mbxContext,
-                    {defaultLights: false}
-                );
-
+                this.tb = new Threebox(map, mbxContext);
+                this.tb.add(ambientLight);
                 this.tb.add(directionalLight);
-                this.tb.add(ambientLightLight);
 
                 const ne = this.tb.utils.projectToWorld([180, 85]);
                 const sw = this.tb.utils.projectToWorld([-180, -85]);
@@ -123,7 +118,7 @@ export default class HiddenLayer {
         if (this.user.id === id) {
             this.selectTarget(null);
             this.selectedTarget = null;
-            
+
             this.user.onClick();
         }
         else if (this.scout.id === id) {
