@@ -23,9 +23,12 @@ export default class HiddenLayer {
         this.wards = [];
 
         this.markers = [];
+        this.mixers = [];
         this.active = false;
         this.tb = null;
         this.fog = null;
+        this.clock = new THREE.Clock();
+        this.delta = 0;
 
         this.selectedItem = null;
         this.selectedTarget = null;
@@ -53,6 +56,13 @@ export default class HiddenLayer {
             }.bind(this),
             // eslint-disable-next-line
             render: function(gl, matrix){
+                const delta = this.clock.getDelta();
+
+                this.mixers.forEach((mixer)=> {
+                    mixer.update(delta);
+                    this.tb.repaint();
+                });
+
                 for (let id in this.markers) {
                     if (this.markers[id].mesh !== null) {
                         const u = this.user.mesh.position;
@@ -110,9 +120,24 @@ export default class HiddenLayer {
         return this.ea.dispatch('selected.click', data)
     }
 
-    handleObjectClick(e, object) {
+    getUserData(object) {
+        if (typeof object.userData.id != 'undefined') {
+            return object;
+        }
+        else if (typeof object.parent.userData.id != 'undefined') {
+            return object.parent;
+        }
+        else if (typeof object.parent.parent.userData.id != 'undefined') {
+            return object.parent.parent;
+        }
+        else if (typeof object.parent.parent.parent.userData.id != 'undefined') {
+            return object.parent.parent.parent;
+        }
+    }
+
+    handleObjectClick(e, o) {
         const HL = window.HL;
-        const target = object.parent.parent;
+        const target = this.getUserData(o);
         const id = target.userData.id;
 
         if (this.user.id === id) {
@@ -139,7 +164,7 @@ export default class HiddenLayer {
             HL.markers[id].pickup();
         }
 
-        console.log('Object click at ', object);
+        console.log('Object click at ', o);
     }
 
     reset() {

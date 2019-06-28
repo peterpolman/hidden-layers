@@ -1,3 +1,4 @@
+const THREE = window.THREE;
 const mapboxgl = window.mapboxgl;
 import EventService from '../services/EventService';
 
@@ -68,23 +69,32 @@ export default class BaseCharacter {
     }
 
     loadAtPosition(id, obj, position) {
-        this.tb.loadObj({
-            obj: `./objects/${obj}/${obj}.obj`,
-            mtl: `./objects/${obj}/${obj}.mtl`
-        }, (object) => {
+        const loader = new THREE.GLTFLoader();
+        const HL = window.HL;
+
+        loader.load(`./objects/${obj}/${obj}.gltf`, (gltf) => {
             // Remove existing objects with same id
             const objectInScene = this.world.getObjectByName(id);
             this.tb.remove(objectInScene);
 
-            // Add user specific data to be retreived later.
-            object.userData = {
+            gltf.scene.scale.set(1.5,1.5,1.5);
+            gltf.scene.rotation.z = (180 * 0.0174533);
+            gltf.scene.name = id;
+            gltf.scene.userData = {
                 id: id,
                 position: position
             }
 
-            object.scale.set(1.5,1.5,1.5);
+            if (gltf.animations.length > 0) {
+                this.mixer = new THREE.AnimationMixer(gltf.scene);
 
-            this.mesh = this.tb.Object3D({obj: object, units:'meters' }).setCoords([position.lng, position.lat]);
+                this.walkCycleAction = this.mixer.clipAction(gltf.animations[0]);
+                this.walkCycleAction.play();
+
+                HL.mixers.push(this.mixer);
+            }
+
+            this.mesh = this.tb.Object3D({obj: gltf.scene, units:'meters' }).setCoords([position.lng, position.lat]);
             this.mesh.name = id;
 
             this.tb.add(this.mesh);
@@ -92,8 +102,8 @@ export default class BaseCharacter {
 
             this.watch();
 
-            console.log('Object added to world: ', id, this.mesh)
-            console.log('Object is visible', id, this.mesh.visible)
+            console.log('Object added to world: ', id, this.mesh);
+            console.log('Object is visible', id, this.mesh.visible);
         });
     }
 
@@ -169,7 +179,7 @@ export default class BaseCharacter {
 
         this.ref.off();
         this.world.remove(objectInScene);
-        HL.tb.repaint();
+        this.tb.repaint();
 
         delete HL.markers[this.id];
 

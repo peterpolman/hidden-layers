@@ -1,3 +1,4 @@
+const THREE = window.THREE;
 const Geohash = require('latlon-geohash');
 
 import firebase from 'firebase/app';
@@ -48,24 +49,35 @@ export default class Item {
     }
 
     loadAtPosition(id, obj, position) {
-        // TEMP hack
-        obj = (obj != 'sword' && obj != 'potion' && obj != 'gold') ? 'dummy' : obj;
+        const loader = new THREE.GLTFLoader();
+        const HL = window.HL;
 
-        return this.tb.loadObj({
-            obj: `./objects/items/${obj}.obj`,
-            mtl: `./objects/items/${obj}.mtl`
-        }, (object) => {
+        // TEMP hack
+        obj = (obj != 'sword' && obj != 'potion' && obj != 'gold') ? 'test' : obj;
+
+        loader.load(`./objects/items/${obj}.gltf`, (gltf) => {
             // Remove existing objects with same id
             const objectInScene = this.world.getObjectByName(id);
             this.tb.remove(objectInScene);
 
-            // Add user specific data to be retreived later.
-            object.userData = {
+            gltf.scene.scale.set(1.5,1.5,1.5);
+            gltf.scene.rotation.z = (180 * 0.0174533);
+            gltf.scene.name = id;
+            gltf.scene.userData = {
                 id: id,
                 position: position
             }
 
-            this.mesh = this.tb.Object3D({obj: object, units:'meters', scale: .5}).setCoords([position.lng, position.lat]);
+            if (gltf.animations.length > 0) {
+                this.mixer = new THREE.AnimationMixer(gltf.scene);
+
+                this.walkCycleAction = this.mixer.clipAction(gltf.animations[0]);
+                this.walkCycleAction.play();
+
+                HL.mixers.push(this.mixer);
+            }
+
+            this.mesh = this.tb.Object3D({obj: gltf.scene, units:'meters' }).setCoords([position.lng, position.lat]);
             this.mesh.name = id;
 
             this.tb.add(this.mesh);

@@ -96,5 +96,12 @@ export default class User extends DamagableCharacter {
                 uid: firebase.auth().currentUser.uid,
             });
         }
+        debugger
+        if (this.walkCycleAction.paused) {
+            this.walkCycleAction.play();
+        }
+        else {
+            this.walkCycleAction.stop();
+        }
     }
 }
