@@ -54,6 +54,8 @@ export default class GeoService {
             HL.user.hashes = HL.markerService.getUniqueHashes(HL.user.id, position);
         }
 
+        this.updateEnvironment(HL.user.hashes);
+
         // Set the new record
         firebase.database().ref(`users/${uid}`).update({
             position: position,
@@ -61,5 +63,48 @@ export default class GeoService {
         });
 
         return this.position = position;
+    }
+
+    updateEnvironment(hashes) {
+        const HL = window.HL;
+        const MAP = window.MAP;
+
+        for (let hash in hashes) {
+            const bounds = Geohash.bounds(hash);
+            console.log(bounds);
+
+            var geometry = new THREE.BoxGeometry( 5, 5, 5 );
+            var materialGreen = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
+            var materialBlue = new THREE.MeshBasicMaterial( {color: 0x0000ff} );
+
+            var ne = this.detectType(bounds.ne, 'water');
+            var sw = this.detectType(bounds.sw, 'water');
+            // var p = this.detectType(bounds.ne, 'park');
+            // var s = this.detectType(bounds.ne, 'street');
+
+            console.log(ne);
+            console.log(sw);
+            if (ne == true || sw == true) debugger
+            // console.log(p);
+            // console.log(s);
+
+            var ne = HL.tb.Object3D({obj: new THREE.Mesh( geometry, materialGreen ), units:'meters' }).setCoords([bounds.ne.lon, bounds.ne.lat]);
+            var sw = HL.tb.Object3D({obj: new THREE.Mesh( geometry, materialBlue ), units:'meters' }).setCoords([bounds.sw.lon, bounds.sw.lat]);
+
+            HL.tb.add(ne);
+            HL.tb.add(sw);
+
+            HL.tb.repaint();
+        }
+    }
+
+    detectType(position, type) {
+        const xy = MAP.project([position.lon, position.lat]);
+        const features = MAP.queryRenderedFeatures(xy, {layers: [type]});
+        console.log(features.length)
+        if (!features.length) {
+            return;
+        }
+        return true
     }
 }

@@ -29,7 +29,7 @@ export default {
         const MAP = window.MAP = new mapboxgl.Map({
             container: 'map',
             style: (hours > 7 && hours < 19) ? require('../assets/style.json') : require('../assets/style-dark.json'),
-            zoom: 19,
+            zoom: 16,
             maxZoom: 21,
             minZoom: 16,
             center: [4.8437, 52.3669],
@@ -46,6 +46,10 @@ export default {
 
         geoService.getPosition().then((p) => {
             MAP.setCenter([p.longitude, p.latitude]);
+        });
+
+        MAP.on('click', function (e) {
+            console.log(e)
         });
 
         MAP.on('click', 'water', function (e) {

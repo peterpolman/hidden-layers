@@ -94,7 +94,7 @@ export default class HiddenLayer {
         // calculate objects intersecting the picking ray
         var intersect = this.tb.queryRenderedFeatures(e.point)[0]
         var intersectionExists = typeof intersect == "object"
-
+        debugger
         // if intersect exists, highlight it
         if (intersect && intersect.object.name !== this.fog.fog.name) {
             var object = intersect.object;

@@ -26,7 +26,7 @@ export default class BaseCharacter {
 
         if (this.marker != null) {
             if (visible) {
-                this.setInfo();
+                // this.setInfo();
             }
             else {
                 this.marker.remove();
