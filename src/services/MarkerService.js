@@ -13,6 +13,7 @@ export default class MarkerService {
         this.db = firebase.database()
 		this.hashes = [];
         this.positions = [];
+        this.environmentPositions = [];
         this.listeners = [];
 
         this.markersRef = firebase.database().ref('markers');
@@ -79,7 +80,7 @@ export default class MarkerService {
         });
     }
 
-    getUniqueHashes(id, position) {
+    getUniqueHashes(id, position, precision) {
         const uniques = (a) => {
             let arr = {};
             for (let i in a) {
@@ -91,7 +92,7 @@ export default class MarkerService {
 
         this.positions[id] = position;
         for (let id in this.positions) {
-            let hash = Geohash.encode(this.positions[id].lat, this.positions[id].lng, 7);
+            let hash = Geohash.encode(this.positions[id].lat, this.positions[id].lng, precision);
             let neighbours = Geohash.neighbours(hash);
 
             hashes.push(hash);
@@ -102,6 +103,31 @@ export default class MarkerService {
 
         return uniques(hashes)
     }
+
+    getUniqueEnvironmentHashes(id, position, precision) {
+        const uniques = (a) => {
+            let arr = {};
+            for (let i in a) {
+                arr[a[i]] = a[i]
+            }
+            return arr;
+        }
+        let hashes = [];
+
+        this.environmentPositions[id] = position;
+        for (let id in this.environmentPositions) {
+            let hash = Geohash.encode(this.environmentPositions[id].lat, this.environmentPositions[id].lng, precision);
+            let neighbours = Geohash.neighbours(hash);
+
+            hashes.push(hash);
+            for (let n in neighbours) {
+                hashes.push(neighbours[n]);
+            }
+        }
+
+        return uniques(hashes)
+    }
+
 
     addHashListener(hash) {
         const isNotMine = key => {

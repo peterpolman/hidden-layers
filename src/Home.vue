@@ -138,6 +138,8 @@ export default {
 </script>
 
 <style>
+@import url('https://fonts.googleapis.com/css?family=Alice');
+
 html,
 body {
     height: 100%;
@@ -154,10 +156,12 @@ body {
 }
 
 h1 {
+    font-family: 'Alice';
+    letter-spacing: 1px;
     font-weight: bold;
     color: #fdc539;
     text-transform: uppercase;
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     text-shadow: 1px 1px 0px rgba(0,0,0,.75);
     text-align: center;
     border-bottom: 1px solid #EFEFEF;
@@ -167,6 +171,8 @@ h1 {
 }
 
 h2 {
+    font-family: 'Alice';
+    letter-spacing: 1px;
     margin-top: 2rem;
     font-weight: bold;
     color: #fdc539;
@@ -344,6 +350,8 @@ input.input-text {
 }
 
 .btn-primary {
+    font-family: 'Alice';
+    letter-spacing: 1px;
     margin-top: 1rem;
     background-color: #fdc539;
     padding: .7rem 1rem;

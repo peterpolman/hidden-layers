@@ -42,7 +42,8 @@ export default class Fog {
         // Loop through the positions that need discovery
         for (let id in positions) {
             let p = this.tb.utils.projectToWorld([positions[id].lng, positions[id].lat])
-            let size = (HL.user.id === id) ? 2 : 1.5;
+            // let size = (HL.user.id === id) ? 2 : 1.5;
+            let size = (HL.user.id === id) ? 4 : 3;
             let hole = this.createHole(size, p);
             let jstsHole = this.jstsPoly(hole);
 
@@ -68,8 +69,8 @@ export default class Fog {
         let geometry = new THREE.ShapeGeometry(this.planeShape);
         let material = new THREE.MeshLambertMaterial({
             color: 0x000000,
-            transparent: true,
-            opacity: 0.5,
+            transparent: false,
+            opacity: 1,
             side: THREE.DoubleSide
         });
 

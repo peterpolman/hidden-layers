@@ -1,6 +1,7 @@
 const Geohash = require('latlon-geohash');
 
 import firebase from 'firebase/app';
+import Tile from '../models/Tile';
 
 export default class GeoService {
     constructor() {
@@ -10,6 +11,19 @@ export default class GeoService {
             timeout: 30000
         };
         this.watcher = null;
+        this.tiles = [];
+        this.gltf = [];
+
+        const loader = new THREE.GLTFLoader();
+
+        loader.load(`./objects/tile/water.gltf`, (gltf) => {
+            this.gltf['water'] = gltf;
+        });
+
+        loader.load(`./objects/tile/landuse.gltf`, (gltf) => {
+            this.gltf['landuse'] = gltf;
+        });
+
     }
 
     stopWatching() {
@@ -51,10 +65,10 @@ export default class GeoService {
                 ref: `users/${uid}`
             });
 
-            HL.user.hashes = HL.markerService.getUniqueHashes(HL.user.id, position);
+            HL.user.hashes = HL.markerService.getUniqueHashes(HL.user.id, position, 7);
         }
-
-        this.updateEnvironment(HL.user.hashes);
+        const environmentHashes = HL.markerService.getUniqueEnvironmentHashes(HL.user.id, position, 8);
+        this.updateEnvironment(environmentHashes);
 
         // Set the new record
         firebase.database().ref(`users/${uid}`).update({
@@ -71,40 +85,17 @@ export default class GeoService {
 
         for (let hash in hashes) {
             const bounds = Geohash.bounds(hash);
-            console.log(bounds);
+            const position = {lat: bounds.ne.lat, lng: bounds.ne.lon };
+            // const geometry = new THREE.BoxGeometry( 23.5, 19, .25 );
+            // const color = this.getFeatureType(bounds.ne);
+            // const material = new THREE.MeshBasicMaterial( {color: color } );
 
-            var geometry = new THREE.BoxGeometry( 5, 5, 5 );
-            var materialGreen = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
-            var materialBlue = new THREE.MeshBasicMaterial( {color: 0x0000ff} );
+            if (typeof this.tiles[hash] != undefined) {
+                this.tiles[hash] = new Tile(hash, { position: position});
+            }
+            // const obj = HL.tb.Object3D({obj: new THREE.Mesh( geometry, material ), units:'meters' }).setCoords([bounds.ne.lon, bounds.ne.lat]);
 
-            var ne = this.detectType(bounds.ne, 'water');
-            var sw = this.detectType(bounds.sw, 'water');
-            // var p = this.detectType(bounds.ne, 'park');
-            // var s = this.detectType(bounds.ne, 'street');
-
-            console.log(ne);
-            console.log(sw);
-            if (ne == true || sw == true) debugger
-            // console.log(p);
-            // console.log(s);
-
-            var ne = HL.tb.Object3D({obj: new THREE.Mesh( geometry, materialGreen ), units:'meters' }).setCoords([bounds.ne.lon, bounds.ne.lat]);
-            var sw = HL.tb.Object3D({obj: new THREE.Mesh( geometry, materialBlue ), units:'meters' }).setCoords([bounds.sw.lon, bounds.sw.lat]);
-
-            HL.tb.add(ne);
-            HL.tb.add(sw);
-
-            HL.tb.repaint();
         }
     }
 
-    detectType(position, type) {
-        const xy = MAP.project([position.lon, position.lat]);
-        const features = MAP.queryRenderedFeatures(xy, {layers: [type]});
-        console.log(features.length)
-        if (!features.length) {
-            return;
-        }
-        return true
-    }
 }
