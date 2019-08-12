@@ -13,17 +13,6 @@ export default class GeoService {
         this.watcher = null;
         this.tiles = [];
         this.gltf = [];
-
-        const loader = new THREE.GLTFLoader();
-
-        loader.load(`./objects/tile/water.gltf`, (gltf) => {
-            this.gltf['water'] = gltf;
-        });
-
-        loader.load(`./objects/tile/landuse.gltf`, (gltf) => {
-            this.gltf['landuse'] = gltf;
-        });
-
     }
 
     stopWatching() {
@@ -86,15 +75,10 @@ export default class GeoService {
         for (let hash in hashes) {
             const bounds = Geohash.bounds(hash);
             const position = {lat: bounds.ne.lat, lng: bounds.ne.lon };
-            // const geometry = new THREE.BoxGeometry( 23.5, 19, .25 );
-            // const color = this.getFeatureType(bounds.ne);
-            // const material = new THREE.MeshBasicMaterial( {color: color } );
 
-            if (typeof this.tiles[hash] != undefined) {
+            if (typeof this.tiles[hash] === 'undefined') {
                 this.tiles[hash] = new Tile(hash, { position: position});
             }
-            // const obj = HL.tb.Object3D({obj: new THREE.Mesh( geometry, material ), units:'meters' }).setCoords([bounds.ne.lon, bounds.ne.lat]);
-
         }
     }
 

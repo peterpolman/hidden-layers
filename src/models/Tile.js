@@ -26,13 +26,13 @@ export default class Item {
         const xy = MAP.project([position.lng, position.lat]);
         const features = MAP.queryRenderedFeatures(xy);
 
-        return features[0]['layer'].id;
+        return (features.length) ? features[0]['layer'].id : 'road';
     }
 
     loadAtPosition(id, obj, position) {
         const loader = new THREE.GLTFLoader();
         const HL = window.HL;
-
+        console.log('Trying to load ', obj)
         loader.load(`./objects/tile/${obj}.gltf`, (gltf) => {
             // Remove existing objects with same id
             const objectInScene = this.world.getObjectByName(id);
@@ -45,7 +45,7 @@ export default class Item {
                 id: id,
                 position: position
             }
-            
+
             this.mesh = this.tb.Object3D({obj: gltf.scene, units:'meters' }).setCoords([position.lng, position.lat]);
             this.mesh.name = id;
 

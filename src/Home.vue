@@ -56,41 +56,21 @@ export default {
 
         MAP.on('load', () => {
             const HL = window.HL = new HiddenLayer();
-            const layers = MAP.getStyle().layers;
-
-            MAP.addLayer({
-                'id': '3d-buildings',
-                'source': 'composite',
-                'source-layer': 'building',
-                'filter': ['==', 'extrude', 'true'],
-                'type': 'fill-extrusion',
-                'minzoom': 15,
-                'paint': {
-                    'fill-extrusion-color': '#EFEFEF',
-                    'fill-extrusion-height': [
-                        "interpolate", ["linear"],
-                        ["zoom"],
-                        15, 0,
-                        15.05, ["get", "height"]
-                    ],
-                    'fill-extrusion-base': [
-                        "interpolate", ["linear"],
-                        ["zoom"],
-                        15, 0,
-                        15.05, ["get", "min_height"]
-                    ],
-                    'fill-extrusion-opacity': .45
-                }
-            }, layers[layers.length-1].id);
 
             let positions = [];
 
             // Load the user data
             usersRef.child(uid).once('value').then(snap => {
+                const geoService = new GeoService();
                 let data = snap.val();
                 // // Creates my user
                 this.user = HL.user = new User(snap.key, data);
                 positions[this.user.id] = HL.markerService.positions[this.user.id] = this.user.position;
+
+                geoService.getPosition().then((p) => {
+                    geoService.updatePosition(p);
+                    MAP.setCenter([p.longitude, p.latitude]);
+                });
 
                 // Load the scout data
                 scoutsRef.child(this.user.scout).once('value').then(snap => {

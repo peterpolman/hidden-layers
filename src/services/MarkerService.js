@@ -35,51 +35,6 @@ export default class MarkerService {
         });
     }
 
-    // TEMP: Should be removed when data is migrated.
-    rebuildMarkerDatabase() {
-        this.markersRef.remove();
-
-        firebase.database().ref(`users`).once('value').then(snap => {
-            for (let id in snap.val()) {
-                let hash = Geohash.encode(snap.val()[id].position.lat, snap.val()[id].position.lng, 7);
-                firebase.database().ref('markers').child(hash).child(id).set({
-                    position: snap.val()[id].position,
-                    race: snap.val().race,
-                    ref: `users/${id}`
-                });
-            }
-        });
-
-        firebase.database().ref(`scouts`).once('value').then(snap => {
-            for (let id in snap.val()) {
-                let hash = Geohash.encode(snap.val()[id].position.lat, snap.val()[id].position.lng, 7);
-                firebase.database().ref('markers').child(hash).child(id).set({
-                    position: snap.val()[id].position,
-                    race: snap.val().race,
-                    ref: `scouts/${id}`
-                });
-            }
-        });
-
-        firebase.database().ref(`loot`).on('child_added', (snap) => {
-            let hash = Geohash.encode(snap.val().position.lat, snap.val().position.lng, 7);
-            firebase.database().ref('markers').child(hash).child(snap.key).set({
-                position: snap.val().position,
-                race: 'loot',
-                ref: `loot/${snap.key}`
-            });
-        });
-
-        firebase.database().ref(`npc`).on('child_added', (snap) => {
-            let hash = Geohash.encode(snap.val().position.lat, snap.val().position.lng, 7);
-            firebase.database().ref('markers').child(hash).child(snap.key).set({
-                position: snap.val().position,
-                race: snap.val().race,
-                ref: `npc/${snap.key}`
-            });
-        });
-    }
-
     getUniqueHashes(id, position, precision) {
         const uniques = (a) => {
             let arr = {};
