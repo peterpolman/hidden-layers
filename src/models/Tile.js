@@ -2,19 +2,18 @@ const THREE = window.THREE;
 const Geohash = require('latlon-geohash');
 
 export default class Item {
-    constructor(id, data) {
+    constructor(id, mesh, data) {
         const HL = window.HL;
 
         this.tb = HL.tb;
         this.world = HL.tb.world;
 
         this.position = data.position;
-        this.mesh = null;
+
+        this.mesh = mesh.duplicate();
 
         if (data.position !== null) {
-            const tile = this.getFeatureType(data.position);
-
-            this.loadAtPosition(id, tile, data.position);
+            this.loadAtPosition(id, mesh, data.position);
         }
     }
 
@@ -22,38 +21,17 @@ export default class Item {
         this.mesh.visible = visible;
     }
 
-    getFeatureType(position) {
-        const xy = MAP.project([position.lng, position.lat]);
-        const features = MAP.queryRenderedFeatures(xy);
-
-        return (features.length) ? features[0]['layer'].id : 'road';
-    }
-
-    loadAtPosition(id, obj, position) {
-        const loader = new THREE.GLTFLoader();
+    loadAtPosition(id, mesh, position) {
         const HL = window.HL;
-        console.log('Trying to load ', obj)
-        loader.load(`./objects/tile/${obj}.gltf`, (gltf) => {
-            // Remove existing objects with same id
-            const objectInScene = this.world.getObjectByName(id);
-            this.tb.remove(objectInScene);
+        const objectInScene = this.world.getObjectByName(id);
 
-            gltf.scene.scale.set(12,12,12);
-            gltf.scene.rotation.z = (180 * 0.0174533);
-            gltf.scene.name = id;
-            gltf.scene.userData = {
-                id: id,
-                position: position
-            }
+        this.tb.remove(objectInScene);
 
-            this.mesh = this.tb.Object3D({obj: gltf.scene, units:'meters' }).setCoords([position.lng, position.lat]);
-            this.mesh.name = id;
+        this.mesh.setCoords([position.lng, position.lat]);
+        this.mesh.name = id;
 
-            this.tb.add(this.mesh);
-            this.tb.repaint();
-
-            console.log('Object added: ', id, this.mesh)
-        });
+        this.tb.add(this.mesh);
+        this.tb.repaint();
     }
 
     // Set the position of the objects in the world scene

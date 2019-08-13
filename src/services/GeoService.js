@@ -5,6 +5,14 @@ import Tile from '../models/Tile';
 
 export default class GeoService {
     constructor() {
+        const types = ['water', 'landuse', 'road'];
+
+        this.preloadTiles(types).then(() => {
+            const environmentHashes = HL.markerService.getUniqueEnvironmentHashes(HL.user.id, HL.user.position, 8);
+
+            this.updateEnvironment(environmentHashes);
+        });
+
         this.options = {
             enableHighAccuracy: true,
             maximumAge: 1000,
@@ -12,7 +20,38 @@ export default class GeoService {
         };
         this.watcher = null;
         this.tiles = [];
-        this.gltf = [];
+        this.tileCache = [];
+    }
+
+    preloadTiles(types) {
+        const HL = window.HL;
+        const loader = new THREE.GLTFLoader();
+
+        return new Promise((resolve, reject) => {
+            let i = 0;
+
+            for (let type of types) {
+                loader.load(`./objects/tile/${type}.gltf`, (gltf) => {
+                    gltf.scene.scale.set(12,12,12);
+                    gltf.scene.rotation.z = (180 * 0.0174533);
+                    gltf.scene.userData = {
+                        id: '', // implement for a ground click, drop item or smth like that
+                    }
+                    this.tileCache[type] = HL.tb.Object3D({obj: gltf.scene, units:'meters' })
+
+                    if (types.length == ++i) {
+                        resolve();
+                    }
+                });
+            }
+        });
+    }
+
+    getFeatureType(position) {
+        const xy = MAP.project([position.lng, position.lat]);
+        const features = MAP.queryRenderedFeatures(xy);
+
+        return (features.length) ? features[0]['layer'].id : 'road';
     }
 
     stopWatching() {
@@ -45,6 +84,7 @@ export default class GeoService {
         const oldHash = Geohash.encode(HL.user.position.lat, HL.user.position.lng, 7);
         const hash = Geohash.encode(position.lat, position.lng, 7);
         const uid = firebase.auth().currentUser.uid;
+        const environmentHashes = HL.markerService.getUniqueEnvironmentHashes(HL.user.id, HL.user.position, 8);
 
         // Remove the old record if they differ
         if (oldHash !== hash) {
@@ -56,7 +96,7 @@ export default class GeoService {
 
             HL.user.hashes = HL.markerService.getUniqueHashes(HL.user.id, position, 7);
         }
-        const environmentHashes = HL.markerService.getUniqueEnvironmentHashes(HL.user.id, position, 8);
+
         this.updateEnvironment(environmentHashes);
 
         // Set the new record
@@ -77,7 +117,12 @@ export default class GeoService {
             const position = {lat: bounds.ne.lat, lng: bounds.ne.lon };
 
             if (typeof this.tiles[hash] === 'undefined') {
-                this.tiles[hash] = new Tile(hash, { position: position});
+                const type = this.getFeatureType(position);
+                const tile = this.tileCache[type];
+
+                if (typeof tile !== 'undefined') {
+                    this.tiles[hash] = new Tile(hash, tile, { position: position});
+                }
             }
         }
     }

@@ -69,8 +69,8 @@ export default class Fog {
         let geometry = new THREE.ShapeGeometry(this.planeShape);
         let material = new THREE.MeshLambertMaterial({
             color: 0x000000,
-            transparent: false,
-            opacity: 1,
+            transparent: true,
+            opacity: .5,
             side: THREE.DoubleSide
         });
 
