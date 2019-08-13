@@ -1,0 +1,124 @@
+{
+    "version": 8,
+    "name": "Blank",
+    "metadata": {
+        "mapbox:autocomposite": true,
+        "mapbox:type": "template",
+        "mapbox:sdk-support": {
+            "js": "0.54.0",
+            "android": "7.4.0",
+            "ios": "4.11.0"
+        }
+    },
+    "center": [4.845159192229858, 52.36701389417763],
+    "zoom": 17.18360917716606,
+    "bearing": 37.60000000000002,
+    "pitch": 60,
+    "sources": {
+        "composite": {
+            "url": "mapbox://mapbox.mapbox-streets-v8",
+            "type": "vector"
+        }
+    },
+    "sprite": "mapbox://sprites/peterpolman/cjz8oyfff3w261cqh020bdh0w/ck2u8j60r58fu0sgyxrigm3cu",
+    "glyphs": "mapbox://fonts/peterpolman/{fontstack}/{range}.pbf",
+    "layers": [
+        {
+            "id": "background",
+            "type": "background",
+            "paint": {"background-color": "#d7d0c6"}
+        },
+        {
+            "id": "landuse",
+            "type": "fill",
+            "source": "composite",
+            "source-layer": "landuse",
+            "filter": [
+                "match",
+                ["get", "class"],
+                [
+                    "park",
+                    "grass",
+                    "aboriginal_lands",
+                    "agriculture",
+                    "wood",
+                    "glacier",
+                    "piste",
+                    "pitch",
+                    "sand",
+                    "rock"
+                ],
+                true,
+                false
+            ],
+            "layout": {},
+            "paint": {"fill-color": "hsl(97, 66%, 82%)"}
+        },
+        {
+            "id": "water",
+            "type": "fill",
+            "metadata": {},
+            "source": "composite",
+            "source-layer": "water",
+            "layout": {},
+            "paint": {"fill-color": "hsl(190, 98%, 55%)"}
+        },
+        {
+            "id": "road",
+            "type": "line",
+            "metadata": {},
+            "source": "composite",
+            "source-layer": "road",
+            "layout": {"line-cap": "round", "line-join": "bevel"},
+            "paint": {
+                "line-color": "#d7d0c6",
+                "line-width": [
+                    "interpolate",
+                    ["linear"],
+                    ["zoom"],
+                    0,
+                    1,
+                    16.51,
+                    10,
+                    18.57,
+                    50,
+                    19.77,
+                    100,
+                    22,
+                    200
+                ]
+            }
+        },
+        {
+            "id": "building",
+            "type": "fill",
+            "metadata": {},
+            "source": "composite",
+            "source-layer": "building",
+            "layout": {},
+            "paint": {"fill-color": "hsl(39, 75%, 31%)"}
+        },
+        {
+            "id": "building_special",
+            "type": "fill",
+            "metadata": {},
+            "source": "composite",
+            "source-layer": "landuse",
+            "filter": [
+                "match",
+                ["get", "class"],
+                ["scrub", "cemetery", "school", "airport"],
+                true,
+                false
+            ],
+            "layout": {},
+            "paint": {"fill-color": "#8a6114"}
+        }
+    ],
+    "created": "2019-08-12T17:49:06.095Z",
+    "id": "cjz8oyfff3w261cqh020bdh0w",
+    "modified": "2019-08-12T18:37:26.965Z",
+    "owner": "peterpolman",
+    "visibility": "private",
+    "draft": false
+}

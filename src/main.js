@@ -14,61 +14,48 @@ let app;
 
 firebase.initializeApp(config.firebase);
 
-firebase.auth().onAuthStateChanged(function(user) {
-  if (!app) {
-    app = new Vue({
-      el: '#app',
-      render: h => h(App),
-      router
-    });
-  }
+firebase.auth().onAuthStateChanged(function() {
+    if (!app) {
+        app = new Vue({
+            el: '#app',
+            render: h => h(App),
+            router
+        });
+    }
 });
 
 Vue.use(VueRouter);
 
 const routes = [
-  {
-    path: '*',
-    redirect: '/login'
-  },
-  {
-    name: 'home',
-    path: '/',
-    component: Home,
-    meta: {
-      requiresAuth: true
+    {
+        path: '*',
+        redirect: '/login'
+    }, {
+        name: 'home',
+        path: '/',
+        component: Home,
+        meta: {
+            requiresAuth: true
+        }
+    }, {
+        name: 'login',
+        path: '/login',
+        component: Login
+    }, {
+        name: 'register',
+        path: '/register',
+        component: Register
     }
-  },
-  {
-    name: 'login',
-    path: '/login',
-    component: Login
-  },
-  {
-    name: 'register',
-    path: '/register',
-    component: Register
-  }
 ];
 
-const router = new VueRouter({
-  routes: routes
-});
-
-window.setMessage = (uid, message) => {
-    window.dispatchEvent(new CustomEvent('message.add', {
-        detail: {
-            uid: uid,
-            message: message,
-            timestamp: firebase.database.ServerValue.TIMESTAMP
-        }
-    }))
-}
+const router = new VueRouter({routes: routes});
 
 router.beforeEach((to, from, next) => {
-  let currentUser = firebase.auth().currentUser;
-  let requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+    let currentUser = firebase.auth().currentUser;
+    let requiresAuth = to.matched.some(record => record.meta.requiresAuth);
 
-  if (requiresAuth && !currentUser) next('login')
-  else next()
+    if (requiresAuth && !currentUser)
+        next('login')
+    else
+        next()
 });

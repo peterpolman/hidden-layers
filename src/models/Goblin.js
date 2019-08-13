@@ -1,12 +1,19 @@
-import firebase from 'firebase/app'
-import Character from './Character.js'
+import DamagableCharacter from './DamagableCharacter';
 
-export default class Goblin extends Character {
-    constructor(position, size) {
-        super(position, 100)
-        const iconSize = 40
+import firebase from 'firebase/app';
+import Item from './Item';
 
-        this.hasTalked = false
+export default class Goblin extends DamagableCharacter {
+    constructor(id, data) {
+        super(id, data);
+
+        this.name = 'Goblin';
+        this.race = 'goblin';
+        this.class = 'goblin';
+        this.level = data.level;
+        this.ref = firebase.database().ref('npc').child(id);
+        this.marker = null;
+        this.defendTimer = null;
         this.greetings = [
             "I got what you need.",
             "Got the best deals anywheres.",
@@ -41,33 +48,70 @@ export default class Goblin extends Character {
             "Go, go!",
             "Make sense!"
         ]
-
-        this.marker.setIcon({
-            labelOrigin: new google.maps.Point(iconSize / 2, -10),
-            url: require('../assets/img/goblin-1.png'),
-            size: new google.maps.Size(iconSize, iconSize),
-            scaledSize: new google.maps.Size(iconSize, iconSize),
-            origin: new google.maps.Point(0, 0),
-            anchor: new google.maps.Point(iconSize / 2, (iconSize / 2) - 5)
-        })
     }
 
-    talk() {
-        const message = `Goblin: ${this.greetings[Math.floor(Math.random() * this.greetings.length)]}`
-        window.dispatchEvent(new CustomEvent('message_add', {
-            detail: {
-                message: message,
-                timestamp: firebase.database.ServerValue.TIMESTAMP
+    dropLoot(amount) {
+        const gold = {
+            id: firebase.database().ref('loot').push().key,
+            slug: 'gold',
+            name: 'Gold',
+            amount: amount,
+            position: this.position,
+        }
+        new Item(gold.id, gold).drop(this.position);
+
+        // See if something else drops
+        if (Math.floor(Math.random() * 10) > 5) {
+            const potion = {
+                id: firebase.database().ref('loot').push().key,
+                slug: 'potion',
+                name: 'Potion',
+                amount: 1,
+                position: this.position,
             }
-        }))
+            new Item(potion.id, potion).drop(this.position)
+        }
 
-        this.hasTalked = true
-
-        return `Goblin: ${message}`
+        // See if something else drops
+        if (Math.floor(Math.random() * 10) > 5) {
+            const sword = {
+                id: firebase.database().ref('loot').push().key,
+                slug: 'sword',
+                name: 'Wooden Sword',
+                amount: 1,
+                position: this.position,
+            }
+            new Item(sword.id, sword).drop(this.position);
+        }
     }
 
-	// update(data) {
-	// 	return this.scoutRef.update(data);
-	// }
+    fight() {
+        const HL = window.HL;
+        const damage = Math.floor(Math.random() * 10) + (this.level * 1);
 
+        HL.user.hit(damage)
+    }
+
+    defend() {
+        if (this.defendTimer === null) {
+            this.defendTimer = window.setInterval(this.fight.bind(this), 1000)
+        }
+    }
+
+    stopDefending() {
+        window.clearInterval(this.defendTimer);
+        this.defendTimer = null;
+    }
+
+    onClick() {
+        const HL = window.HL;
+
+        if (HL.selectedItem !== null) {
+            this.use(HL.selectedItem);
+            this.defend();
+        }
+        else {
+            console.info(`Goblin: ${this.greetings[Math.floor(Math.random() * this.greetings.length)]}`);
+        }
+    }
 }

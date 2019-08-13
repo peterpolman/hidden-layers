@@ -1,41 +1,60 @@
 <template>
-<section class="section-login">
-    <div class="google-map" id="home-map"></div>
-    <h1>Let's create an account</h1>
-    <form v-on:submit.prevent="register">
+    <div class="row">
+        <div class="loader" v-if="loading">Loading...</div>
+        <form class="form" v-on:submit.prevent="register" v-if="!loading">
+            <h1>Nice to meet you!</h1>
+            <h2>Authentication</h2>
+            <div class="form-item">
+                <input required type="text" v-model="email" class="input-text" placeholder="E-mail">
+            </div>
+            <div class="form-item">
+                <input required type="password" v-model="password" class="input-text" placeholder="******">
+            </div>
+            <div class="form-item">
+                <input required type="password" v-model="passwordVerify" class="input-text" placeholder="******">
+            </div>
 
-        <h2>Authentication</h2>
-        <input required type="text" v-model="email" placeholder="E-mail">
-        <input required type="password" v-model="password" placeholder="password">
+            <h2>Personal</h2>
+            <div class="form-item">
+                <input required type="text" v-model="userName" class="input-text" placeholder="Username">
+            </div>
 
-        <h2>Personal</h2>
-        <input required type="text" v-model="username" placeholder="Username">
+            <h2>Hero Race</h2>
+            <div class="form-item">
+                <input name="race" class="form-radio" id="class-human" type="radio" value="human" v-model="userRace">
+                <label for="class-knight">Human</label>
+            </div>
 
-        <h2>Hero Class</h2>
-        <div class="form-item">
-            <input name="class" class="form-radio" id="class-knight" type="radio" value="knight" v-model="userClass">
-            <label for="class-knight">Knight</label>
-            <input name="class" class="form-radio" id="class-archer" type="radio" value="archer" v-model="userClass">
-            <label for="class-archer">Archer</label>
-            <input name="class" class="form-radio" id="class-wizard" type="radio" value="wizard" v-model="userClass">
-            <label for="class-wizard">Wizard</label>
-        </div>
-        <div class="form-item" v-if="alert">
-            {{ alert }}
-        </div>
-        <button class="btn" type="submit">Register</button>
-        <p>or go back to <router-link to="/login">Login</router-link>
-        </p>
-    </form>
-</section>
+            <h2>Hero Class</h2>
+            <div class="form-item">
+                <input name="class" class="form-radio" id="class-knight" type="radio" value="knight" v-model="userClass">
+                <label for="class-knight">Knight</label>
+                <input name="class" class="form-radio" id="class-archer" type="radio" value="archer" v-model="userClass">
+                <label for="class-archer">Archer</label>
+                <input name="class" class="form-radio" id="class-wizard" type="radio" value="wizard" v-model="userClass">
+                <label for="class-wizard">Wizard</label>
+            </div>
+
+            <h2>Position</h2>
+            <div class="form-item" v-if="position">
+                Lat: <strong>{{position.latitude}}</strong><br>
+                Lng: <strong>{{position.longitude}}</strong>
+            </div>
+            <div class="form-item" v-if="!position">
+                Trying to get your position...
+            </div>
+            <button v-bind:disabled="!position" class="btn btn-primary" type="submit">Create account</button>
+            <p class="align-center">or go back to <router-link to="/login">Login</router-link></p>
+        </form>
+    </div>
 </template>
 
 <script>
 import firebase from 'firebase/app';
 import 'firebase/auth';
-
-import UserController from './controllers/UserController';
-import MapBackground from './assets/img/map.png';
+import GeoService from './services/GeoService';
+import MarkerService from './services/MarkerService';
+const Geohash = require('latlon-geohash');
 
 export default {
     name: 'register',
@@ -43,55 +62,103 @@ export default {
         return {
             email: '',
             password: '',
-            userClass: '',
-            username: '',
-            alert: ''
+            passwordVerify: '',
+            position: null,
+            userName: '',
+            userRace: 'human',
+            userClass: 'knight',
+            loading: false,
         }
     },
     mounted() {
-        document.getElementById('home-map').style.backgroundImage = `url(${MapBackground})`
+        const geoService = new GeoService();
+        geoService.getPosition()
+            .then((position) => {
+                this.position = position;
+            })
+            .catch((err) => alert(err));
     },
     methods: {
         register: function() {
-            const options = {
-                enableHighAccuracy: true,
-                maximumAge: 1000,
-                timeout: 30000
+            this.loading = true;
+            if (this.password === this.passwordVerify) {
+                const position = this.position;
+                this.createAccount(position);
             }
-            this.alert = "Processing location data."
-            navigator.geolocation.getCurrentPosition(this.createAccount, this.error, options);
-        },
-        error(err) {
-            if (typeof err != 'undefined') {
-                this.alert = 'Error during processing location data.'
+            else {
+                alert("Your passwords do not match.");
             }
         },
         createAccount(position) {
             firebase.auth().createUserWithEmailAndPassword(this.email, this.password)
                 .then((r) => {
-                    const data = {
+                    const scout = {
+                        id: firebase.database().ref('scouts').push().key,
+                        uid: r.user.uid,
+                        hitPoints: 100,
+                        level: 1,
+                        name: `${this.userName}'s scout`,
+                        race: 'wolf',
+                        position: {
+                            lat: position.latitude + 0.00001,
+                            lng: position.longitude + 0.00001,
+                        },
+                    }
+                    const markerService = new MarkerService();
+                    const hashes = markerService.getUniqueHashes(r.user.id, {
+                        lat: position.latitude,
+                        lng: position.longitude
+                    });
+                    const user = {
+                        hashes: hashes,
+                        scout: scout.id,
                         uid: r.user.uid,
                         email: r.user.email,
                         hitPoints: 100,
+                        exp: 0,
+                        level: 1,
+                        race: this.userRace,
+                        class: this.userClass,
+                        name: this.userName,
                         position: {
-                            lat: position.coords.latitude,
-                            lng: position.coords.longitude
+                            lat: position.latitude,
+                            lng: position.longitude
                         },
-                        userClass: this.userClass,
-                        username: this.username,
                     }
+                    const hash = Geohash.encode(user.position.lat, user.position.lng, 7);
 
-                    new UserController(r.user.uid).createUser(r.user.uid, data)
-                    this.$router.replace('/')
+                    debugger
+
+                    firebase.database().ref('users').child(user.uid).set(user);
+                    firebase.database().ref('scouts').child(scout.id).set(scout);
+                    firebase.database().ref('markers').child(hash).child(user.uid).set({
+                        position: user.position,
+                        race: 'human',
+                        ref: `users/${user.uid}`
+                    });
+                    firebase.database().ref('markers').child(hash).child(scout.id).set({
+                        position: scout.position,
+                        race: 'wolf',
+                        ref: `scouts/${scout.id}`
+                    });
+
+                    this.loading = false;
+                    this.$router.replace('/');
                 })
                 .catch((err) => {
                     if (typeof err != 'undefined') {
-                        this.alert = "Error during account registration."
-                        console.log(err)
-                        alert(err)
+                        alert("Error during account registration.")
                     }
+                    this.loading = false;
                 })
         }
     }
 }
 </script>
+
+<style>
+    .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+</style>
