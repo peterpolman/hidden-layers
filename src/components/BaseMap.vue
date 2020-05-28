@@ -1,0 +1,18 @@
+<template>
+    <div id="map"></div>
+</template>
+<script src="./BaseMap.ts" lang="ts"></script>
+<style>
+#map {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    z-index: -1;
+}
+
+.mapboxgl-ctrl-bottom-left,
+.mapboxgl-ctrl-bottom-right {
+    display: none !important;
+}
+</style>

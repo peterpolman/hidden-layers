@@ -1,0 +1,15 @@
+{
+  "name": "Hidden Layers",
+  "short_name": "Hidden Layers",
+  "theme_color": "#fdc539",
+  "background_color": "#3f2d42",
+  "display": "standalone",
+  "orientation": "portrait",
+  "Scope": "/",
+  "start_url": "/",
+  "splash_pages": null,
+  "icons": [{
+    "src": "/pwa_icon.png",
+    "sizes": "254x254"
+  }]
+}

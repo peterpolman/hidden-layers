@@ -1,0 +1,14 @@
+{
+    "firebase": {
+        "apiKey": "AIzaSyATtPuq_NyADi2fJXWj4BtLmc63oGevEyM",
+        "authDomain": "growth-9f10c.firebaseapp.com",
+        "databaseURL": "https://growth-9f10c.firebaseio.com",
+        "projectId": "growth-9f10c",
+        "storageBucket": "growth-9f10c.appspot.com",
+        "messagingSenderId": "40207947328",
+        "appId": "1:40207947328:web:68dd474cb18a4841d2f1a5"
+    },
+    "mapbox": {
+        "key": "pk.eyJ1IjoicGV0ZXJwb2xtYW4iLCJhIjoiY2pza3Mzc29hMmhmNzQ5bnhvcjNhZGRlbCJ9.zwdPJJb7j5NFKjDYhvOuLQ"
+    }
+}
