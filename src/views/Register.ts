@@ -42,7 +42,7 @@ export default class Register extends Vue {
                     },
                 };
             })
-            .catch(err => {
+            .catch((err) => {
                 if (typeof err != 'undefined') {
                     alert('Error during account registration.');
                 }

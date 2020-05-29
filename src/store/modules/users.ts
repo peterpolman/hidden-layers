@@ -37,13 +37,13 @@ class UsersModule extends VuexModule implements UsersModuleState {
     public async init(firebaseUser: any) {
         const usersRef = firebase.db.ref(`users`);
 
-        usersRef.on('child_added', async s => {
+        usersRef.on('child_added', async (s) => {
             const user = new User(s.val().uid, s.val());
 
             this.context.commit('addUser', user);
         });
 
-        usersRef.on('child_changed', async s => {
+        usersRef.on('child_changed', async (s) => {
             this.context.commit('setUser', {
                 uid: s.val().uid,
                 update: {
@@ -53,7 +53,7 @@ class UsersModule extends VuexModule implements UsersModuleState {
             });
         });
 
-        usersRef.on('child_removed', async s => {
+        usersRef.on('child_removed', async (s) => {
             this.context.commit('removeUser', s.val().uid);
         });
     }

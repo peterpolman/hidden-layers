@@ -23,12 +23,14 @@ const Threebox = (window as any)['Threebox'];
 })
 export default class BaseMap extends Vue {
     account!: Account;
+    mixers!: any;
     map: any;
     tb: any;
     markers!: any;
     tracker = 0;
     position = { lat: 0, lng: 0 };
     options = { enableHighAccuracy: true, maximumAge: 1000, timeout: 30000 };
+    clock: any;
 
     async mounted() {
         const position: any = await this.getPosition();
@@ -45,11 +47,12 @@ export default class BaseMap extends Vue {
     }
 
     addLayer() {
+        this.clock = new THREE.Clock();
         this.$store.commit('map/addLayer', {
             id: 'custom_layer',
             type: 'custom',
             renderingMode: '3d',
-            onAdd: function(map: any, mbxContext: any) {
+            onAdd: (map: any, mbxContext: any) => {
                 const ambientLight = new THREE.AmbientLight(0xffffff, 1);
                 const directionalLight = new THREE.DirectionalLight(0xffffff, 0.65);
                 const tb = new Threebox(map, mbxContext);
@@ -57,20 +60,27 @@ export default class BaseMap extends Vue {
                 tb.add(ambientLight);
                 tb.add(directionalLight);
 
-                // eslint-disable-next-line
                 this.$store.commit('map/addThreebox', tb);
-            }.bind(this),
-            render: function(gl: any, matrix: any) {
-                // eslint-disable-next-line
+            },
+            render: (gl: any, matrix: any) => {
+                const delta = this.clock.getDelta();
+
+                if (this.mixers) {
+                    this.mixers.forEach((mixer: any) => {
+                        mixer.update(delta);
+                        this.tb.repaint();
+                    });
+                }
+
                 this.tb.update();
-            }.bind(this),
+            },
         });
     }
 
     startTracking() {
         this.tracker = navigator.geolocation.watchPosition(
-            this.update,
-            err => {
+            this.updatePosition,
+            (err) => {
                 console.error(err);
             },
             this.options,
@@ -84,10 +94,10 @@ export default class BaseMap extends Vue {
     getPosition() {
         return new Promise((resolve, reject) => {
             navigator.geolocation.getCurrentPosition(
-                r => {
+                (r) => {
                     resolve({ lat: r.coords.latitude, lng: r.coords.longitude });
                 },
-                err => {
+                (err) => {
                     reject(err.message);
                 },
                 this.options,
@@ -95,7 +105,7 @@ export default class BaseMap extends Vue {
         });
     }
 
-    async update(r: { coords: any }) {
+    async updatePosition(r: { coords: any }) {
         if (this.account) {
             await this.$store.dispatch('account/setPosition', {
                 account: this.account,

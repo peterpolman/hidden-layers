@@ -13,6 +13,7 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
     private _listeners: any[] = [];
 
     get all() {
+        console.log(this._markers);
         return this._markers;
     }
 

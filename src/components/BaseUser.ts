@@ -40,10 +40,6 @@ export default class BaseUser extends Vue {
         const loader = new THREE.GLTFLoader();
 
         loader.load(`./objects/${this.user.class}/${this.user.class}.gltf`, (gltf: any) => {
-            // Remove existing objects with same id
-            const objectInScene = this.tb.world.getObjectByName(this.user.uid);
-            this.tb.remove(objectInScene);
-
             gltf.scene.scale.set(1.5, 1.5, 1.5);
             gltf.scene.rotation.z = 180 * 0.0174533;
             gltf.scene.name = this.user.uid;
@@ -68,9 +64,6 @@ export default class BaseUser extends Vue {
 
             this.tb.add(this.mesh);
             this.tb.repaint();
-
-            console.log('Object added to world: ', this.user.uid, this.mesh);
-            console.log('Object is visible', this.user.uid, this.mesh.visible);
         });
 
         // const lngLat = [this.user.position.lng, this.user.position.lat];
