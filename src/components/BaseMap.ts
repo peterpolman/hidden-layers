@@ -38,6 +38,7 @@ export default class BaseMap extends Vue {
         await this.$store.dispatch('map/init', { container: this.$refs.map, position });
 
         this.map.on('style.load', () => this.init());
+        this.map.on('click', (e: any) => this.$emit('click', e));
     }
 
     async init() {
@@ -80,7 +81,7 @@ export default class BaseMap extends Vue {
     startTracking() {
         this.tracker = navigator.geolocation.watchPosition(
             this.updatePosition,
-            (err) => {
+            err => {
                 console.error(err);
             },
             this.options,
@@ -94,10 +95,10 @@ export default class BaseMap extends Vue {
     getPosition() {
         return new Promise((resolve, reject) => {
             navigator.geolocation.getCurrentPosition(
-                (r) => {
+                r => {
                     resolve({ lat: r.coords.latitude, lng: r.coords.longitude });
                 },
-                (err) => {
+                err => {
                     reject(err.message);
                 },
                 this.options,

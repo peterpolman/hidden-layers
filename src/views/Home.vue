@@ -1,6 +1,6 @@
 <template>
     <div>
-        <base-map />
+        <base-map @click="onMapClick($event)" />
 
         <div class="map-ui" v-if="map">
             <base-profile />

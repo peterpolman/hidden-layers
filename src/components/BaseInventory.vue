@@ -11,7 +11,6 @@
     background-color: rgba(0, 0, 0, 0.5);
     position: absolute;
     bottom: 1rem;
-    left: 1rem;
     right: 1rem;
     width: auto;
 }
