@@ -1,13 +1,13 @@
 <template>
     <div>
-        <base-map @init="map = $event" />
+        <base-map />
 
         <div class="map-ui" v-if="map">
             <base-profile />
             <base-inventory />
 
             <div class="users">
-                <base-user class="user" v-for="(user, key) of users" :map="map" :user="user" :key="key" />
+                <base-user class="user" v-for="(user, key) of users" :user="user" :key="key" />
             </div>
         </div>
     </div>

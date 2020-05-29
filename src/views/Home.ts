@@ -15,11 +15,14 @@ import BaseUser from '@/components/BaseUser.vue';
         'base-user': BaseUser,
     },
     computed: {
+        ...mapGetters('map', {
+            map: 'map',
+        }),
         ...mapGetters('users', {
             users: 'users',
         }),
     },
 })
 export default class Home extends Vue {
-    map: any = null;
+    map!: any;
 }

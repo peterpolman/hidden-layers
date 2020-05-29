@@ -1,5 +1,5 @@
 <template>
-    <div id="map"></div>
+    <div ref="map" id="map"></div>
 </template>
 <script src="./BaseMap.ts" lang="ts"></script>
 <style>

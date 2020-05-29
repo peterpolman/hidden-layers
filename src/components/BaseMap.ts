@@ -1,7 +1,9 @@
 import { Component, Vue } from 'vue-property-decorator';
-import MapboxGL from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
 import { mapGetters } from 'vuex';
+import { Account } from '@/models/Account';
+
+const THREE = (window as any)['THREE'];
+const Threebox = (window as any)['Threebox'];
 
 @Component({
     name: 'BaseMap',
@@ -9,45 +11,63 @@ import { mapGetters } from 'vuex';
         ...mapGetters('account', {
             account: 'account',
         }),
+        ...mapGetters('map', {
+            map: 'map',
+            tb: 'tb',
+            layers: 'layers',
+        }),
+        ...mapGetters('markers', {
+            markers: 'visible',
+        }),
     },
 })
 export default class BaseMap extends Vue {
-    account!: any;
-    position = { lat: 0, lng: 0 };
+    account!: Account;
     map: any;
+    tb: any;
+    markers!: any;
     tracker = 0;
+    position = { lat: 0, lng: 0 };
     options = { enableHighAccuracy: true, maximumAge: 1000, timeout: 30000 };
 
     async mounted() {
         const position: any = await this.getPosition();
 
-        this.map = new MapboxGL.Map({
-            container: 'map',
-            style: require('../assets/style-dark.json'),
-            zoom: 19,
-            maxZoom: 21,
-            minZoom: 16,
-            center: [position.lng, position.lat],
-            pitch: 75,
-            bearing: 45,
-            antialias: true,
-            doubleClickZoom: false,
-            pitchWithRotate: false,
-            touchZoomRotate: false,
-            scrollZoom: true,
-            boxZoom: false,
-            dragRotate: true,
-        });
+        await this.$store.dispatch('map/init', { container: this.$refs.map, position });
 
-        this.map.on('load', this.init);
+        this.map.on('style.load', () => this.init());
     }
 
     async init() {
-        this.start();
-        this.$emit('init', this.map);
+        this.$emit('init');
+        this.addLayer();
+        this.startTracking();
     }
 
-    start() {
+    addLayer() {
+        this.$store.commit('map/addLayer', {
+            id: 'custom_layer',
+            type: 'custom',
+            renderingMode: '3d',
+            onAdd: function(map: any, mbxContext: any) {
+                const ambientLight = new THREE.AmbientLight(0xffffff, 1);
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.65);
+                const tb = new Threebox(map, mbxContext);
+
+                tb.add(ambientLight);
+                tb.add(directionalLight);
+
+                // eslint-disable-next-line
+                this.$store.commit('map/addThreebox', tb);
+            }.bind(this),
+            render: function(gl: any, matrix: any) {
+                // eslint-disable-next-line
+                this.tb.update();
+            }.bind(this),
+        });
+    }
+
+    startTracking() {
         this.tracker = navigator.geolocation.watchPosition(
             this.update,
             err => {
@@ -57,7 +77,7 @@ export default class BaseMap extends Vue {
         );
     }
 
-    stop() {
+    stopTracking() {
         navigator.geolocation.clearWatch(this.tracker);
     }
 
