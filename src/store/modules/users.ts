@@ -1,5 +1,6 @@
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 import { Vue } from 'vue-property-decorator';
+import { firestoreAction } from 'vuexfire';
 
 import { User } from '@/models/User';
 import firebase from '@/firebase';
@@ -18,11 +19,12 @@ class UsersModule extends VuexModule implements UsersModuleState {
 
     @Mutation
     public addUser(user: User) {
-        Vue.set(this._users, user.uid, user);
+        Vue.set(this._users, user.id, user);
     }
 
     @Mutation
     public setUser(mutation: any) {
+        debugger;
         mutation.updates.map((key: string, value: any) => {
             Vue.set(this._users[mutation.updates.uid], key, value);
         });
@@ -30,7 +32,7 @@ class UsersModule extends VuexModule implements UsersModuleState {
 
     @Mutation
     public removeUser(user: User) {
-        Vue.delete(this._users, user.uid);
+        Vue.delete(this._users, user.id);
     }
 
     @Action
@@ -43,15 +45,12 @@ class UsersModule extends VuexModule implements UsersModuleState {
             this.context.commit('addUser', user);
         });
 
-        usersRef.on('child_changed', async (s) => {
-            this.context.commit('setUser', {
-                uid: s.val().uid,
-                update: {
-                    key: s.key,
-                    value: s.val(),
-                },
-            });
-        });
+        // usersRef.on('child_changed', async s => {
+        //     this.context.commit('setUser', {
+        //         uid: s.val().uid,
+        //         update: s.val()
+        //     });
+        // });
 
         usersRef.on('child_removed', async (s) => {
             this.context.commit('removeUser', s.val().uid);

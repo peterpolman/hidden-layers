@@ -28,7 +28,7 @@ class AccountModule extends VuexModule implements AccountModuleState {
 
     @Action
     public async setPosition(payload: { account: User; position: { lat: number; lng: number } }) {
-        return await firebase.db.ref(`users/${payload.account.uid}`).update({ position: payload.position });
+        return await firebase.db.ref(`users/${payload.account.id}`).update({ position: payload.position });
     }
 
     @Action

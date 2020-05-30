@@ -1,38 +1,68 @@
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 import { Vue } from 'vue-property-decorator';
 import firebase from '@/firebase';
+import { User } from '@/models/User';
+import { Goblin } from '@/models/Enemies';
 
 export interface MarkersModuleState {
-    all: any;
-    visible: any;
+    all: { [id: string]: User | Goblin };
+    users: { [id: string]: User };
+    enemies: { [id: string]: Goblin };
 }
 
 @Module({ namespaced: true })
 class MarkersModule extends VuexModule implements MarkersModuleState {
-    private _markers: { [id: string]: any } = {};
-    private _listeners: any[] = [];
+    private _all: { [id: string]: Goblin | User } = {};
+    private _target!: Goblin | User | undefined;
 
-    get all() {
-        console.log(this._markers);
-        return this._markers;
+    get all(): any {
+        return this._all;
     }
 
-    get visible() {
-        return this._markers;
+    get users(): any {
+        return Object.values(this._all).filter((char: any) => {
+            return char.race === 'human';
+        });
+    }
+
+    get enemies(): any {
+        return Object.values(this._all).filter((char: any) => {
+            return char.race === 'goblin';
+        });
+    }
+
+    get target() {
+        return this._target;
+    }
+
+    @Action
+    public setTarget(id: string) {
+        this._all[id].target = true;
     }
 
     @Mutation
-    public addMarker(id: string, marker: any) {
-        Vue.set(this._markers, id, marker);
+    public addMarker(marker: any) {
+        switch (marker.race) {
+            case 'human':
+                const user = new User(marker.uid, marker);
 
-        console.log('Marker added: ', id);
+                Vue.set(this._all, user.id, user);
+
+                console.log('User added: ', user);
+                break;
+            case 'goblin':
+                const goblin = new Goblin(marker.id, marker);
+
+                Vue.set(this._all, goblin.id, goblin);
+
+                console.log('Enemy added: ', goblin);
+                break;
+        }
     }
 
     @Mutation
-    public removeMarker(id: string) {
-        Vue.delete(this._markers, id);
-
-        console.log('Marker removed: ', id);
+    public removeMarker(marker: any) {
+        Vue.delete(this._all, marker.id);
     }
 
     @Action
@@ -49,7 +79,7 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
             firebase.db.ref(`markers/${s.key}`).on('child_removed', async (s: any) => {
                 const snap = await firebase.db.ref(s.val().ref).once('value');
 
-                this.context.commit('removeMarker', snap.val().id);
+                this.context.commit('removeMarker', s.key);
             });
 
             console.log('Hash added: ', firebaseUser.uid, s.key);
@@ -60,11 +90,8 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
             const snap = await firebase.db.ref(`markers/${s.key}`).once('value');
 
             snap.val().forEach((marker: any) => {
-                this.context.commit('removeMarker', marker.id);
+                this.context.commit('removeMarker', marker);
             });
-
-            // delete listener for this hash
-            delete this._listeners[s.key];
 
             console.log('Hash removed: ', firebaseUser.uid, s.key);
         });
