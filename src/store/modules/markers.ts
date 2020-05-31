@@ -58,6 +58,12 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
                 Vue.set(this._all, goblin.id, goblin);
 
                 console.log('Enemy added: ', goblin);
+
+                firebase.db.ref(`npc/${goblin.id}`).on('child_changed', (s: any) => {
+                    Vue.set(this._all[goblin.id], s.key, s.val());
+
+                    console.log('Enemy changed: ', s.key, s.val());
+                });
                 break;
         }
     }
