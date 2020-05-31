@@ -26,17 +26,14 @@ import BaseGoblin from '@/components/characters/Goblin.vue';
         }),
         ...mapGetters('markers', {
             all: 'all',
-            target: 'target',
-            // users: 'users',
-            // enemies: 'enemies',
         }),
     },
 })
 export default class Home extends Vue {
     map!: any;
     tb!: any;
-    users!: { [id: string]: User };
-    enemies!: { [id: string]: Goblin };
+    all!: { [id: string]: Goblin | User };
+    selected!: Goblin | User;
 
     onMapClick(event: any) {
         const intersect = this.tb.queryRenderedFeatures(event.point)[0];
@@ -49,11 +46,24 @@ export default class Home extends Vue {
     }
 
     handleMeshClick(event: any, object: any) {
-        this.$store.dispatch('markers/setTarget', object.parent.parent.parent.userData.id);
-        debugger;
+        const data = this.getUserData(object).userData;
+
+        this.$store.dispatch('markers/select', data.id);
     }
 
     handleMapClick(event: any) {
-        debugger;
+        this.$store.dispatch('markers/deselect');
+    }
+
+    getUserData(object: any) {
+        if (typeof object.userData.id != 'undefined') {
+            return object;
+        } else if (typeof object.parent.userData.id != 'undefined') {
+            return object.parent;
+        } else if (typeof object.parent.parent.userData.id != 'undefined') {
+            return object.parent.parent;
+        } else if (typeof object.parent.parent.parent.userData.id != 'undefined') {
+            return object.parent.parent.parent;
+        }
     }
 }

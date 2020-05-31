@@ -16,19 +16,18 @@ import { BButton } from 'bootstrap-vue';
     },
 })
 export default class BaseCharacter extends Vue {
-    @Prop() id!: string;
     @Prop() img!: string;
-    @Prop() position!: { lng: number; lat: number };
+    @Prop() character!: any;
     @Prop() object!: string;
-    @Prop() show!: boolean;
 
     map: any;
     tb: any;
     mixer: any;
     walkCycle: any;
     mesh: any;
+    show = false;
 
-    mounted() {
+    created() {
         const THREE = (window as any)['THREE'];
         const loader = new THREE.GLTFLoader();
 
@@ -36,8 +35,8 @@ export default class BaseCharacter extends Vue {
             gltf.scene.scale.set(1.5, 1.5, 1.5);
             gltf.scene.rotation.z = 180 * 0.0174533;
             gltf.scene.userData = {
-                id: this.id,
-                position: this.position,
+                id: this.character.id,
+                position: this.character.position,
             };
 
             if (gltf.animations.length > 0) {
@@ -51,7 +50,7 @@ export default class BaseCharacter extends Vue {
 
             this.mesh = this.tb
                 .Object3D({ obj: gltf.scene, units: 'meters' })
-                .setCoords([this.position.lng, this.position.lat]);
+                .setCoords([this.character.position.lng, this.character.position.lat]);
 
             this.tb.add(this.mesh);
             this.tb.repaint();
@@ -59,6 +58,6 @@ export default class BaseCharacter extends Vue {
     }
 
     onClick() {
-        this.map.setCenter([this.position.lng, this.position.lat]);
+        this.map.setCenter([this.character.position.lng, this.character.position.lat]);
     }
 }

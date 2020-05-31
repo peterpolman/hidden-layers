@@ -7,7 +7,7 @@
             <base-inventory />
 
             <div class="nearby">
-                <component :is="marker.race" v-for="marker of all" :marker="marker" :key="marker.id" />
+                <component :is="marker.race" v-for="marker of all" :character="marker" :key="marker.id" />
             </div>
         </div>
     </div>

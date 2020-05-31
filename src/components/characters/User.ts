@@ -23,7 +23,7 @@ const ImgAccountClass = {
     },
 })
 export default class CharacterUser extends Vue {
-    @Prop() marker!: User;
+    @Prop() character!: User;
 
     img = ImgAccountClass;
 }

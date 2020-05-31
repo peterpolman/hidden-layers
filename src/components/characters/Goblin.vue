@@ -1,19 +1,13 @@
 <template>
-    <base-character
-        :show="marker.target"
-        :img="img"
-        object="./objects/goblin/goblin.gltf"
-        :id="marker.id"
-        :position="marker.position"
-    >
+    <base-character :img="img" object="./objects/goblin/goblin.gltf" :character="character">
         <div slot="level">
-            {{ marker.lvl }}
+            {{ character.lvl }}
         </div>
         <div slot="name">
             Goblin
         </div>
         <div slot="progress">
-            <b-progress class="profile-hp" variant="success" :value="marker.hp" :max="100" />
+            <b-progress class="profile-hp" variant="success" :value="character.hp" :max="100" />
         </div>
     </base-character>
 </template>

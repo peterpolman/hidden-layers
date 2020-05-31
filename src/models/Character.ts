@@ -3,16 +3,28 @@ export class Character {
     name: string;
     position: { lat: number; lng: number };
     race: string;
-    hp: number;
-    lvl: number;
-    target = false;
+    hitPoints: number;
+    level: number;
+    selected = false;
 
     constructor(id: string, data: any) {
         this.id = id;
         this.name = data.name;
         this.position = data.position;
         this.race = data.race;
-        this.lvl = data.level;
-        this.hp = data.hitPoints;
+        this.level = data.level;
+        this.hitPoints = data.hitPoints;
+    }
+
+    select() {
+        this.selected = true;
+    }
+
+    get hp() {
+        return this.hitPoints;
+    }
+
+    get lvl() {
+        return this.level;
     }
 }

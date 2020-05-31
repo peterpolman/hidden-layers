@@ -1,5 +1,5 @@
 <template>
-    <div class="profile" v-if="show">
+    <div class="profile" v-show="character.selected">
         <b-button @click="onClick()" class="btn-circle">
             <img width="30" :src="img" />
         </b-button>

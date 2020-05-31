@@ -3,17 +3,15 @@ import { Vue } from 'vue-property-decorator';
 import firebase from '@/firebase';
 import { User } from '@/models/User';
 import { Goblin } from '@/models/Enemies';
+import { firebaseAction } from 'vuexfire';
 
 export interface MarkersModuleState {
     all: { [id: string]: User | Goblin };
-    users: { [id: string]: User };
-    enemies: { [id: string]: Goblin };
 }
 
 @Module({ namespaced: true })
 class MarkersModule extends VuexModule implements MarkersModuleState {
     private _all: { [id: string]: Goblin | User } = {};
-    private _target!: Goblin | User | undefined;
 
     get all(): any {
         return this._all;
@@ -31,13 +29,10 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
         });
     }
 
-    get target() {
-        return this._target;
-    }
-
-    @Action
-    public setTarget(id: string) {
-        this._all[id].target = true;
+    get selected() {
+        return Object.values(this._all).find((char: any) => {
+            return char.selected;
+        });
     }
 
     @Mutation
@@ -49,6 +44,13 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
                 Vue.set(this._all, user.id, user);
 
                 console.log('User added: ', user);
+
+                firebase.db.ref(`users/${user.id}`).on('child_changed', (s: any) => {
+                    Vue.set(this._all[user.id], s.key, s.val());
+
+                    console.log('User changed: ', s.key, s.val());
+                });
+
                 break;
             case 'goblin':
                 const goblin = new Goblin(marker.id, marker);
@@ -66,19 +68,30 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
     }
 
     @Action
+    public select(id: number) {
+        if (this.selected) {
+            this._all[this.selected.id].selected = false;
+        }
+        this._all[id].selected = true;
+    }
+
+    @Action
+    public deselect() {
+        if (this.selected) {
+            this._all[this.selected.id].selected = false;
+        }
+    }
+
+    @Action
     public async discover(firebaseUser: firebase.User) {
         firebase.db.ref(`users/${firebaseUser.uid}/hashes`).on('child_added', (s: any) => {
-            // Bind to markers added to this hash
             firebase.db.ref(`markers/${s.key}`).on('child_added', async (s: any) => {
                 const snap = await firebase.db.ref(s.val().ref).once('value');
-
                 this.context.commit('addMarker', snap.val());
             });
 
-            // Bind to markers removed from this hash
             firebase.db.ref(`markers/${s.key}`).on('child_removed', async (s: any) => {
                 const snap = await firebase.db.ref(s.val().ref).once('value');
-
                 this.context.commit('removeMarker', s.key);
             });
 
