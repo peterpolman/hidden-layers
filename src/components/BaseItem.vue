@@ -1,16 +1,25 @@
 <template>
-    <b-button class="btn-square" :title="item.name">
-        <img class="image" :src="img[item.slug]" :alt="item.name" />
-        <div class="amount">
-            {{ item.amount }}
-        </div>
-    </b-button>
+    <span>
+        <b-button :id="item.id" class="btn-square" :title="item.name">
+            <img class="image" :src="img[item.slug]" :alt="item.name" />
+            <div class="amount">
+                {{ item.amount }}
+            </div>
+        </b-button>
+        <b-popover :target="item.id" triggers="hover" placement="top">
+            <template v-slot:title>
+                <small v-if="item.amount > 1">{{ item.amount }} x </small>
+                <span :style="{ color: item.rarity.color }">{{ item.name }}</span>
+            </template>
+            <i v-if="item.description">{{ item.description }}</i>
+        </b-popover>
+    </span>
 </template>
 <script src="./BaseItem.ts" lang="ts"></script>
 <style scoped>
 .image {
-    width: 25px;
-    height: auto;
+    height: 25px;
+    width: auto;
 }
 
 .amount {

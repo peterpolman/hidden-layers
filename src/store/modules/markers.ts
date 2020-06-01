@@ -3,7 +3,6 @@ import { Vue } from 'vue-property-decorator';
 import firebase from '@/firebase';
 import { User } from '@/models/User';
 import { Goblin } from '@/models/Enemies';
-import { firebaseAction } from 'vuexfire';
 
 export interface MarkersModuleState {
     all: { [id: string]: User | Goblin };

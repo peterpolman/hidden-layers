@@ -1,17 +1,37 @@
 <template>
-    <div class="inventory" v-if="inventory">
-        <base-item :item="item" v-for="(item, key) of inventory" :key="key" />
+    <div class="ui-inventory">
+        <b-button class="btn-square" @click="open()">
+            <img class="image" :src="img[isOpen ? 'backpackOpen' : 'backpack']" />
+        </b-button>
+        <base-modal @close="isOpen = false" title="Inventory" id="inventory" v-if="inventory">
+            <div slot="content">
+                <div class="modal-inventory">
+                    <draggable v-model="inventory">
+                        <transition-group>
+                            <base-item :id="item.id" :item="item" v-for="item of inventory" :key="item.id" />
+                        </transition-group>
+                    </draggable>
+                </div>
+            </div>
+        </base-modal>
     </div>
 </template>
 <script src="./BaseInventory.ts" lang="ts"></script>
 <style scoped>
-.inventory {
-    display: inline-flex;
+.btn-square {
     padding: 0.25rem;
-    background-color: rgba(0, 0, 0, 0.5);
+}
+.btn-square .image {
+    height: 35px;
+}
+.ui-inventory {
     position: absolute;
     bottom: 1rem;
     right: 1rem;
+}
+.modal-inventory {
+    display: inline-flex;
+    padding: 0.25rem;
     width: auto;
 }
 </style>

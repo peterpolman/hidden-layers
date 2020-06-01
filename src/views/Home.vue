@@ -17,11 +17,19 @@
 
 <style>
 .btn-square {
+    width: 50px;
+    height: 50px;
     position: relative;
     border-radius: 4px;
     margin: 0.25rem;
-    background: rgba(255, 255, 255, 0.75);
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: white;
+    border: 1px solid #efefef;
+    box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.25);
+}
+
+.btn-square .amount {
+    background: #333;
+    color: white;
 }
 
 .nearby {
@@ -104,5 +112,33 @@
     width: 100%;
     box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
     background-color: rgba(0, 0, 0, 0.5);
+}
+
+.popover {
+    border-radius: 0;
+    background-color: #222;
+    border: 2px solid #d19a66;
+    border-radius: 5px;
+}
+
+.popover .arrow:after {
+    border-top-color: #d19a66;
+}
+.popover .popover-header,
+.popover .popover-body {
+    background-color: transparent;
+    color: white;
+    border: 0;
+}
+.popover .popover-header {
+    font-size: 14px;
+    padding: 0.5rem;
+    color: white;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+.popover .popover-body {
+    padding: 0 0.5rem 0.5rem 0.5rem;
+    font-size: 12px;
 }
 </style>

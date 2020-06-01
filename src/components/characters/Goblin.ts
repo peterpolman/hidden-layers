@@ -3,7 +3,9 @@ import { Goblin } from '@/models/Enemies';
 import BaseCharacter from '@/components/BaseCharacter.vue';
 import { BProgress } from 'bootstrap-vue';
 
-const ImgGoblin = require('../../assets/img/goblin-1.png');
+const ImgGoblin = {
+    goblin: require('../../assets/img/goblin-1.png'),
+};
 
 @Component({
     name: 'Goblin',
@@ -15,5 +17,5 @@ const ImgGoblin = require('../../assets/img/goblin-1.png');
 export default class CharacterUser extends Vue {
     @Prop() character!: Goblin;
 
-    img = ImgGoblin;
+    img = ImgGoblin.goblin;
 }

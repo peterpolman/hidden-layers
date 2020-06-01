@@ -3,21 +3,12 @@
 </template>
 <script src="./App.ts" lang="ts"></script>
 <style>
+@import url('https://fonts.googleapis.com/css?family=Alice');
+
 html,
 body {
     margin: 0;
-}
-
-.btn-square {
-    width: 50px;
-    height: 50px;
-}
-
-.btn-square .image {
-}
-
-.btn-square .amount {
-    background: #333;
-    color: white;
+    font-family: 'Avenir', Helvetica, Arial, sans-serif;
+    background: #3f2d42;
 }
 </style>
