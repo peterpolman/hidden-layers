@@ -7,7 +7,6 @@ config.rawError = true;
 
 import AccountStore from './modules/account';
 import MapModule from './modules/map';
-import UsersModule from './modules/users';
 import MarkersModule from './modules/markers';
 import InventoryModule from './modules/inventory';
 import EquipmentModule from './modules/equipment';
@@ -24,7 +23,6 @@ const getters = {};
 const modules = {
     account: AccountStore,
     map: MapModule,
-    users: UsersModule,
     markers: MarkersModule,
     inventory: InventoryModule,
     equipment: EquipmentModule,

@@ -14,6 +14,7 @@ import './registerServiceWorker';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
+import './style.css';
 
 Vue.config.productionTip = false;
 

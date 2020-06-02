@@ -44,6 +44,11 @@ class AccountModule extends VuexModule implements AccountModuleState {
     }
 
     @Action
+    public register({ email, password }: { email: string; password: string }) {
+        return firebase.auth.createUserWithEmailAndPassword(email, password);
+    }
+
+    @Action
     public reset() {
         const action = firebaseAction(({ unbindFirebaseRef }) => {
             return unbindFirebaseRef('_account');

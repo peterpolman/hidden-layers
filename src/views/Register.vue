@@ -1,21 +1,21 @@
 <template>
-    <div class="row">
-        <form class="form" v-on:submit.prevent="register" v-if="!loading">
+    <div class="h-100 container">
+        <form class="form mt-3" v-on:submit.prevent="register" v-if="!loading">
             <h1>Nice to meet you!</h1>
             <h2>Authentication</h2>
             <div class="form-item">
-                <input required type="text" v-model="email" class="input-text" placeholder="E-mail" />
+                <input required type="text" v-model="email" class="form-control" placeholder="E-mail" />
             </div>
             <div class="form-item">
-                <input required type="password" v-model="password" class="input-text" placeholder="******" />
+                <input required type="password" v-model="password" class="form-control" placeholder="******" />
             </div>
             <div class="form-item">
-                <input required type="password" v-model="passwordVerify" class="input-text" placeholder="******" />
+                <input required type="password" v-model="passwordVerify" class="form-control" placeholder="******" />
             </div>
 
             <h2>Personal</h2>
             <div class="form-item">
-                <input required type="text" v-model="userName" class="input-text" placeholder="Username" />
+                <input required type="text" v-model="userName" class="form-control" placeholder="Username" />
             </div>
 
             <h2>Hero Race</h2>
@@ -65,8 +65,13 @@
                 Trying to get your position...
             </div>
             <button v-bind:disabled="!position" class="btn btn-primary" type="submit">Create account</button>
-            <p class="align-center">or go back to <router-link to="/login">Login</router-link></p>
+            <p>... or go back to <router-link to="/login">Login</router-link></p>
         </form>
     </div>
 </template>
 <script src="./Register.ts" lang="ts"></script>
+<style scoped>
+.d-flex {
+    overflow: auto;
+}
+</style>
