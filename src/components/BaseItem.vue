@@ -6,7 +6,7 @@
                 {{ item.amount }}
             </div>
         </b-button>
-        <b-popover :target="item.id" :delay="{ show: 0, hide: 0 }" triggers="click blur">
+        <b-popover :target="item.id" triggers="hover">
             <template v-slot:title>
                 <small v-if="item.amount > 1">{{ item.amount }} x </small>
                 <span :style="{ color: item.rarity.color }">{{ item.name }}</span>

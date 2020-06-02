@@ -133,7 +133,8 @@ input[type='checkbox']:checked + label:after {
 }
 
 .btn-square .image {
-    pointer-events: none;
+    pointer-events: none !important;
+    user-select: none !important;
 }
 
 .btn-square .amount {
