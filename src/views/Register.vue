@@ -71,6 +71,11 @@
 </template>
 <script src="./Register.ts" lang="ts"></script>
 <style scoped>
+.btn-primary {
+    height: 40px;
+    font-size: 16px;
+    margin-bottom: 1rem;
+}
 .d-flex {
     overflow: auto;
 }

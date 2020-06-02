@@ -13,7 +13,7 @@
 <script src="./Login.ts" lang="ts"></script>
 <style scoped>
 .btn-primary {
-    padding: 1.25rem;
+    height: 40px;
     font-size: 16px;
     margin-bottom: 1rem;
 }
