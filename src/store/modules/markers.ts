@@ -91,9 +91,9 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
             const snap = await firebase.db.ref(`markers/${s.val()}`).once('value');
 
             snap.val().forEach((marker: any) => {
-                // if (snap.key !== firebaseUser.uid) {
-                this.context.commit('removeMarker', marker);
-                // }
+                if (snap.key !== firebaseUser.uid) {
+                    this.context.commit('removeMarker', marker);
+                }
             });
 
             console.log('Hash removed: ', firebaseUser.uid, s.key);
