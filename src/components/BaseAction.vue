@@ -39,6 +39,7 @@
 }
 
 .btn-circle.btn-sm .image {
+    display: block;
     width: 20px;
     height: 20px;
 }

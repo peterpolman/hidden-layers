@@ -132,6 +132,10 @@ input[type='checkbox']:checked + label:after {
     border: 1px solid #efefef;
 }
 
+.btn-square .image {
+    pointer-events: none;
+}
+
 .btn-square .amount {
     width: auto;
     height: 16px;

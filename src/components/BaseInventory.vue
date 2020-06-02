@@ -6,7 +6,7 @@
         <base-modal @close="isOpen = false" title="Inventory" id="inventory" v-if="inventory">
             <div slot="content">
                 <div class="modal-inventory">
-                    <draggable v-model="inventory" ghost-class="item-sortable">
+                    <draggable :options="{ delay: 500 }" v-model="inventory" ghost-class="item-sortable">
                         <base-item v-for="item of inventory" :equipped="false" :item="item" :key="item.id" />
                     </draggable>
                 </div>
