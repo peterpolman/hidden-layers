@@ -1,34 +1,58 @@
-# hidden-layers
+# Hidden Layers
+
+Just another **Browser-based Augmented Reality Massive Multiplayer Online Role Playing Game**. Built for fun with [Vue.js](https://github.com/vuejs/vue) and [Typescript](https://github.com/microsoft/typescript). :heart:
+
+![Hidden Layers UI](./public/demo.png 'Hidden Layers')
 
 ## Project setup
+
 ```
-yarn install
+yarn
 ```
 
 ### Compiles and hot-reloads for development
+
 ```
 yarn serve
 ```
 
 ### Compiles and minifies for production
+
 ```
 yarn build
 ```
 
-### Run your unit tests
-```
-yarn test:unit
-```
-
-### Run your end-to-end tests
-```
-yarn test:e2e
-```
-
 ### Lints and fixes files
+
 ```
 yarn lint
 ```
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+### Deploy to Firebase Hosting
+
+```
+yarn deploy
+```
+
+## Feature delivery
+
+In order of appearance. No strings attached. Never really done and always a work in progress.
+
+-   [x] Firebase Authentication
+-   [x] Firebase/Vuex integration
+-   [x] Mapbox implementation
+-   [x] Threebox implementation
+-   [x] Geohash/Marker store
+-   [x] Fog of war
+-   [x] Item Factory
+-   [x] Inventory System
+-   [x] Equipment System
+-   [x] Registration
+-   [x] Geo positioning System
+-   [ ] Loot System
+-   [ ] Scouts
+-   [ ] NPC Spawn Service
+-   [ ] Combat System
+-   [ ] Quest System
+-   [ ] Skill System
+-   [ ] Trading System/Marketplace

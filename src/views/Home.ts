@@ -59,9 +59,11 @@ export default class Home extends Vue {
     }
 
     handleMeshClick(object: any) {
-        const data = this.getUserData(object).userData;
+        if (object.name !== 'fog') {
+            const data = this.getUserData(object).userData;
 
-        this.$store.commit('markers/select', data.id);
+            this.$store.commit('markers/select', data.id);
+        }
     }
 
     handleMapClick() {

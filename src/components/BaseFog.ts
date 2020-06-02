@@ -25,7 +25,12 @@ export default class BaseFog extends Vue {
         const sw = this.tb.utils.projectToWorld([-180, -85]);
 
         this.planeShape = this.createPlane(ne, sw, 5);
+
         this.updateFog({ user: this.account.position });
+
+        this.$watch('account.position', (position) => {
+            this.updateFog({ user: position });
+        });
     }
 
     jstsPoly(path: any) {
@@ -96,9 +101,9 @@ export default class BaseFog extends Vue {
         });
 
         this.fog = new THREE.Mesh(geometry, material);
-        this.fog.name = 'fogOfWar';
+        this.fog.name = 'fog';
 
-        this.tb.world.remove(this.tb.world.getObjectByName('fogOfWar'));
+        this.tb.world.remove(this.tb.world.getObjectByName('fog'));
         this.tb.add(this.fog);
         this.tb.repaint();
     }

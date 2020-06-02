@@ -14,6 +14,10 @@ export default class Register extends Vue {
     userClass = 'knight';
     loading = false;
 
+    async mounted() {
+        await this.getPosition();
+    }
+
     async register() {
         this.loading = true;
         if (this.password === this.passwordVerify) {
