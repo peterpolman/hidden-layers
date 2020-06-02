@@ -38,28 +38,20 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
     public addMarker(marker: any) {
         switch (marker.race) {
             case 'human':
-                const user = new User(marker.uid, marker);
+                Vue.set(this._all, marker.id, new User(marker.uid, marker));
 
-                Vue.set(this._all, user.id, user);
-
-                console.log('User added: ', user);
-
-                firebase.db.ref(`users/${user.id}`).on('child_changed', (s: any) => {
-                    Vue.set(this._all[user.id], s.key, s.val());
+                firebase.db.ref(`users/${marker.id}`).on('child_changed', (s: any) => {
+                    Vue.set(this._all[marker.id], s.key, s.val());
 
                     console.log('User changed: ', s.key, s.val());
                 });
 
                 break;
             case 'goblin':
-                const goblin = new Goblin(marker.id, marker);
+                Vue.set(this._all, marker.id, new Goblin(marker.id, marker));
 
-                Vue.set(this._all, goblin.id, goblin);
-
-                console.log('Enemy added: ', goblin);
-
-                firebase.db.ref(`npc/${goblin.id}`).on('child_changed', (s: any) => {
-                    Vue.set(this._all[goblin.id], s.key, s.val());
+                firebase.db.ref(`npc/${marker.id}`).on('child_changed', (s: any) => {
+                    Vue.set(this._all[marker.id], s.key, s.val());
 
                     console.log('Enemy changed: ', s.key, s.val());
                 });
@@ -96,7 +88,7 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
             });
 
             firebase.db.ref(`markers/${s.key}`).on('child_removed', async (s: any) => {
-                const snap = await firebase.db.ref(s.val().ref).once('value');
+                // const snap = await firebase.db.ref(s.val().ref).once('value');
                 this.context.commit('removeMarker', s.key);
             });
 
