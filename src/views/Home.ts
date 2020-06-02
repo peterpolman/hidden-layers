@@ -1,5 +1,6 @@
 import { Vue, Component } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
+import { BButton } from 'bootstrap-vue';
 
 import { User } from '@/models/User';
 import { Goblin } from '@/models/Enemies';
@@ -15,6 +16,7 @@ import BaseGoblin from '@/components/characters/Goblin.vue';
 @Component({
     name: 'home',
     components: {
+        'b-button': BButton,
         'base-map': BaseMap,
         'base-profile': BaseProfile,
         'base-action': BaseAction,
@@ -50,20 +52,19 @@ export default class Home extends Vue {
         const intersect = this.tb.queryRenderedFeatures(event.point)[0];
 
         if (intersect) {
-            this.handleMeshClick(event, intersect.object);
+            this.handleMeshClick(intersect.object);
         } else {
-            this.handleMapClick(event);
+            this.handleMapClick();
         }
     }
 
-    handleMeshClick(event: any, object: any) {
+    handleMeshClick(object: any) {
         const data = this.getUserData(object).userData;
-        console.log(event);
-        this.$store.dispatch('markers/select', data.id);
+
+        this.$store.commit('markers/select', data.id);
     }
 
-    handleMapClick(event: any) {
-        console.log(event);
+    handleMapClick() {
         this.$store.dispatch('markers/deselect');
     }
 
@@ -77,5 +78,9 @@ export default class Home extends Vue {
         } else if (typeof object.parent.parent.parent.userData.id != 'undefined') {
             return object.parent.parent.parent;
         }
+    }
+
+    logout() {
+        this.$router.replace('logout');
     }
 }

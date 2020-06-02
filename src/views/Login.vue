@@ -11,3 +11,10 @@
     </div>
 </template>
 <script src="./Login.ts" lang="ts"></script>
+<style scoped>
+.btn-primary {
+    padding: 1.25rem;
+    font-size: 16px;
+    margin-bottom: 1rem;
+}
+</style>

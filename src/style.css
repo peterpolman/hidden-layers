@@ -39,6 +39,10 @@ h2 {
     text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.75);
 }
 
+.spinner-border {
+    color: #fdc539;
+}
+
 input[type='radio'],
 input[type='checkbox'] {
     position: absolute;
@@ -204,7 +208,7 @@ input[type='checkbox']:checked + label:after {
     display: flex;
     align-items: center;
     position: absolute;
-    top: 1rem;
+    top: 2.5rem;
     left: 1rem;
     width: 100%;
     max-width: 200px;
@@ -304,7 +308,8 @@ input[type='checkbox']:checked + label:after {
     font-size: 12px;
 }
 
-.form-control {
+.form-control,
+.form-control:focus {
     background-color: rgba(0, 0, 0, 0.5);
     border-color: #fdc539;
     margin-bottom: 0.5rem;
@@ -314,11 +319,6 @@ input[type='checkbox']:checked + label:after {
 }
 .form-control:focus {
     box-shadow: none;
-}
-.btn-primary {
-    padding: 1.25rem;
-    font-size: 16px;
-    margin-bottom: 1rem;
 }
 a {
     color: #fdc539;

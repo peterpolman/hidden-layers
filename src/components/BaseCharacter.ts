@@ -54,7 +54,16 @@ export default class BaseCharacter extends Vue {
 
             this.tb.add(this.mesh);
             this.tb.repaint();
+
+            this.$watch('character.position', (position) => {
+                this.updatePosition(position);
+            });
         });
+    }
+
+    updatePosition(position: any) {
+        this.mesh.setCoords([position.lng, position.lat]);
+        this.tb.repaint();
     }
 
     onClick() {

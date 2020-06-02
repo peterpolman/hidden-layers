@@ -5,7 +5,7 @@ import firebase from '@/firebase';
     name: 'App',
 })
 export default class App extends Vue {
-    created() {
+    mounted() {
         firebase.auth.onAuthStateChanged((user: firebase.User | any) => {
             if (user) {
                 this.$store.dispatch('account/init', user);

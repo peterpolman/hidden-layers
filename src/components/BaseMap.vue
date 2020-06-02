@@ -7,7 +7,8 @@
     position: fixed;
     top: 0;
     bottom: 0;
-    width: 100%;
+    right: 0;
+    left: 0;
 }
 
 .mapboxgl-ctrl-bottom-left,

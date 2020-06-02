@@ -21,9 +21,6 @@ const routes: Array<RouteConfig> = [
     {
         name: 'logout',
         path: '/logout',
-        meta: {
-            requiresAuth: true,
-        },
         component: () => import(/* webpackChunkName: "logout" */ '../views/Logout.vue'),
     },
     {

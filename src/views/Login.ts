@@ -17,8 +17,9 @@ export default class Login extends Vue {
         this.loading = true;
         try {
             await this.$store.dispatch('account/login', { email: this.email, password: this.password });
-            this.loading = false;
+
             this.$router.replace('/');
+            this.loading = false;
         } catch (err) {
             if (typeof err != 'undefined') {
                 alert('Error during account authentication.');

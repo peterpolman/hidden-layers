@@ -16,16 +16,19 @@ import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
 import './style.css';
 
-Vue.config.productionTip = false;
+let app: Vue;
 
+Vue.config.productionTip = false;
 Vue.use(ModalPlugin);
 
 firebase.auth.onAuthStateChanged(() => {
     MapboxGL.accessToken = config.mapbox.key;
 
-    new Vue({
-        router,
-        store,
-        render: (h) => h(App),
-    }).$mount('#app');
+    if (!app) {
+        app = new Vue({
+            router,
+            store,
+            render: (h) => h(App),
+        }).$mount('#app');
+    }
 });

@@ -31,6 +31,13 @@ class MapModule extends VuexModule implements MapModuleState {
     }
 
     @Mutation
+    public remove() {
+        this._map.remove();
+        this._map = null;
+        this._tb = null;
+    }
+
+    @Mutation
     public addMixer(mixer: any) {
         this._mixers.push(mixer);
     }
@@ -56,7 +63,6 @@ class MapModule extends VuexModule implements MapModuleState {
         this.context.commit('setMap', {
             container: payload.container,
             style: style,
-
             zoom: 19,
             maxZoom: 21,
             minZoom: 16,

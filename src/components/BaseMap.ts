@@ -35,9 +35,7 @@ export default class BaseMap extends Vue {
     sw!: any;
 
     async mounted() {
-        const position: any = await this.getPosition();
-
-        await this.$store.dispatch('map/init', { container: this.$refs.map, position });
+        await this.$store.dispatch('map/init', { container: this.$refs.map, position: this.account.position });
 
         this.map.on('style.load', () => this.init());
         this.map.on('click', (e: any) => this.$emit('click', e));
@@ -65,7 +63,7 @@ export default class BaseMap extends Vue {
 
                 this.$store.commit('map/addThreebox', tb);
             },
-            render: (gl: any, matrix: any) => {
+            render: () => {
                 const delta = this.clock.getDelta();
 
                 if (this.mixers) {
@@ -94,29 +92,13 @@ export default class BaseMap extends Vue {
         navigator.geolocation.clearWatch(this.tracker);
     }
 
-    getPosition() {
-        return new Promise((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(
-                (r) => {
-                    resolve({ lat: r.coords.latitude, lng: r.coords.longitude });
-                },
-                (err) => {
-                    reject(err.message);
-                },
-                this.options,
-            );
-        });
-    }
-
     async updatePosition(r: { coords: any }) {
-        if (this.account) {
-            await this.$store.dispatch('account/setPosition', {
-                account: this.account,
-                position: {
-                    lat: r.coords.latitude,
-                    lng: r.coords.longitude,
-                },
-            });
-        }
+        await this.$store.dispatch('account/setPosition', {
+            account: this.account,
+            position: {
+                lat: r.coords.latitude,
+                lng: r.coords.longitude,
+            },
+        });
     }
 }
