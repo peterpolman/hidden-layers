@@ -15,6 +15,7 @@
                 <b-progress class="profile-xp" variant="warning" :value="account.xp" :max="100" />
             </div>
         </div>
+        <base-equipment />
     </div>
 </template>
 <script src="./BaseProfile.ts" lang="ts"></script>

@@ -6,10 +6,8 @@
         <base-modal @close="isOpen = false" title="Inventory" id="inventory" v-if="inventory">
             <div slot="content">
                 <div class="modal-inventory">
-                    <draggable v-model="inventory">
-                        <transition-group>
-                            <base-item :id="item.id" :item="item" v-for="item of inventory" :key="item.id" />
-                        </transition-group>
+                    <draggable v-model="inventory" ghost-class="item-sortable">
+                        <base-item v-for="item of inventory" :equipped="false" :item="item" :key="item.id" />
                     </draggable>
                 </div>
             </div>

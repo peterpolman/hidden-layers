@@ -1,10 +1,12 @@
 <template>
     <div>
         <base-map @click="onMapClick($event)" />
+        <base-fog v-if="tb && account" :account="account" />
 
         <div class="map-ui" v-if="map">
             <base-profile />
             <base-inventory />
+            <base-action :main="equipment.main" :off="equipment.off" :target="selected" />
 
             <div class="nearby">
                 <component :is="marker.race" v-for="marker of all" :character="marker" :key="marker.id" />
@@ -16,6 +18,10 @@
 <script src="./Home.ts" lang="ts"></script>
 
 <style>
+.btn {
+    box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.25);
+}
+
 .btn-square {
     width: 50px;
     height: 50px;
@@ -24,12 +30,70 @@
     margin: 0.25rem;
     background: white;
     border: 1px solid #efefef;
-    box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.25);
 }
 
 .btn-square .amount {
-    background: #333;
+    width: auto;
+    height: 16px;
+    background: black;
     color: white;
+    padding: 0.25rem;
+    font-weight: bold;
+    line-height: 0;
+    font-size: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    right: -1px;
+    bottom: -1px;
+    border-top-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+.btn-square:hover,
+.btn-square:focus,
+.btn-square:focus:hover {
+    background-color: white !important;
+    box-shadow: 0;
+}
+
+.btn-square.active {
+    box-shadow: 0 0 0 3px #d19a66;
+}
+
+.btn-primary,
+.btn-success {
+    font-family: 'Alice';
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border: 0;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+    height: 21px;
+    padding: 0 0.5rem;
+    opacity: 1;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    position: relative;
+    font-size: 10px;
+}
+
+.btn-primary {
+    background-color: #650703 !important;
+    color: #d19a66;
+}
+
+.btn-success {
+    background-color: #cb9500 !important;
+    color: #650703;
+}
+
+.btn-primary span,
+.btn-success span {
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
 }
 
 .nearby {
@@ -116,13 +180,15 @@
 
 .popover {
     border-radius: 0;
-    background-color: #222;
-    border: 2px solid #d19a66;
+    background-color: rgba(0, 0, 0, 0.75);
+    border: 1px solid #666;
     border-radius: 5px;
+    overflow: visible;
+    width: 200px;
 }
 
-.popover .arrow:after {
-    border-top-color: #d19a66;
+.popover .arrow {
+    display: none;
 }
 .popover .popover-header,
 .popover .popover-body {

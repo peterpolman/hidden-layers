@@ -1,7 +1,8 @@
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
-import { BButton, BSpinner, BListGroup, BListGroupItem, BProgress, BProgressBar } from 'bootstrap-vue';
+import { BButton, BSpinner, BProgress, BProgressBar } from 'bootstrap-vue';
 import { Account } from '@/models/Account';
+import BaseEquipment from '@/components/BaseEquipment.vue';
 
 const ImgAccountClass = {
     wizard: require('../assets/img/wizard-1.png'),
@@ -16,8 +17,7 @@ const ImgAccountClass = {
         'b-button': BButton,
         'b-progress': BProgress,
         'b-progress-bar': BProgressBar,
-        'b-list-group': BListGroup,
-        'b-list-group-item': BListGroupItem,
+        'base-equipment': BaseEquipment,
     },
     computed: {
         ...mapGetters('map', {
@@ -35,5 +35,6 @@ export default class BaseProfile extends Vue {
 
     onProfileClick() {
         this.map.setCenter([this.account.position.lng, this.account.position.lat]);
+        this.$bvModal.show('equipment');
     }
 }

@@ -5,3 +5,4 @@ declare module '*.vue' {
 declare module 'mapbox-gl';
 declare module 'latlon-geohash';
 declare module 'vuedraggable';
+declare module 'jsts';

@@ -1,18 +1,9 @@
 import { Component, Vue, Prop } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { Item } from '@/models/Item';
+import { Account } from '@/models/Account';
+import { Images } from '@/models/Images';
 import { BButton, BPopover } from 'bootstrap-vue';
-
-const ImgItems = {
-    potion: require('../assets/img/potion.png'),
-    map: require('../assets/img/map.png'),
-    ward: require('../assets/img/ward-1.png'),
-    woodSword: require('../assets/img/woodSword.png'),
-    gold: require('../assets/img/coin.png'),
-    coinStack: require('../assets/img/coinstack.png'),
-    backpack: require('../assets/img/backpack.png'),
-    backpackOpen: require('../assets/img/backpack_open.png'),
-};
 
 @Component({
     name: 'BaseInventory',
@@ -21,6 +12,9 @@ const ImgItems = {
         'b-popover': BPopover,
     },
     computed: {
+        ...mapGetters('account', {
+            account: 'account',
+        }),
         ...mapGetters('inventory', {
             inventory: 'items',
         }),
@@ -28,6 +22,20 @@ const ImgItems = {
 })
 export default class BaseInventory extends Vue {
     @Prop() item!: Item;
+    @Prop() equipped!: boolean;
 
-    img = ImgItems;
+    account!: Account;
+    img: Images = new Images();
+
+    equip() {
+        this.$store.dispatch('inventory/equip', { account: this.account, item: this.item });
+    }
+
+    unequip() {
+        this.$store.dispatch('inventory/unequip', { account: this.account, item: this.item });
+    }
+
+    use() {
+        debugger;
+    }
 }

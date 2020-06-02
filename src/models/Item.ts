@@ -32,6 +32,8 @@ export class Item {
     description: string;
     amount: number;
     rarity: { name: string; color: string };
+    value: number;
+    slot: string;
 
     constructor(data: any) {
         this.id = data.id;
@@ -40,5 +42,7 @@ export class Item {
         this.description = data.description;
         this.amount = data.amount;
         this.rarity = Rarity[data.rarity];
+        this.value = data.value;
+        this.slot = data.slot;
     }
 }

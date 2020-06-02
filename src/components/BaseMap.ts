@@ -31,6 +31,8 @@ export default class BaseMap extends Vue {
     position = { lat: 0, lng: 0 };
     options = { enableHighAccuracy: true, maximumAge: 1000, timeout: 30000 };
     clock: any;
+    ne!: any;
+    sw!: any;
 
     async mounted() {
         const position: any = await this.getPosition();

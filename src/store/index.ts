@@ -10,6 +10,7 @@ import MapModule from './modules/map';
 import UsersModule from './modules/users';
 import MarkersModule from './modules/markers';
 import InventoryModule from './modules/inventory';
+import EquipmentModule from './modules/equipment';
 
 Vue.use(Vuex);
 
@@ -26,6 +27,7 @@ const modules = {
     users: UsersModule,
     markers: MarkersModule,
     inventory: InventoryModule,
+    equipment: EquipmentModule,
 };
 
 export default new Vuex.Store({

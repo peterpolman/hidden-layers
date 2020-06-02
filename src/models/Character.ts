@@ -16,10 +16,6 @@ export class Character {
         this.hitPoints = data.hitPoints;
     }
 
-    select() {
-        this.selected = true;
-    }
-
     get hp() {
         return this.hitPoints;
     }
