@@ -5,7 +5,7 @@ node_modules/
 dist/
 npm-debug.log
 yarn-error.log
-src/config.js
+src/config.json
 
 # Editor directories and files
 .idea

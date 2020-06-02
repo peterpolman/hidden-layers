@@ -1,15 +1,14 @@
 <template>
     <router-view></router-view>
 </template>
+<script src="./App.ts" lang="ts"></script>
+<style>
+@import url('https://fonts.googleapis.com/css?family=Alice');
 
-<script>
-import firebase from 'firebase/app';
-import 'firebase/auth';
-export default {
-    data() {
-        return {
-            currentUser: firebase.auth().currentUser
-        }
-    }
+html,
+body {
+    margin: 0;
+    font-family: 'Avenir', Helvetica, Arial, sans-serif;
+    background: #3f2d42;
 }
-</script>
+</style>
