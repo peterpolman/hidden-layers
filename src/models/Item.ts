@@ -34,6 +34,7 @@ export class Item {
     rarity: { name: string; color: string };
     value: number;
     slot: string;
+    component = 'item';
 
     constructor(data: any) {
         this.id = data.id;

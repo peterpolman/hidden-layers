@@ -34,7 +34,7 @@ yarn lint
 yarn deploy
 ```
 
-## Feature delivery
+## Feature Roadmap
 
 In order of appearance. No strings attached. Never really done and always a work in progress.
 

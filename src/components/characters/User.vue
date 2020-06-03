@@ -1,17 +1,17 @@
 <template>
     <base-character
-        :img="img[character.class]"
-        :object="`./objects/${character.class}/${character.class}.gltf`"
-        :character="character"
+        :img="img[marker.class]"
+        :object="`./objects/${marker.class}/${marker.class}.gltf`"
+        :marker="marker"
     >
         <div slot="level">
-            <span>{{ character.lvl }}</span>
+            <span>{{ marker.lvl }}</span>
         </div>
         <div slot="name">
-            <span>{{ character.name }}</span>
+            <span>{{ marker.name }}</span>
         </div>
         <div slot="progress">
-            <b-progress class="profile-hp" variant="success" :value="character.hp" :max="100" />
+            <b-progress class="profile-hp" variant="success" :value="marker.hp" :max="100" />
         </div>
     </base-character>
 </template>

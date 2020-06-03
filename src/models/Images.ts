@@ -3,6 +3,7 @@ export class Images {
     map = require('../assets/img/map.png');
     ward = require('../assets/img/ward-1.png');
     woodSword = require('../assets/img/woodSword.png');
+    tools = require('../assets/img/tools.png');
     gold = require('../assets/img/coin.png');
     coinStack = require('../assets/img/coinstack.png');
     backpack = require('../assets/img/backpack.png');

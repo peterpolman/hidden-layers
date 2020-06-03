@@ -1,10 +1,11 @@
 import { Component, Vue, Prop } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { BButton } from 'bootstrap-vue';
+import { Loot } from '@/models/Loot';
 import { Account } from '@/models/Account';
 
 @Component({
-    name: 'BaseCharacter',
+    name: 'BaseLoot',
     components: {
         'b-button': BButton,
     },
@@ -12,6 +13,7 @@ import { Account } from '@/models/Account';
         ...mapGetters('account', {
             account: 'account',
         }),
+
         ...mapGetters('map', {
             map: 'map',
             tb: 'tb',
@@ -19,9 +21,8 @@ import { Account } from '@/models/Account';
         }),
     },
 })
-export default class BaseCharacter extends Vue {
-    @Prop() img!: string;
-    @Prop() marker!: any;
+export default class BaseLoot extends Vue {
+    @Prop() marker!: Loot;
     @Prop() object!: string;
 
     account!: Account;
@@ -30,13 +31,12 @@ export default class BaseCharacter extends Vue {
     mixer: any;
     walkCycle: any;
     mesh: any;
-    show = false;
 
     created() {
         const THREE = (window as any)['THREE'];
         const loader = new THREE.GLTFLoader();
 
-        loader.load(this.object, (gltf: any) => {
+        loader.load(`./objects/items/${this.marker.item.slug}.gltf`, (gltf: any) => {
             gltf.scene.scale.set(1.5, 1.5, 1.5);
             gltf.scene.rotation.z = 180 * 0.0174533;
             gltf.scene.userData = {
@@ -60,23 +60,25 @@ export default class BaseCharacter extends Vue {
             this.tb.add(this.mesh);
             this.tb.repaint();
 
-            this.$watch('marker.position', (position) => {
-                this.updatePosition(position);
-            });
+            this.$watch('marker.selected', () => this.pickup());
         });
     }
 
-    updatePosition(position: any) {
-        this.mesh.setCoords([position.lng, position.lat]);
-        this.tb.repaint();
+    render() {
+        return;
+    }
 
-        if (this.account.id === this.marker.id && this.account.lockCamera) {
-            this.map.setCenter([position.lng, position.lat]);
-        }
+    pickup() {
+        this.$store.dispatch('inventory/pickup', { account: this.account, loot: this.marker });
     }
 
     destroyed() {
         this.tb.remove(this.mesh);
+        this.tb.repaint();
+    }
+
+    updatePosition(position: any) {
+        this.mesh.setCoords([position.lng, position.lat]);
         this.tb.repaint();
     }
 

@@ -15,7 +15,7 @@ const ImgGoblin = {
     },
 })
 export default class CharacterUser extends Vue {
-    @Prop() character!: Goblin;
+    @Prop() marker!: Goblin;
 
     img = ImgGoblin.goblin;
 }

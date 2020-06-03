@@ -4,6 +4,8 @@ import { BButton } from 'bootstrap-vue';
 
 import { User } from '@/models/User';
 import { Goblin } from '@/models/Enemies';
+import { Loot } from '@/models/Loot';
+import { Account } from '@/models/Account';
 
 import BaseFog from '@/components/BaseFog.vue';
 import BaseMap from '@/components/BaseMap.vue';
@@ -12,6 +14,7 @@ import BaseProfile from '@/components/BaseProfile.vue';
 import BaseInventory from '@/components/BaseInventory.vue';
 import BaseUser from '@/components/characters/User.vue';
 import BaseGoblin from '@/components/characters/Goblin.vue';
+import BaseLoot from '@/components/BaseLoot';
 
 @Component({
     name: 'home',
@@ -23,6 +26,7 @@ import BaseGoblin from '@/components/characters/Goblin.vue';
         'base-inventory': BaseInventory,
         'human': BaseUser,
         'goblin': BaseGoblin,
+        'loot': BaseLoot,
         'base-fog': BaseFog,
     },
     computed: {
@@ -43,9 +47,10 @@ import BaseGoblin from '@/components/characters/Goblin.vue';
     },
 })
 export default class Home extends Vue {
+    account!: Account;
     map!: any;
     tb!: any;
-    all!: { [id: string]: Goblin | User };
+    all!: { [id: string]: Goblin | User | Loot };
     selected!: Goblin | User;
 
     onMapClick(event: any) {
@@ -80,6 +85,12 @@ export default class Home extends Vue {
         } else if (typeof object.parent.parent.parent.userData.id != 'undefined') {
             return object.parent.parent.parent;
         }
+    }
+
+    async toggleLockCamera() {
+        await this.$store.dispatch('account/toggleLockCamera');
+        this.map.dragPan[this.account.lockCamera ? 'disable' : 'enable']();
+        this.map.setCenter([this.account.position.lng, this.account.position.lat]);
     }
 
     logout() {

@@ -4,6 +4,9 @@
         <base-fog v-if="tb" :account="account" />
 
         <header class="menu">
+            <b-button @click="toggleLockCamera()" class="btn btn-success">
+                {{ account.lockCamera ? 'Unlock' : 'Lock' }} Camera
+            </b-button>
             <b-button @click="logout()" class="btn close btn-secondary">
                 <span>×</span>
             </b-button>
@@ -15,7 +18,7 @@
             <base-action :main="equipment.main" :off="equipment.off" :target="selected" />
 
             <div class="nearby">
-                <component :is="marker.race" v-for="marker of all" :character="marker" :key="marker.id" />
+                <component :is="marker.component" v-for="marker of all" :marker="marker" :key="marker.id" />
             </div>
         </div>
     </div>
@@ -32,5 +35,8 @@
     position: fixed;
     z-index: 1;
     border: 0;
+}
+.menu .btn {
+    display: inline;
 }
 </style>

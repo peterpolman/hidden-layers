@@ -23,6 +23,13 @@ class AccountModule extends VuexModule implements AccountModuleState {
     }
 
     @Action
+    public async toggleLockCamera() {
+        await firebase.db.ref(`users/${this._data.uid}`).update({
+            lockCamera: !this._data.lockCamera,
+        });
+    }
+
+    @Action
     public init(firebaseUser: firebase.User) {
         const action = firebaseAction(async ({ bindFirebaseRef }) => {
             return bindFirebaseRef('_data', firebase.db.ref(`users/${firebaseUser.uid}`));

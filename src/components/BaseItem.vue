@@ -24,8 +24,8 @@
             <b-button v-if="equipped" variant="primary" block size="sm" @click="unequip()">
                 <span>Unequip</span>
             </b-button>
-            <b-button variant="success" block size="sm" @click="use()">
-                <span>Use</span>
+            <b-button v-if="dropable" variant="success" block size="sm" @click="drop()">
+                <span>Drop</span>
             </b-button>
         </b-popover>
     </span>

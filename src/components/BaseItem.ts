@@ -23,6 +23,7 @@ import { BButton, BPopover } from 'bootstrap-vue';
 export default class BaseInventory extends Vue {
     @Prop() item!: Item;
     @Prop() equipped!: boolean;
+    @Prop() dropable!: boolean;
 
     account!: Account;
     img: Images = new Images();
@@ -35,7 +36,7 @@ export default class BaseInventory extends Vue {
         this.$store.dispatch('inventory/unequip', { account: this.account, item: this.item });
     }
 
-    use() {
-        debugger;
+    drop() {
+        this.$store.dispatch('inventory/drop', { account: this.account, item: this.item });
     }
 }

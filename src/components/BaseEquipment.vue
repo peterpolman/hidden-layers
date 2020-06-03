@@ -3,7 +3,14 @@
         <div slot="content">
             <div class="modal-equipment">
                 <div class="btn-slot" v-for="(item, name) of equipment" :key="name">
-                    <base-item v-if="item" :equipped="true" :id="item.id" :item="item" :key="item.id" />
+                    <base-item
+                        v-if="item"
+                        :equipped="true"
+                        :dropable="false"
+                        :id="item.id"
+                        :item="item"
+                        :key="item.id"
+                    />
                     <small v-else>
                         {{ name }}
                     </small>

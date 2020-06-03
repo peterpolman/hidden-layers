@@ -3,7 +3,7 @@ import { mapGetters } from 'vuex';
 import { Account } from '@/models/Account';
 
 const THREE = (window as any)['THREE'];
-const jsts = require('jsts');
+const JSTS = require('jsts');
 
 @Component({
     name: 'BaseFog',
@@ -34,7 +34,7 @@ export default class BaseFog extends Vue {
     }
 
     jstsPoly(path: any) {
-        const geometryFactory = new jsts.geom.GeometryFactory();
+        const geometryFactory = new JSTS.geom.GeometryFactory();
         const jstsPath = this.convertToJSTSPath(path);
         const linearRing = geometryFactory.createLinearRing(jstsPath);
 
@@ -46,7 +46,7 @@ export default class BaseFog extends Vue {
         const coordinates = [];
 
         for (let i = 0; i < points.length; i++) {
-            coordinates.push(new jsts.geom.Coordinate(points[i].x, points[i].y));
+            coordinates.push(new JSTS.geom.Coordinate(points[i].x, points[i].y));
         }
 
         return coordinates;

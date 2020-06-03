@@ -6,6 +6,7 @@ export class Character {
     level: number;
     selected = false;
     mesh: any;
+    component: string;
     _position: { lat: number; lng: number };
 
     constructor(id: string, data: any) {
@@ -14,6 +15,7 @@ export class Character {
         this.race = data.race;
         this.level = data.level;
         this.hitPoints = data.hitPoints;
+        this.component = data.race;
         this._position = data.position;
     }
 

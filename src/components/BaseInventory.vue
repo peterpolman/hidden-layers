@@ -7,7 +7,13 @@
             <div slot="content">
                 <div class="modal-inventory">
                     <draggable :options="{ delay: 100 }" v-model="inventory" ghost-class="item-sortable">
-                        <base-item v-for="item of inventory" :equipped="false" :item="item" :key="item.id" />
+                        <base-item
+                            v-for="item of inventory"
+                            :equipped="false"
+                            :dropable="true"
+                            :item="item"
+                            :key="item.id"
+                        />
                     </draggable>
                 </div>
             </div>
