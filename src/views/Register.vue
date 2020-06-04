@@ -1,70 +1,79 @@
 <template>
     <div class="h-100 container">
-        <form class="form mt-3" v-on:submit.prevent="register" v-if="!loading">
+        <b-spinner variant="primary" v-if="loading"></b-spinner>
+        <form v-else class="form mt-3" v-on:submit.prevent="register">
             <h1>Nice to meet you!</h1>
             <h2>Authentication</h2>
-            <div class="form-item">
+            <div class="form-group">
                 <input required type="text" v-model="email" class="form-control" placeholder="E-mail" />
             </div>
-            <div class="form-item">
+            <div class="form-group">
                 <input required type="password" v-model="password" class="form-control" placeholder="******" />
             </div>
-            <div class="form-item">
+            <div class="form-group">
                 <input required type="password" v-model="passwordVerify" class="form-control" placeholder="******" />
             </div>
 
             <h2>Personal</h2>
-            <div class="form-item">
+            <div class="form-group">
                 <input required type="text" v-model="userName" class="form-control" placeholder="Username" />
             </div>
 
             <h2>Hero Race</h2>
-            <div class="form-item">
+            <div class="form-group">
                 <input name="race" class="form-radio" id="class-human" type="radio" value="human" v-model="userRace" />
                 <label for="class-knight">Human</label>
             </div>
 
             <h2>Hero Class</h2>
-            <div class="form-item">
-                <input
-                    name="class"
-                    class="form-radio"
-                    id="class-knight"
-                    type="radio"
-                    value="knight"
-                    v-model="userClass"
-                />
-                <label for="class-knight">Knight</label>
-                <input
-                    name="class"
-                    class="form-radio"
-                    id="class-archer"
-                    type="radio"
-                    value="archer"
-                    v-model="userClass"
-                />
-                <label for="class-archer">Archer</label>
-                <input
-                    name="class"
-                    class="form-radio"
-                    id="class-wizard"
-                    type="radio"
-                    value="wizard"
-                    v-model="userClass"
-                />
-                <label for="class-wizard">Wizard</label>
+            <div class="form-group">
+                <div class="form-check form-check-inline">
+                    <input
+                        name="class"
+                        class="form-radio"
+                        id="class-knight"
+                        type="radio"
+                        value="knight"
+                        v-model="userClass"
+                    />
+                    <label for="class-knight">Knight</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input
+                        name="class"
+                        class="form-radio"
+                        id="class-archer"
+                        type="radio"
+                        value="archer"
+                        v-model="userClass"
+                    />
+                    <label for="class-archer">Archer</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input
+                        name="class"
+                        class="form-radio"
+                        id="class-wizard"
+                        type="radio"
+                        value="wizard"
+                        v-model="userClass"
+                    />
+                    <label for="class-wizard">Wizard</label>
+                </div>
             </div>
 
             <h2>Position</h2>
-            <div class="form-item" v-if="position">
-                Lat: <strong>{{ position.latitude }}</strong
+            <div class="form-group" v-if="position">
+                Lat: <strong>{{ position.lat }}</strong
                 ><br />
-                Lng: <strong>{{ position.longitude }}</strong>
+                Lng: <strong>{{ position.lng }}</strong>
             </div>
-            <div class="form-item" v-if="!position">
+            <div class="form-group" v-if="!position">
                 Trying to get your position...
             </div>
-            <button v-bind:disabled="!position" class="btn btn-primary" type="submit">Create account</button>
+            <b-button :disabled="!position" variant="primary" block class="mt-3" type="submit">
+                Create account
+            </b-button>
             <p>... or go back to <router-link to="/login">Login</router-link></p>
         </form>
     </div>

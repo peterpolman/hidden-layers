@@ -90,8 +90,19 @@ class AccountModule extends VuexModule implements AccountModuleState {
     }
 
     @Action
-    public register({ email, password }: { email: string; password: string }) {
-        return firebase.auth.createUserWithEmailAndPassword(email, password);
+    public async register(payload: { account: { email: string; password: string }; user: User }) {
+        const credentials = await firebase.auth.createUserWithEmailAndPassword(
+            payload.account.email,
+            payload.account.password,
+        );
+
+        if (credentials.user) {
+            return await firebase.db.ref(`users/${credentials.user.uid}`).set({
+                uid: credentials.user.uid,
+                email: payload.account.email,
+                ...payload.user,
+            });
+        }
     }
 }
 

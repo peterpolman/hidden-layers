@@ -325,7 +325,8 @@ input[type='checkbox']:checked + label:after {
 .form-control:focus {
     box-shadow: none;
 }
-a {
+a,
+a:hover {
     color: #fdc539;
 }
 .modal-content {
