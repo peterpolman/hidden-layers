@@ -1,5 +1,5 @@
 <template>
-    <div class="h-100 container">
+    <div class="h-100 d-flex align-items-center justify-content-center">
         <b-spinner variant="primary" v-if="loading"></b-spinner>
         <form v-else class="form mt-3" v-on:submit.prevent="register">
             <h1>Nice to meet you!</h1>

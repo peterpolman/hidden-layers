@@ -40,7 +40,7 @@ h2 {
 }
 
 .spinner-border {
-    color: #fdc539;
+    color: #fdc539 !important;
 }
 
 input[type='radio'],
