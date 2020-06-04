@@ -1,5 +1,5 @@
 <template>
-    <base-modal @close="isOpen = false" title="Equipment" id="equipment">
+    <base-modal @close="isOpen = false" title="Equipment" id="equipment" style="max-width: 200px;">
         <div slot="content">
             <div class="modal-equipment">
                 <div class="btn-slot" v-for="(item, name) of equipment" :key="name">
@@ -33,8 +33,8 @@
     height: 60px;
     background: rgba(0, 0, 0, 0.5);
     border-radius: 5px;
-    margin: 0 5px;
-    display: flex;
+    margin: 0 5px 5px 5px;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     text-transform: uppercase;
@@ -44,10 +44,11 @@
 .btn-slot .btn-square {
     margin: 5px;
 }
+
 .modal-equipment {
-    display: inline-flex;
+    display: inline-block;
     padding: 0.25rem;
-    margin: 5px;
-    width: auto;
+    width: 100%;
+    text-align: center;
 }
 </style>

@@ -117,17 +117,24 @@ class InventoryModule extends VuexModule implements InventoryModuleState {
     }
 
     @Action
-    public async equip(payload: { account: Account; item: Item }) {
-        // Check if item slot is populated
-        const s = await firebase.db.ref(`equipment/${payload.account.id}/${payload.item.slot}`).once('value');
+    public async add(payload: { account: Account; item: Item }) {
+        const snap = await firebase.db.ref(`inventory/${payload.account.id}`).once('value');
+        const inventory = snap.val();
+        const index = inventory.findIndex((i: Item) => {
+            if (i) {
+                return i.id === payload.item.id;
+            }
+        });
 
-        if (s.exists()) {
-            // If so show an error
-            alert('Another item is equipped already!');
+        if (index > -1) {
+            return await firebase.db.ref(`inventory/${payload.account.id}/${index}/`).update({
+                amount: inventory[index].amount + 1,
+            });
         } else {
-            await this.context.dispatch('remove', payload);
-            // Set the item for the slot in equipment
-            await firebase.db.ref(`equipment/${payload.account.id}/${payload.item.slot}`).set(payload.item.id);
+            return await firebase.db.ref(`inventory/${payload.account.id}/${inventory.length}`).set({
+                id: payload.item.id,
+                amount: 1,
+            });
         }
     }
 
@@ -151,24 +158,17 @@ class InventoryModule extends VuexModule implements InventoryModuleState {
     }
 
     @Action
-    public async add(payload: { account: Account; item: Item }) {
-        const snap = await firebase.db.ref(`inventory/${payload.account.id}`).once('value');
-        const inventory = snap.val();
-        const index = inventory.findIndex((i: Item) => {
-            if (i) {
-                return i.id === payload.item.id;
-            }
-        });
+    public async equip(payload: { account: Account; item: Item }) {
+        // Check if item slot is populated
+        const s = await firebase.db.ref(`equipment/${payload.account.id}/${payload.item.slot}`).once('value');
 
-        if (index > -1) {
-            return await firebase.db.ref(`inventory/${payload.account.id}/${index}/`).update({
-                amount: inventory[index].amount + 1,
-            });
+        if (s.exists()) {
+            // If so show an error
+            alert('Another item is equipped already!');
         } else {
-            return await firebase.db.ref(`inventory/${payload.account.id}/${inventory.length}`).set({
-                id: payload.item.id,
-                amount: 1,
-            });
+            await this.context.dispatch('remove', payload);
+            // Set the item for the slot in equipment
+            await firebase.db.ref(`equipment/${payload.account.id}/${payload.item.slot}`).set(payload.item.id);
         }
     }
 

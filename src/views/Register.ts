@@ -8,14 +8,14 @@ export default class Register extends Vue {
     email = '';
     password = '';
     passwordVerify = '';
-    position = null;
+    position: any = null;
     userName = '';
     userRace = 'human';
     userClass = 'knight';
     loading = false;
 
     async mounted() {
-        await this.getPosition();
+        this.position = await this.getPosition();
     }
 
     async register() {
