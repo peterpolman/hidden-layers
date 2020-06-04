@@ -49,7 +49,7 @@ In order of appearance. No strings attached. Never really done and always a work
 -   [x] Equipment System
 -   [x] Registration
 -   [x] Geo positioning System
--   [ ] Loot System
+-   [x] Loot System
 -   [ ] Scouts
 -   [ ] NPC Spawn Service
 -   [ ] Combat System
