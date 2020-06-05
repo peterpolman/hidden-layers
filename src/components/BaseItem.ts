@@ -6,7 +6,7 @@ import { Images } from '@/models/Images';
 import { BButton, BPopover } from 'bootstrap-vue';
 
 @Component({
-    name: 'BaseInventory',
+    name: 'BaseItem',
     components: {
         'b-button': BButton,
         'b-popover': BPopover,
@@ -20,7 +20,7 @@ import { BButton, BPopover } from 'bootstrap-vue';
         }),
     },
 })
-export default class BaseInventory extends Vue {
+export default class BaseItem extends Vue {
     @Prop() item!: Item;
     @Prop() equipped!: boolean;
     @Prop() dropable!: boolean;

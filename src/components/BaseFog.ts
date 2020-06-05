@@ -1,6 +1,7 @@
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { Account } from '@/models/Account';
+import { Ward } from '@/models/Ward';
 
 const THREE = (window as any)['THREE'];
 const JSTS = require('jsts');
@@ -14,6 +15,9 @@ const JSTS = require('jsts');
         ...mapGetters('map', {
             tb: 'tb',
         }),
+        ...mapGetters('markers', {
+            wards: 'wards',
+        }),
     },
 })
 export default class BaseFog extends Vue {
@@ -21,6 +25,13 @@ export default class BaseFog extends Vue {
     tb!: any;
     planeShape!: any;
     fog!: any;
+    wards!: Ward[];
+
+    get wardPositions() {
+        return this.wards.map((ward: Ward) => {
+            return ward.position;
+        });
+    }
 
     mounted() {
         const ne = this.tb.utils.projectToWorld([180, 85]);
@@ -28,10 +39,14 @@ export default class BaseFog extends Vue {
 
         this.planeShape = this.createPlane(ne, sw, 5);
 
-        this.updateFog({ user: this.account.position });
+        this.updateFog([this.account.position].concat(this.wardPositions));
 
-        this.$watch('account.position', (position) => {
-            this.updateFog({ user: position });
+        this.$watch('account.position', () => {
+            this.updateFog([this.account.position].concat(this.wardPositions));
+        });
+
+        this.$watch('wardPositions', () => {
+            this.updateFog([this.account.position].concat(this.wardPositions));
         });
     }
 
@@ -63,20 +78,14 @@ export default class BaseFog extends Vue {
     }
 
     updateFog(positions: any) {
-        const holes = [],
-            visibility = [];
-
-        // Loop through the positions that need discovery
-        for (const id in positions) {
-            const p = this.tb.utils.projectToWorld([positions[id].lng, positions[id].lat]);
-            // let size = (HL.user.id === id) ? 2 : 1.5;
-            const size = this.account.id === id ? 4 : 3;
-
+        const visibility = [];
+        const holes = positions.map((position: { lat: number; lng: number }) => {
+            const p = this.tb.utils.projectToWorld([position.lng, position.lat]);
+            const size = this.account.position === position ? 4 : 3;
             const hole = this.createHole(size, p);
-            const jstsHole = this.jstsPoly(hole);
 
-            holes.push(jstsHole);
-        }
+            return this.jstsPoly(hole);
+        });
 
         // Checks for intersections and unites the holes and then converts them back
         // to Three paths and pushes them in the visility array

@@ -35,6 +35,7 @@ export class Item {
     value: number;
     slot: string;
     component = 'item';
+    active = false;
 
     constructor(data: any) {
         this.id = data.id;
@@ -45,5 +46,9 @@ export class Item {
         this.rarity = Rarity[data.rarity];
         this.value = data.value;
         this.slot = data.slot;
+    }
+
+    activate() {
+        this.active = true;
     }
 }

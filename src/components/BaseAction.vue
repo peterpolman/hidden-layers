@@ -1,9 +1,14 @@
 <template>
     <div class="ui-action">
-        <b-button v-if="main" @click="onMainClick()" class="btn-circle">
+        <b-button v-if="main" @click="onMainClick()" class="btn-circle" :class="{ active: main.active }">
             <img class="image" :src="img[main.slug]" :alt="main.name" />
         </b-button>
-        <b-button v-if="off" @click="onOffClick()" class="btn btn-circle" :class="{ 'btn-sm': main }">
+        <b-button
+            v-if="off"
+            @click="onOffClick()"
+            class="btn btn-circle"
+            :class="{ 'btn-sm': main, 'active': off.active }"
+        >
             <img class="image" :src="img[off.slug]" :alt="off.name" />
         </b-button>
     </div>

@@ -4,21 +4,13 @@ import firebase from '@/firebase';
 import { Item } from '@/models/Item';
 
 export interface EquipmentModuleState {
-    equipment: Equipment;
-}
-
-export interface Equipment {
-    head: Item | null;
-    body: Item | null;
-    main: Item | null;
-    off: Item | null;
-    legs: Item | null;
-    feet: Item | null;
+    equipment: { [slot: string]: Item | null };
+    active: Item | null;
 }
 
 @Module({ namespaced: true })
 class EquipmentModule extends VuexModule implements EquipmentModuleState {
-    private _equipment: Equipment = {
+    private _equipment: { [slot: string]: Item | null } = {
         head: null,
         body: null,
         main: null,
@@ -26,9 +18,19 @@ class EquipmentModule extends VuexModule implements EquipmentModuleState {
         legs: null,
         feet: null,
     };
+    private _active: Item | null = null;
 
-    get equipment(): Equipment {
+    get equipment(): { [slot: string]: Item | null } {
         return this._equipment;
+    }
+
+    get active(): Item | null {
+        return this._active;
+    }
+
+    @Mutation
+    public async activate(item: Item) {
+        this._active = item;
     }
 
     @Mutation

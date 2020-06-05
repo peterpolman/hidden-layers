@@ -1,5 +1,8 @@
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 import MapboxGL from 'mapbox-gl';
+import firebase from '@/firebase';
+import Geohash from 'latlon-geohash';
+import { Ward } from '@/models/ward';
 
 export interface MapModuleState {
     map: any;
@@ -52,6 +55,31 @@ class MapModule extends VuexModule implements MapModuleState {
     @Mutation
     public addThreebox(tb: any) {
         this._tb = tb;
+    }
+
+    @Action
+    public async addWard(payload: { account: Account; position: { lat: number; lng: number } }) {
+        const snap = await firebase.db.ref(`wards`).push();
+        const hash = Geohash.encode(payload.position.lat, payload.position.lng, 7);
+
+        await firebase.db.ref(`wards/${snap.key}`).set({
+            id: snap.key,
+            position: payload.position,
+            owner: payload.account.id,
+        });
+
+        await firebase.db.ref(`markers/${hash}/${snap.key}`).set({
+            position: payload.position,
+            ref: `wards/${snap.key}`,
+        });
+    }
+
+    @Action
+    public async removeWard(payload: { account: Account; marker: Ward }) {
+        const hash = Geohash.encode(payload.marker.position.lat, payload.marker.position.lng, 7);
+
+        await firebase.db.ref(`markers/${hash}/${payload.marker.id}`).remove();
+        await firebase.db.ref(`wards/${payload.marker.id}`).remove();
     }
 
     @Action

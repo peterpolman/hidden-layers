@@ -5,52 +5,59 @@ import { User } from '@/models/User';
 import { Goblin } from '@/models/Enemies';
 import { Loot } from '@/models/Loot';
 import { Item } from '@/models/Item';
+import { Ward } from '@/models/Ward';
 
 export interface MarkersModuleState {
-    all: { [id: string]: User | Goblin };
-    selected: User | Goblin | undefined;
+    all: { [id: string]: User | Goblin | Ward | Loot };
+    wards: any;
+    selected: User | Goblin | Ward | Loot | undefined;
 }
 
 @Module({ namespaced: true })
 class MarkersModule extends VuexModule implements MarkersModuleState {
-    private _all: { [id: string]: Goblin | User } = {};
+    private _all: { [id: string]: Goblin | User | Ward } = {};
 
     get all(): any {
         return this._all;
     }
 
-    get selected(): User | Goblin | undefined {
+    get wards(): any {
+        return Object.values(this._all).filter((marker: any) => {
+            return marker.component === 'ward';
+        });
+    }
+
+    get selected(): User | Goblin | Ward | undefined {
         return Object.values(this._all).find((char: any) => {
             return char.selected;
         });
     }
 
     @Mutation
-    public async addMarker(data: { id: string; position: { lat: number; lng: number }; marker: any }) {
-        switch (data.marker.race) {
-            case 'human':
-                Vue.set(this._all, data.id, new User(data.id, data.marker));
+    public async addMarker(data: { id: string; position: { lat: number; lng: number }; marker: any; refRoot: string }) {
+        const subscribe = (root: string, marker: User | Goblin | Ward | Loot) => {
+            Vue.set(this._all, marker.id, marker);
 
-                firebase.db.ref(`users/${data.marker.uid}`).on('child_changed', (s: any) => {
-                    Vue.set(this._all[data.marker.uid], s.key, s.val());
+            firebase.db.ref(`${root}/${marker.id}`).on('child_changed', (s: any) => {
+                Vue.set(this._all[marker.id], s.key, s.val());
 
-                    console.log('User changed: ', s.key, s.val());
-                });
+                console.log(root + ' child changed: ', s.key, s.val());
+            });
+        };
 
+        switch (data.refRoot) {
+            case 'users':
+                subscribe(data.refRoot, new User(data.id, data.marker));
                 break;
-            case 'goblin':
-                Vue.set(this._all, data.id, new Goblin(data.id, data.marker));
-
-                firebase.db.ref(`npc/${data.marker.id}`).on('child_changed', (s: any) => {
-                    Vue.set(this._all[data.marker.id], s.key, s.val());
-
-                    console.log('Enemy changed: ', s.key, s.val());
-                });
+            case 'npc':
+                subscribe(data.refRoot, new Goblin(data.id, data.marker));
                 break;
-            default:
-                Vue.set(
-                    this._all,
-                    data.id,
+            case 'wards':
+                subscribe(data.refRoot, new Ward(data.id, data.marker));
+                break;
+            case 'loot':
+                subscribe(
+                    data.refRoot,
                     new Loot(
                         data.id,
                         data.position,
@@ -61,12 +68,9 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
                         }),
                     ),
                 );
-
-                firebase.db.ref(`loot/${data.marker.id}`).on('child_removed', (s: any) => {
-                    Vue.delete(this._all[data.marker.id], s.key);
-
-                    console.log('Loot removed: ', s.key, s.val());
-                });
+                break;
+            default:
+                console.log('Can not subscribe to this refRoot', data.refRoot);
                 break;
         }
     }
@@ -95,12 +99,15 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
     public async discover(firebaseUser: firebase.User) {
         firebase.db.ref(`users/${firebaseUser.uid}/hashes`).on('child_added', (hashSnap: any) => {
             firebase.db.ref(`markers/${hashSnap.val()}`).on('child_added', async (markerSnap: any) => {
-                const refSnap = await firebase.db.ref(markerSnap.val().ref).once('value');
+                const marker = markerSnap.val();
+                const refRoot = marker.ref.split('/')[0];
+                const refSnap = await firebase.db.ref(marker.ref).once('value');
 
                 this.context.commit('addMarker', {
                     id: refSnap.key,
-                    position: markerSnap.val().position,
+                    position: marker.position,
                     marker: refSnap.val(),
+                    refRoot,
                 });
             });
 

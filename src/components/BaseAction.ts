@@ -3,7 +3,6 @@ import { mapGetters } from 'vuex';
 import { BButton } from 'bootstrap-vue';
 import { User } from '@/models/User';
 import { Goblin } from '@/models/Enemies';
-import { Equipment } from '@/store/modules/equipment';
 import { Images } from '@/models/Images';
 import { Item } from '@/models/Item';
 
@@ -13,6 +12,9 @@ import { Item } from '@/models/Item';
         'b-button': BButton,
     },
     computed: {
+        ...mapGetters('account', {
+            account: 'account',
+        }),
         ...mapGetters('equipment', {
             equipment: 'equipment',
         }),
@@ -23,23 +25,22 @@ import { Item } from '@/models/Item';
         }),
     },
 })
-export default class BaseCharacter extends Vue {
+export default class BaseAction extends Vue {
     @Prop() target!: Goblin | User;
-    @Prop() main!: Item;
-    @Prop() off!: Item;
+    @Prop() main!: any | Item;
+    @Prop() off!: any | Item;
 
-    equipment!: Equipment;
+    equipment!: { [slot: string]: Item };
+    account!: Account;
     img: Images = new Images();
 
     onMainClick() {
-        console.log(this.main);
-        console.log(this.target);
-        debugger;
+        this.main.activate();
+        this.$store.commit('equipment/activate', this.main);
     }
 
     onOffClick() {
-        console.log(this.off);
-        console.log(this.target);
-        debugger;
+        this.main.activate();
+        this.$store.commit('equipment/activate', this.off);
     }
 }

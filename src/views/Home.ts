@@ -3,6 +3,8 @@ import { mapGetters } from 'vuex';
 import { BButton } from 'bootstrap-vue';
 
 import { User } from '@/models/User';
+import { Item } from '@/models/Item';
+import { Ward } from '@/models/Ward';
 import { Goblin } from '@/models/Enemies';
 import { Loot } from '@/models/Loot';
 import { Account } from '@/models/Account';
@@ -14,6 +16,7 @@ import BaseProfile from '@/components/BaseProfile.vue';
 import BaseInventory from '@/components/BaseInventory.vue';
 import BaseUser from '@/components/characters/User.vue';
 import BaseGoblin from '@/components/characters/Goblin.vue';
+import BaseWard from '@/components/characters/Ward.vue';
 import BaseLoot from '@/components/BaseLoot';
 
 @Component({
@@ -27,6 +30,7 @@ import BaseLoot from '@/components/BaseLoot';
         'human': BaseUser,
         'goblin': BaseGoblin,
         'loot': BaseLoot,
+        'ward': BaseWard,
         'base-fog': BaseFog,
     },
     computed: {
@@ -40,6 +44,7 @@ import BaseLoot from '@/components/BaseLoot';
         }),
         ...mapGetters('equipment', {
             equipment: 'equipment',
+            active: 'active',
         }),
         ...mapGetters('account', {
             account: 'account',
@@ -50,8 +55,9 @@ export default class Home extends Vue {
     account!: Account;
     map!: any;
     tb!: any;
-    all!: { [id: string]: Goblin | User | Loot };
+    all!: { [id: string]: Goblin | User | Loot | Ward };
     selected!: Goblin | User;
+    active!: Item;
 
     onMapClick(event: any) {
         const intersect = this.tb.queryRenderedFeatures(event.point)[0];
@@ -59,7 +65,7 @@ export default class Home extends Vue {
         if (intersect) {
             this.handleMeshClick(intersect.object);
         } else {
-            this.handleMapClick();
+            this.handleMapClick(event);
         }
     }
 
@@ -71,8 +77,16 @@ export default class Home extends Vue {
         }
     }
 
-    handleMapClick() {
-        this.$store.dispatch('markers/deselect');
+    handleMapClick(e: any) {
+        if (this.active) {
+            switch (this.active.slug) {
+                case 'ward':
+                    this.$store.dispatch('map/addWard', { account: this.account, position: e.lngLat });
+                    break;
+            }
+        } else {
+            this.$store.dispatch('markers/deselect');
+        }
     }
 
     getUserData(object: any) {
