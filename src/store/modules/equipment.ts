@@ -34,6 +34,14 @@ class EquipmentModule extends VuexModule implements EquipmentModuleState {
     }
 
     @Mutation
+    public async deactivate() {
+        if (this._active) {
+            Vue.set(this._active, 'active', false);
+            this._active = null;
+        }
+    }
+
+    @Mutation
     public async setItem(data: { slot: string; item: Item }) {
         Vue.set(this._equipment, data.slot, data.item);
     }
@@ -60,9 +68,6 @@ class EquipmentModule extends VuexModule implements EquipmentModuleState {
         });
 
         firebase.db.ref(`equipment/${firebaseUser.uid}`).on('child_removed', async (snap: any) => {
-            // const id = snap.val();
-            // const s = await firebase.db.ref(`items/${id}`).once('value');
-
             this.context.commit('removeItem', snap.key);
         });
     }

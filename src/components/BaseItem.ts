@@ -33,7 +33,7 @@ export default class BaseItem extends Vue {
     }
 
     unequip() {
-        this.$store.dispatch('inventory/unequip', { account: this.account, item: this.item });
+        this.$store.dispatch('inventory/unequip', { account: this.account, item: this.item, destroy: false });
     }
 
     drop() {

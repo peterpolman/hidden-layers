@@ -77,11 +77,17 @@ export default class Home extends Vue {
         }
     }
 
-    handleMapClick(e: any) {
+    async handleMapClick(e: any) {
         if (this.active) {
             switch (this.active.slug) {
                 case 'ward':
-                    this.$store.dispatch('map/addWard', { account: this.account, position: e.lngLat });
+                    await this.$store.dispatch('map/addWard', { account: this.account, position: e.lngLat });
+                    this.$store.dispatch('inventory/unequip', {
+                        account: this.account,
+                        item: this.active,
+                        destroy: true,
+                    });
+                    this.$store.commit('equipment/deactivate');
                     break;
             }
         } else {

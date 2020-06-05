@@ -43,18 +43,15 @@ class InventoryModule extends VuexModule implements InventoryModuleState {
     @Mutation
     public async changeOrder(payload: { account: Account; inventory: Item[] }) {
         const update: any = {};
-        let i = 0;
         this._all = {};
 
         payload.inventory.forEach((item: Item) => {
-            this._all[i] = item;
+            this._all[item.slug] = item;
 
-            update[i] = {
+            update[item.slug] = {
                 id: item.id,
                 amount: item.amount,
             };
-
-            i++;
         });
 
         await firebase.db.ref(`inventory/${payload.account.id}`).set(update);
@@ -117,43 +114,32 @@ class InventoryModule extends VuexModule implements InventoryModuleState {
     }
 
     @Action
-    public async add(payload: { account: Account; item: Item }) {
-        const snap = await firebase.db.ref(`inventory/${payload.account.id}`).once('value');
-        const inventory = snap.val();
-        const index = inventory.findIndex((i: Item) => {
-            if (i) {
-                return i.id === payload.item.id;
-            }
-        });
+    public async add(payload: { account: Account; item: Item; amount: number }) {
+        const snap = await firebase.db.ref(`inventory/${payload.account.id}/${payload.item.slug}`).once('value');
 
-        if (index > -1) {
-            return await firebase.db.ref(`inventory/${payload.account.id}/${index}/`).update({
-                amount: inventory[index].amount + 1,
+        if (snap.exists()) {
+            await firebase.db.ref(`inventory/${payload.account.id}/${payload.item.slug}/`).update({
+                amount: snap.val().amount + payload.amount,
             });
         } else {
-            return await firebase.db.ref(`inventory/${payload.account.id}/${inventory.length}`).set({
+            return await firebase.db.ref(`inventory/${payload.account.id}/${payload.item.slug}`).set({
                 id: payload.item.id,
-                amount: 1,
+                amount: payload.amount,
             });
         }
     }
 
     @Action
-    public async remove(payload: { account: Account; item: Item }) {
-        const snap = await firebase.db.ref(`inventory/${payload.account.id}`).once('value');
-        const inventory = snap.val();
-        const index = inventory.findIndex((i: Item) => {
-            if (i) {
-                return i.id === payload.item.id;
-            }
-        });
+    public async remove(payload: { account: Account; item: Item; amount: number }) {
+        const snap = await firebase.db.ref(`inventory/${payload.account.id}/${payload.item.slug}`).once('value');
+        const inventoryItem = snap.val();
 
-        if (inventory[index].amount > 1) {
-            await firebase.db.ref(`inventory/${payload.account.id}/${index}/`).update({
-                amount: inventory[index].amount - 1,
+        if (inventoryItem.amount > payload.amount) {
+            await firebase.db.ref(`inventory/${payload.account.id}/${payload.item.slug}/`).update({
+                amount: inventoryItem.amount - payload.amount,
             });
         } else {
-            await firebase.db.ref(`inventory/${payload.account.id}/${index}`).remove();
+            await firebase.db.ref(`inventory/${payload.account.id}/${payload.item.slug}`).remove();
         }
     }
 
@@ -164,30 +150,20 @@ class InventoryModule extends VuexModule implements InventoryModuleState {
 
         if (s.exists()) {
             // If so show an error
-            alert('Another item is equipped already!');
+            alert('Another item is equipped already! Unequip this one first.');
         } else {
-            await this.context.dispatch('remove', payload);
+            await this.context.dispatch('remove', { ...payload, amount: 1 });
             // Set the item for the slot in equipment
             await firebase.db.ref(`equipment/${payload.account.id}/${payload.item.slot}`).set(payload.item.id);
         }
     }
 
     @Action
-    public async unequip(payload: { account: Account; item: Item }) {
-        await this.context.dispatch('add', payload);
-
+    public async unequip(payload: { account: Account; item: Item; destroy: boolean }) {
+        if (!payload.destroy) {
+            await this.context.dispatch('add', { ...payload, amount: 1 });
+        }
         await firebase.db.ref(`equipment/${payload.account.id}/${payload.item.slot}`).remove();
-    }
-
-    @Action
-    public async getItemIndex(payload: { account: Account; item: Item }) {
-        const snap = await firebase.db.ref(`inventory/${payload.account.id}`).once('value');
-
-        return snap.val().findIndex((i: Item) => {
-            if (i) {
-                return i.id === payload.item.id;
-            }
-        });
     }
 
     @Action
@@ -208,7 +184,7 @@ class InventoryModule extends VuexModule implements InventoryModuleState {
             ref: `loot/${snap.key}`,
         });
 
-        return await this.context.dispatch('remove', payload);
+        return await this.context.dispatch('remove', { ...payload, amount: payload.item.amount });
     }
 
     @Action
@@ -217,8 +193,11 @@ class InventoryModule extends VuexModule implements InventoryModuleState {
 
         await firebase.db.ref(`markers/${hash}/${payload.loot.id}`).remove();
         await firebase.db.ref(`loot/${payload.loot.id}`).remove();
-
-        this.context.dispatch('add', { account: payload.account, item: payload.loot.item });
+        await this.context.dispatch('add', {
+            account: payload.account,
+            item: payload.loot.item,
+            amount: payload.loot.item.amount,
+        });
     }
 }
 

@@ -56,8 +56,8 @@ export default class MarkerWard extends Vue {
         return;
     }
 
-    remove() {
-        this.$store.dispatch('map/removeWard', { account: this.account, marker: this.marker });
+    async remove() {
+        await this.$store.dispatch('map/removeWard', { account: this.account, marker: this.marker });
     }
 
     destroyed() {
