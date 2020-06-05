@@ -63,12 +63,12 @@ class InventoryModule extends VuexModule implements InventoryModuleState {
     @Action
     public async init(firebaseUser: firebase.User) {
         // firebase.db.ref(`items`).push().set({
-        //     description: 'Make some stuff!',
-        //     name: 'Tools',
-        //     rarity: 3,
-        //     slot: 'off',
-        //     slug: 'tools',
-        //     value: 150,
+        //     name: 'Vision Ward',
+        //     slug: 'ward',
+        //     value: 50,
+        //     description: '',
+        //     rarity: 1,
+        //     slot: 'main',
         // });
 
         firebase.db.ref(`inventory/${firebaseUser.uid}`).on('child_added', async (snap: any) => {

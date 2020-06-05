@@ -1,4 +1,4 @@
-import { Prop, Component, Vue } from 'vue-property-decorator';
+import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { Account } from '@/models/Account';
 
