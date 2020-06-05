@@ -47,8 +47,8 @@ class AccountModule extends VuexModule implements AccountModuleState {
         if (oldHash !== hash) {
             const neighbours = Geohash.neighbours(hash);
 
-            firebase.db.ref('markers').child(oldHash).child(this._data.uid).remove();
-            firebase.db
+            await firebase.db.ref('markers').child(oldHash).child(this._data.uid).remove();
+            await firebase.db
                 .ref('markers')
                 .child(hash)
                 .child(this._data.uid)

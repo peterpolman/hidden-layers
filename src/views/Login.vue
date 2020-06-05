@@ -1,5 +1,5 @@
 <template>
-    <div class="h-100 d-flex align-items-center justify-content-center">
+    <div class="h-100 d-flex align-items-center justify-content-center container">
         <b-spinner variant="primary" v-if="loading"></b-spinner>
         <form v-on:submit.prevent="login" v-else>
             <h1>Enter your details</h1>

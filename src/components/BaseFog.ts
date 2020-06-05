@@ -8,14 +8,16 @@ const JSTS = require('jsts');
 @Component({
     name: 'BaseFog',
     computed: {
+        ...mapGetters('account', {
+            account: 'account',
+        }),
         ...mapGetters('map', {
             tb: 'tb',
         }),
     },
 })
 export default class BaseFog extends Vue {
-    @Prop() account!: Account;
-
+    account!: Account;
     tb!: any;
     planeShape!: any;
     fog!: any;
