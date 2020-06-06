@@ -119,8 +119,10 @@ export default class BaseMap extends Vue {
     }
 
     async updatePosition(r: { coords: any }) {
+        console.log(r);
         await this.$store.dispatch('account/setPosition', {
             account: this.account,
+            heading: r.coords.heading || this.account.heading,
             position: {
                 lat: r.coords.latitude,
                 lng: r.coords.longitude,

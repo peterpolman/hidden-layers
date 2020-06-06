@@ -65,10 +65,23 @@ export default class BaseCharacter extends Vue {
             this.$watch('marker.position', (position) => {
                 this.updatePosition(position);
             });
+
+            this.$watch('marker.heading', (heading) => {
+                this.updateHeading(heading);
+            });
         });
     }
 
-    updatePosition(position: any) {
+    updateHeading(heading: number) {
+        this.mesh.rotation.z = heading;
+        this.tb.repaint();
+
+        if (this.account.id === this.marker.id) {
+            this.miniMap.setBearing(heading);
+        }
+    }
+
+    updatePosition(position: { lat: number; lng: number }) {
         this.mesh.setCoords([position.lng, position.lat]);
         this.tb.repaint();
 

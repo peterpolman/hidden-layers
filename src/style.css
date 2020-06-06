@@ -128,15 +128,24 @@ input[type='checkbox']:checked + label:after {
     right: 0;
     left: 0;
 }
+
 #miniMap {
     height: 100%;
     width: 100%;
-    border-radius: 50%;
+    overflow: hidden !important;
+    display: block;
     border: 2px solid #d19a66;
-    box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    -webkit-mask-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAA5JREFUeNpiYGBgAAgwAAAEAAGbA+oJAAAAAElFTkSuQmCC);
+}
+
+#miniMap > div {
+    z-index: -1;
 }
 
 .mini-map {
+    box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
     top: 1rem;
     right: 1rem;
     width: 100px;

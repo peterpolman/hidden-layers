@@ -8,6 +8,7 @@ export class Character {
     mesh: any;
     component: string;
     _position: { lat: number; lng: number };
+    heading: number;
 
     constructor(id: string, data: any) {
         this.id = id;
@@ -17,6 +18,7 @@ export class Character {
         this.hitPoints = data.hitPoints;
         this.component = data.race;
         this._position = data.position;
+        this.heading = data.heading;
     }
 
     get position() {

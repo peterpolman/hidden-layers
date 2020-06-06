@@ -38,7 +38,7 @@ class AccountModule extends VuexModule implements AccountModuleState {
     }
 
     @Action
-    public async setPosition(payload: { account: User; position: { lat: number; lng: number } }) {
+    public async setPosition(payload: { account: User; heading: number; position: { lat: number; lng: number } }) {
         const oldHash = Geohash.encode(this._data.position.lat, this._data.position.lng, 7);
         const hash = Geohash.encode(payload.position.lat, payload.position.lng, 7);
         let hashes = this._data.hashes;
@@ -67,6 +67,7 @@ class AccountModule extends VuexModule implements AccountModuleState {
 
         // Set the new record
         await firebase.db.ref(`users/${payload.account.id}`).update({
+            heading: payload.heading,
             position: payload.position,
             hashes,
         });
