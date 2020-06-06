@@ -5,9 +5,8 @@
     "background_color": "#3f2d42",
     "display": "standalone",
     "orientation": "landscape",
-    "Scope": "/",
+    "scope": "/",
     "start_url": "/",
-    "splash_pages": null,
     "icons": [
         {
             "src": "/pwa_icon.png",

@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="map-container">
         <div ref="map" id="map"></div>
         <div class="mini-map">
             <div ref="miniMap" id="miniMap"></div>

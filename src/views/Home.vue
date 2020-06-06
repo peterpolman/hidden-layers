@@ -1,5 +1,5 @@
 <template>
-    <div v-if="account">
+    <div class="map-container" v-if="account">
         <base-map @click="onMapClick($event)" />
         <base-fog v-if="tb" :account="account" />
 

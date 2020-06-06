@@ -78,7 +78,7 @@ export default class BaseCharacter extends Vue {
 
         if (this.account.id === this.marker.id) {
             this.miniMap.setBearing(heading);
-            
+
             if (this.account.lockCamera) {
                 this.map.setBearing(heading);
             }
