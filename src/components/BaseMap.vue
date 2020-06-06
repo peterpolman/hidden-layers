@@ -26,7 +26,8 @@
     margin-top: 1px;
 }
 
-.fa-plus, .fa-minus {
+.fa-plus,
+.fa-minus {
     margin-left: 1px;
     margin-top: 1px;
 }
@@ -34,5 +35,4 @@
 .fa-lock {
     margin-left: 1px;
 }
-    
 </style>
