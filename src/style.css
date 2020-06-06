@@ -226,7 +226,8 @@ input[type='checkbox']:checked + label:after {
 }
 
 .btn-primary span,
-.btn-success span {
+.btn-success span,
+.btn-icon i {
     text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
 }
 

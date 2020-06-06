@@ -20,3 +20,19 @@
     </div>
 </template>
 <script src="./BaseMap.ts" lang="ts"></script>
+<style scoped>
+.fa-sign-out-alt {
+    margin-left: 4px;
+    margin-top: 1px;
+}
+
+.fa-plus, .fa-minus {
+    margin-left: 1px;
+    margin-top: 1px;
+}
+
+.fa-lock {
+    margin-left: 1px;
+}
+    
+</style>
