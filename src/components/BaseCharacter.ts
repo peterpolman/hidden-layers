@@ -74,9 +74,12 @@ export default class BaseCharacter extends Vue {
 
         this.$emit('update:position', position);
 
-        if (this.account.id === this.marker.id && this.account.lockCamera) {
-            this.map.setCenter([position.lng, position.lat]);
+        if (this.account.id === this.marker.id) {
             this.miniMap.setCenter([position.lng, position.lat]);
+
+            if (this.account.lockCamera) {
+                this.map.setCenter([position.lng, position.lat]);
+            }
         }
     }
 
