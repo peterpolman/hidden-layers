@@ -50,7 +50,7 @@ In order of appearance. No strings attached. Never really done and always a work
 -   [x] Registration
 -   [x] Geo positioning System
 -   [x] Loot System
--   [ ] Vison Wards
+-   [x] Vison Wards
 -   [ ] Minimap
 -   [ ] Scouts
 -   [ ] NPC Spawn Service

@@ -3,6 +3,7 @@
         :img="img[marker.class]"
         :object="`./objects/${marker.class}/${marker.class}.gltf`"
         :marker="marker"
+        @update:position="updatePosition($event)"
     >
         <div slot="level">
             <span>{{ marker.lvl }}</span>

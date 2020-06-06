@@ -9,7 +9,8 @@ import { Ward } from '@/models/Ward';
 
 export interface MarkersModuleState {
     all: { [id: string]: User | Goblin | Ward | Loot };
-    wards: any;
+    wards: Ward[];
+    users: User[];
     selected: User | Goblin | Ward | Loot | undefined;
 }
 
@@ -27,6 +28,12 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
         });
     }
 
+    get users(): any {
+        return Object.values(this._all).filter((marker: any) => {
+            return marker.component === 'user';
+        });
+    }
+
     get selected(): User | Goblin | Ward | undefined {
         return Object.values(this._all).find((char: any) => {
             return char.selected;
@@ -39,9 +46,10 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
             Vue.set(this._all, marker.id, marker);
 
             firebase.db.ref(`${root}/${marker.id}`).on('child_changed', (s: any) => {
-                Vue.set(this._all[marker.id], s.key, s.val());
-
-                console.log(root + ' child changed: ', s.key, s.val());
+                if (this._all[marker.id]) {
+                    Vue.set(this._all[marker.id], s.key, s.val());
+                    console.log(root + ' child changed: ', s.key, s.val());
+                }
             });
         };
 

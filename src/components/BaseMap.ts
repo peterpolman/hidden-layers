@@ -1,18 +1,23 @@
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { Account } from '@/models/Account';
+import { BButton } from 'bootstrap-vue';
 
 const THREE = (window as any)['THREE'];
 const Threebox = (window as any)['Threebox'];
 
 @Component({
     name: 'BaseMap',
+    components: {
+        'b-button': BButton,
+    },
     computed: {
         ...mapGetters('account', {
             account: 'account',
         }),
         ...mapGetters('map', {
             map: 'map',
+            miniMap: 'miniMap',
             tb: 'tb',
             layers: 'layers',
         }),
@@ -25,6 +30,7 @@ export default class BaseMap extends Vue {
     account!: Account;
     mixers!: any;
     map: any;
+    miniMap: any;
     tb: any;
     markers!: any;
     tracker = 0;
@@ -45,6 +51,20 @@ export default class BaseMap extends Vue {
         this.$emit('init');
         this.addLayer();
         this.startTracking();
+
+        this.$store.commit('map/setMiniMap', { container: this.$refs.miniMap, position: this.account.position });
+    }
+
+    zoomIn() {
+        this.miniMap.zoomIn({ duration: 400 });
+    }
+
+    zoomOut() {
+        this.miniMap.zoomOut({ duration: 400 });
+    }
+
+    logout() {
+        this.$router.replace('logout');
     }
 
     addLayer() {
@@ -76,6 +96,12 @@ export default class BaseMap extends Vue {
                 this.tb.update();
             },
         });
+    }
+
+    async toggleLockCamera() {
+        await this.$store.dispatch('account/toggleLockCamera');
+        this.map.dragPan[this.account.lockCamera ? 'disable' : 'enable']();
+        this.map.setCenter([this.account.position.lng, this.account.position.lat]);
     }
 
     startTracking() {

@@ -1,4 +1,6 @@
+@import url('./assets/css/all.min.css');
 @import url('https://fonts.googleapis.com/css?family=Alice');
+
 html,
 body {
     height: 100%;
@@ -8,6 +10,7 @@ body {
     color: white;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    user-select: none;
 }
 
 *:focus {
@@ -118,8 +121,119 @@ input[type='checkbox']:checked + label:after {
     background-color: #fdc539;
 }
 
+#map {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+}
+#miniMap {
+    height: 100%;
+    width: 100%;
+    border-radius: 50%;
+    border: 2px solid #d19a66;
+    box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.5);
+}
+
+.mini-map {
+    top: 1rem;
+    right: 1rem;
+    width: 100px;
+    height: 100px;
+    display: block;
+    z-index: 1;
+    left: auto;
+    position: fixed;
+}
+
+.mini-map .marker-user {
+    width: 5px;
+    height: 5px;
+    display: block;
+    background: red;
+    border-radius: 50%;
+}
+
+.mini-map .btn-lock-camera {
+    position: absolute;
+    bottom: -7px;
+    left: 10px;
+}
+.mini-map .btn-zoom-in {
+    position: absolute;
+    bottom: 10px;
+    right: -7px;
+}
+
+.mini-map .btn-zoom-out {
+    position: absolute;
+    bottom: -7px;
+    right: 10px;
+}
+
+.mini-map .btn-logout {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.mapboxgl-ctrl-bottom-left,
+.mapboxgl-ctrl-bottom-right {
+    display: none !important;
+}
+
 .btn {
     box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.25);
+}
+
+.btn-primary,
+.btn-success {
+    font-family: 'Alice';
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border: 0;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+    height: 21px;
+    padding: 0 0.5rem;
+    opacity: 1;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    position: relative;
+    font-size: 10px;
+}
+
+.btn-primary {
+    background-color: #650703 !important;
+    color: #d19a66;
+}
+
+.btn-success {
+    background-color: #cb9500 !important;
+    color: #650703;
+}
+
+.btn-primary span,
+.btn-success span {
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+}
+
+.btn-icon {
+    border: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.75);
+    color: #d19a66;
+    font-weight: bold;
+    box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.5);
 }
 
 .btn-square {
@@ -167,53 +281,19 @@ input[type='checkbox']:checked + label:after {
     box-shadow: 0 0 0 3px #d19a66;
 }
 
-.btn-primary,
-.btn-success {
-    font-family: 'Alice';
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    border: 0;
-    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
-    height: 21px;
-    padding: 0 0.5rem;
-    opacity: 1;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 5px;
-    position: relative;
-    font-size: 10px;
-}
-
-.btn-primary {
-    background-color: #650703 !important;
-    color: #d19a66;
-}
-
-.btn-success {
-    background-color: #cb9500 !important;
-    color: #650703;
-}
-
-.btn-primary span,
-.btn-success span {
-    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
-}
-
 .nearby {
     display: block;
-    position: absolute;
-    top: 0rem;
-    right: 1rem;
+    position: fixed;
+    top: 4.5rem;
+    left: 0;
     width: 220px;
 }
 
 .profile {
     display: flex;
     align-items: center;
-    position: absolute;
-    top: 2.5rem;
+    position: fixed;
+    top: 1rem;
     left: 1rem;
     width: 100%;
     max-width: 200px;

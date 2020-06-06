@@ -18,7 +18,7 @@
 .ui-action {
     bottom: 1rem;
     left: 1rem;
-    position: absolute;
+    position: fixed;
 }
 .btn-circle {
     width: 60px;

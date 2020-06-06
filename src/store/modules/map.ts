@@ -4,8 +4,16 @@ import firebase from '@/firebase';
 import Geohash from 'latlon-geohash';
 import { Ward } from '@/models/ward';
 
+const MapStyle = function () {
+    const hours = new Date().getHours();
+    const isDayTime = hours > 7 && hours < 19;
+
+    return isDayTime ? require('../../assets/style.json') : require('../../assets/style-dark.json');
+};
+
 export interface MapModuleState {
     map: any;
+    miniMap: any;
     tb: any;
     mixers: any[];
 }
@@ -15,6 +23,7 @@ class MapModule extends VuexModule implements MapModuleState {
     private _tb: any = null;
     private _mixers: any = [];
     private _map: any = null;
+    private _miniMap: any = null;
 
     get tb() {
         return this._tb;
@@ -22,6 +31,10 @@ class MapModule extends VuexModule implements MapModuleState {
 
     get map() {
         return this._map;
+    }
+
+    get miniMap() {
+        return this._miniMap;
     }
 
     get mixers() {
@@ -57,6 +70,26 @@ class MapModule extends VuexModule implements MapModuleState {
         this._tb = tb;
     }
 
+    @Mutation
+    public setMiniMap(payload: { container: HTMLElement; position: any }) {
+        this._miniMap = new MapboxGL.Map({
+            container: payload.container,
+            style: MapStyle(),
+            zoom: 10,
+            maxZoom: 16,
+            minZoom: 10,
+            center: [payload.position.lng, payload.position.lat],
+            antialias: true,
+            doubleClickZoom: false,
+            pitchWithRotate: false,
+            touchZoomRotate: false,
+            scrollZoom: false,
+            boxZoom: false,
+            dragRotate: false,
+            dragPan: false,
+        });
+    }
+
     @Action
     public async addWard(payload: { account: Account; position: { lat: number; lng: number } }) {
         const snap = await firebase.db.ref(`wards`).push();
@@ -84,13 +117,9 @@ class MapModule extends VuexModule implements MapModuleState {
 
     @Action
     public async init(payload: { container: HTMLElement; position: any }) {
-        const hours = new Date().getHours();
-        const isDayTime = hours > 7 && hours < 19;
-        const style = isDayTime ? require('../../assets/style.json') : require('../../assets/style-dark.json');
-
         this.context.commit('setMap', {
             container: payload.container,
-            style: style,
+            style: MapStyle(),
             zoom: 19,
             maxZoom: 21,
             minZoom: 18,
@@ -100,8 +129,8 @@ class MapModule extends VuexModule implements MapModuleState {
             antialias: true,
             doubleClickZoom: false,
             pitchWithRotate: false,
-            touchZoomRotate: true,
-            scrollZoom: true,
+            touchZoomRotate: { around: 'center' },
+            scrollZoom: { around: 'center' },
             boxZoom: false,
             dragRotate: true,
         });

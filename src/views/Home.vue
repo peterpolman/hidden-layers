@@ -3,15 +3,6 @@
         <base-map @click="onMapClick($event)" />
         <base-fog v-if="tb" :account="account" />
 
-        <header class="menu">
-            <b-button @click="toggleLockCamera()" class="btn btn-success">
-                {{ account.lockCamera ? 'Unlock' : 'Lock' }} Camera
-            </b-button>
-            <b-button @click="logout()" class="btn close btn-secondary">
-                <span>×</span>
-            </b-button>
-        </header>
-
         <div class="map-ui" v-if="map">
             <base-profile />
             <base-inventory />
@@ -25,18 +16,3 @@
 </template>
 
 <script src="./Home.ts" lang="ts"></script>
-
-<style scoped>
-.menu {
-    background: rgba(0, 0, 0, 0.5);
-    left: 0;
-    top: 0;
-    right: 0;
-    position: fixed;
-    z-index: 1;
-    border: 0;
-}
-.menu .btn {
-    display: inline;
-}
-</style>

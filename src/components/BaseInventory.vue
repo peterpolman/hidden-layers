@@ -29,7 +29,7 @@
     height: 35px;
 }
 .ui-inventory {
-    position: absolute;
+    position: fixed;
     bottom: 1rem;
     right: 1rem;
 }

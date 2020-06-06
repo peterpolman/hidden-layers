@@ -22,6 +22,7 @@ const ImgAccountClass = {
     computed: {
         ...mapGetters('map', {
             map: 'map',
+            miniMap: 'miniMap',
         }),
         ...mapGetters('account', {
             account: 'account',

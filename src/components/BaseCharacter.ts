@@ -14,6 +14,7 @@ import { Account } from '@/models/Account';
         }),
         ...mapGetters('map', {
             map: 'map',
+            miniMap: 'miniMap',
             tb: 'tb',
             mixers: 'mixers',
         }),
@@ -26,6 +27,7 @@ export default class BaseCharacter extends Vue {
 
     account!: Account;
     map: any;
+    miniMap: any;
     tb: any;
     mixer: any;
     walkCycle: any;
@@ -70,8 +72,11 @@ export default class BaseCharacter extends Vue {
         this.mesh.setCoords([position.lng, position.lat]);
         this.tb.repaint();
 
+        this.$emit('update:position', position);
+
         if (this.account.id === this.marker.id && this.account.lockCamera) {
             this.map.setCenter([position.lng, position.lat]);
+            this.miniMap.setCenter([position.lng, position.lat]);
         }
     }
 

@@ -106,14 +106,4 @@ export default class Home extends Vue {
             return object.parent.parent.parent;
         }
     }
-
-    async toggleLockCamera() {
-        await this.$store.dispatch('account/toggleLockCamera');
-        this.map.dragPan[this.account.lockCamera ? 'disable' : 'enable']();
-        this.map.setCenter([this.account.position.lng, this.account.position.lat]);
-    }
-
-    logout() {
-        this.$router.replace('logout');
-    }
 }
