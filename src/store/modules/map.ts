@@ -42,8 +42,22 @@ class MapModule extends VuexModule implements MapModuleState {
     }
 
     @Mutation
-    public setMap(options: any) {
-        this._map = new MapboxGL.Map(options);
+    public setMap(payload: { container: HTMLElement; center: any; bearing: number }) {
+        this._map = new MapboxGL.Map({
+            style: MapStyle(),
+            zoom: 19,
+            maxZoom: 21,
+            minZoom: 18,
+            pitch: 75,
+            antialias: true,
+            dragPan: true,
+            doubleClickZoom: false,
+            pitchWithRotate: false,
+            touchZoomRotate: { around: 'center' },
+            scrollZoom: { around: 'center' },
+            boxZoom: false,
+            ...payload,
+        });
     }
 
     @Mutation
@@ -71,14 +85,12 @@ class MapModule extends VuexModule implements MapModuleState {
     }
 
     @Mutation
-    public setMiniMap(payload: { container: HTMLElement; position: any }) {
+    public setMiniMap(payload: { container: HTMLElement; center: any; bearing: number }) {
         this._miniMap = new MapboxGL.Map({
-            container: payload.container,
             style: MapStyle(),
             zoom: 10,
             maxZoom: 16,
             minZoom: 10,
-            center: [payload.position.lng, payload.position.lat],
             antialias: true,
             doubleClickZoom: false,
             pitchWithRotate: false,
@@ -87,6 +99,7 @@ class MapModule extends VuexModule implements MapModuleState {
             boxZoom: false,
             dragRotate: false,
             dragPan: false,
+            ...payload,
         });
     }
 
@@ -113,27 +126,6 @@ class MapModule extends VuexModule implements MapModuleState {
 
         await firebase.db.ref(`markers/${hash}/${payload.marker.id}`).remove();
         await firebase.db.ref(`wards/${payload.marker.id}`).remove();
-    }
-
-    @Action
-    public async init(payload: { container: HTMLElement; position: any }) {
-        this.context.commit('setMap', {
-            container: payload.container,
-            style: MapStyle(),
-            zoom: 19,
-            maxZoom: 21,
-            minZoom: 18,
-            center: [payload.position.lng, payload.position.lat],
-            pitch: 75,
-            bearing: 45,
-            antialias: true,
-            doubleClickZoom: false,
-            pitchWithRotate: false,
-            touchZoomRotate: { around: 'center' },
-            scrollZoom: { around: 'center' },
-            boxZoom: false,
-            dragRotate: true,
-        });
     }
 }
 

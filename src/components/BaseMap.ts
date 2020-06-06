@@ -41,7 +41,13 @@ export default class BaseMap extends Vue {
     sw!: any;
 
     async mounted() {
-        await this.$store.dispatch('map/init', { container: this.$refs.map, position: this.account.position });
+        await this.$store.commit('map/setMap', {
+            container: this.$refs.map,
+            bearing: this.account.heading,
+            center: [this.account.position.lng, this.account.position.lat],
+        });
+
+        this.map.dragPan[this.account.lockCamera ? 'disable' : 'enable']();
 
         this.map.on('style.load', () => this.init());
         this.map.on('click', (e: any) => this.$emit('click', e));
@@ -52,7 +58,11 @@ export default class BaseMap extends Vue {
         this.addLayer();
         this.startTracking();
 
-        this.$store.commit('map/setMiniMap', { container: this.$refs.miniMap, position: this.account.position });
+        this.$store.commit('map/setMiniMap', {
+            container: this.$refs.miniMap,
+            bearing: this.account.heading,
+            center: [this.account.position.lng, this.account.position.lat],
+        });
     }
 
     zoomIn() {
