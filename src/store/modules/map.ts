@@ -88,10 +88,10 @@ class MapModule extends VuexModule implements MapModuleState {
     public setMiniMap(payload: { container: HTMLElement; center: any; bearing: number }) {
         this._miniMap = new MapboxGL.Map({
             style: MapStyle(),
-            zoom: 10,
+            zoom: 13,
             maxZoom: 16,
             minZoom: 10,
-            antialias: true,
+            antialias: false,
             doubleClickZoom: false,
             pitchWithRotate: false,
             touchZoomRotate: false,
