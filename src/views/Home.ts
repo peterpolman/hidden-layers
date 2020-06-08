@@ -8,6 +8,7 @@ import { Ward } from '@/models/Ward';
 import { Goblin } from '@/models/Enemies';
 import { Loot } from '@/models/Loot';
 import { Account } from '@/models/Account';
+import { Scout } from '@/models/Scout';
 
 import BaseFog from '@/components/BaseFog.vue';
 import BaseMap from '@/components/BaseMap.vue';
@@ -15,6 +16,7 @@ import BaseAction from '@/components/BaseAction.vue';
 import BaseProfile from '@/components/BaseProfile.vue';
 import BaseInventory from '@/components/BaseInventory.vue';
 import BaseUser from '@/components/characters/User.vue';
+import BaseScout from '@/components/characters/Scout.vue';
 import BaseGoblin from '@/components/characters/Goblin.vue';
 import BaseWard from '@/components/characters/Ward.vue';
 import BaseLoot from '@/components/BaseLoot';
@@ -28,6 +30,7 @@ import BaseLoot from '@/components/BaseLoot';
         'base-action': BaseAction,
         'base-inventory': BaseInventory,
         'human': BaseUser,
+        'wolf': BaseScout,
         'goblin': BaseGoblin,
         'loot': BaseLoot,
         'ward': BaseWard,
@@ -56,7 +59,7 @@ export default class Home extends Vue {
     map!: any;
     tb!: any;
     all!: { [id: string]: Goblin | User | Loot | Ward };
-    selected!: Goblin | User;
+    selected!: Goblin | User | Scout;
     active!: Item;
 
     onMapClick(event: any) {
@@ -90,6 +93,9 @@ export default class Home extends Vue {
                     this.$store.commit('equipment/deactivate');
                     break;
             }
+        } else if (this.selected.race === 'wolf') {
+            this.$store.dispatch('account/moveScout', { from: this.selected.position, to: e.lngLat });
+            this.$store.dispatch('markers/deselect');
         } else {
             this.$store.dispatch('markers/deselect');
         }

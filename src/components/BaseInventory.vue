@@ -3,6 +3,9 @@
         <b-button class="btn-square" @click="open()">
             <img class="image" :src="img[isOpen ? 'backpackOpen' : 'backpack']" />
         </b-button>
+        <b-button class="btn-square" @click="spawnScout()">
+            <img class="image" :src="img.scout" />
+        </b-button>
         <base-modal @close="isOpen = false" title="Inventory" id="inventory" v-if="inventory">
             <div slot="content">
                 <div class="modal-inventory">

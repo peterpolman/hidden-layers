@@ -7,7 +7,7 @@ export class Character {
     selected = false;
     mesh: any;
     component: string;
-    _position: { lat: number; lng: number };
+    position: { lat: number; lng: number };
     heading: number;
 
     constructor(id: string, data: any) {
@@ -17,16 +17,8 @@ export class Character {
         this.level = data.level;
         this.hitPoints = data.hitPoints;
         this.component = data.race;
-        this._position = data.position;
+        this.position = data.position;
         this.heading = data.heading;
-    }
-
-    get position() {
-        return this._position;
-    }
-
-    set position(position: any) {
-        this._position = position;
     }
 
     get hp() {

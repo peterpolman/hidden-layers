@@ -4,6 +4,8 @@ import firebase from '@/firebase';
 import { User } from '@/models/User';
 import { Account } from '@/models/Account';
 import Geohash from 'latlon-geohash';
+import axios from 'axios';
+import config from '@/config.json';
 
 export interface AccountModuleState {
     account: Account | null;
@@ -30,7 +32,7 @@ class AccountModule extends VuexModule implements AccountModuleState {
     }
 
     @Action
-    public init(firebaseUser: firebase.User) {
+    public async init(firebaseUser: firebase.User) {
         const action = firebaseAction(async ({ bindFirebaseRef }) => {
             return bindFirebaseRef('_data', firebase.db.ref(`users/${firebaseUser.uid}`));
         }) as any; // Call function that firebaseAction returns
@@ -88,6 +90,32 @@ class AccountModule extends VuexModule implements AccountModuleState {
     @Action
     public login({ email, password }: { email: string; password: string }) {
         return firebase.auth.signInWithEmailAndPassword(email, password);
+    }
+
+    @Action
+    public async moveScout(payload: { from: any; to: any }) {
+        const origin = [payload.from.lng, payload.from.lat];
+        const destination = [payload.to.lng, payload.to.lat];
+        const r = await axios.get(
+            'https://api.mapbox.com/directions/v5/mapbox/walking/' +
+                [origin, destination].join(';') +
+                '?geometries=geojson&access_token=' +
+                config.mapbox.key,
+        );
+
+        firebase.db
+            .ref('scouts')
+            .child(this._data.scout)
+            .update({
+                route: {
+                    now: firebase.database.ServerValue.TIMESTAMP,
+                    start: firebase.database.ServerValue.TIMESTAMP,
+                    options: {
+                        path: r.data.routes[0].geometry.coordinates,
+                        duration: r.data.routes[0].duration * 60,
+                    },
+                },
+            });
     }
 
     @Action

@@ -2,6 +2,7 @@ import { Character } from '@/models/Character';
 
 export class User extends Character {
     class: string;
+    scout: string;
     experiencePoints: number;
     hashes: { [hash: string]: string };
 
@@ -10,6 +11,7 @@ export class User extends Character {
         this.class = data.class;
         this.experiencePoints = data.experiencePoints;
         this.hashes = data.hashes;
+        this.scout = data.scout;
     }
 
     get xp() {

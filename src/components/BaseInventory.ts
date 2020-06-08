@@ -8,8 +8,9 @@ import { Item } from '@/models/Item';
 import { Account } from '@/models/Account';
 
 const ImgItems = {
-    backpack: require('../assets/img/backpack.png'),
-    backpackOpen: require('../assets/img/backpack_open.png'),
+    backpack: require('../assets/img2/Backpack1.png'),
+    backpackOpen: require('../assets/img2/BackpackOpen.png'),
+    scout: require('../assets/img/wolf-0.png'),
 };
 
 @Component({
@@ -46,5 +47,11 @@ export default class BaseInventory extends Vue {
     open() {
         this.isOpen = !this.isOpen;
         this.$bvModal.show('inventory');
+    }
+
+    spawnScout() {
+        console.log(this.account.scout);
+        debugger;
+        this.$store.dispatch('markers/spawn', this.account);
     }
 }

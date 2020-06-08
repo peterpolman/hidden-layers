@@ -6,6 +6,9 @@ import { Goblin } from '@/models/Enemies';
 import { Loot } from '@/models/Loot';
 import { Item } from '@/models/Item';
 import { Ward } from '@/models/Ward';
+import { Scout } from '@/models/Scout';
+import { Account } from '@/models/Account';
+import Geohash from 'latlon-geohash';
 
 export interface MarkersModuleState {
     all: { [id: string]: User | Goblin | Ward | Loot };
@@ -57,6 +60,9 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
             case 'users':
                 subscribe(data.refRoot, new User(data.id, data.marker));
                 break;
+            case 'scouts':
+                subscribe(data.refRoot, new Scout(data.id, data.marker));
+                break;
             case 'npc':
                 subscribe(data.refRoot, new Goblin(data.id, data.marker));
                 break;
@@ -101,6 +107,16 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
         if (this.selected) {
             this._all[this.selected.id].selected = false;
         }
+    }
+
+    @Action
+    public async spawn(account: Account) {
+        const hash = Geohash.encode(account.position.lat, account.position.lng, 7);
+
+        await firebase.db.ref(`markers/${hash}/${account.scout}`).set({
+            position: account.position,
+            ref: `scouts/${account.scout}`,
+        });
     }
 
     @Action

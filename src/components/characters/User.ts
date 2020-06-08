@@ -31,22 +31,22 @@ export default class CharacterUser extends Vue {
 
     img = ImgAccountClass;
     miniMap: any;
-    icon: any;
+    miniMapIcon: any;
 
     mounted() {
         const el = document.createElement('div');
         el.className = 'marker-user';
 
-        this.icon = new MapboxGL.Marker(el)
+        this.miniMapIcon = new MapboxGL.Marker(el)
             .setLngLat([this.marker.position.lng, this.marker.position.lat])
             .addTo(this.miniMap);
     }
 
     updatePosition(position: any) {
-        this.icon.setLngLat([position.lng, position.lat]);
+        this.miniMapIcon.setLngLat([position.lng, position.lat]);
     }
 
     destroyed() {
-        this.icon.remove();
+        this.miniMapIcon.remove();
     }
 }

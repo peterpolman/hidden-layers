@@ -51,7 +51,7 @@ In order of appearance. No strings attached. Never really done and always a work
 -   [x] Geo positioning System
 -   [x] Loot System
 -   [x] Vison Wards
--   [ ] Minimap
+-   [x] Minimap
 -   [ ] Scouts
 -   [ ] NPC Spawn Service
 -   [ ] Combat System

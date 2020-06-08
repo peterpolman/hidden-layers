@@ -10,5 +10,6 @@ const db = firebase.database();
 const auth = firebase.auth();
 const storage = firebase.storage();
 const currentUser = auth.currentUser;
+const database = firebase.database;
 
-export default { db, auth, storage, currentUser };
+export default { db, database, auth, storage, currentUser };
