@@ -20,6 +20,7 @@ export interface MarkersModuleState {
 @Module({ namespaced: true })
 class MarkersModule extends VuexModule implements MarkersModuleState {
     private _all: { [id: string]: Goblin | User | Ward } = {};
+    private listeners: any = {};
 
     get all(): any {
         return this._all;
@@ -37,6 +38,12 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
         });
     }
 
+    get scouts(): any {
+        return Object.values(this._all).filter((marker: any) => {
+            return marker.component === 'wolf';
+        });
+    }
+
     get selected(): User | Goblin | Ward | undefined {
         return Object.values(this._all).find((char: any) => {
             return char.selected;
@@ -48,12 +55,14 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
         const subscribe = (root: string, marker: User | Goblin | Ward | Loot) => {
             Vue.set(this._all, marker.id, marker);
 
-            firebase.db.ref(`${root}/${marker.id}`).on('child_changed', (s: any) => {
-                if (this._all[marker.id]) {
-                    Vue.set(this._all[marker.id], s.key, s.val());
-                    console.log(root + ' child changed: ', s.key, s.val());
-                }
-            });
+            if (!this.listeners[marker.id]) {
+                this.listeners[marker.id] = firebase.db.ref(`${root}/${marker.id}`).on('child_changed', (s: any) => {
+                    if (this._all[marker.id]) {
+                        Vue.set(this._all[marker.id], s.key, s.val());
+                        console.log(root + ' child changed: ', s.key, s.val());
+                    }
+                });
+            }
         };
 
         switch (data.refRoot) {
@@ -91,6 +100,9 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
 
     @Mutation
     public removeMarker(id: string) {
+        if (this.listeners[id] && this.listeners[id].off) {
+            this.listeners[id].off();
+        }
         Vue.delete(this._all, id);
     }
 

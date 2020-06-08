@@ -6,6 +6,7 @@ import Geohash from 'latlon-geohash';
 import firebase from '@/firebase';
 import { BButton } from 'bootstrap-vue';
 import { Account } from '@/models/Account';
+import MapboxGL from 'mapbox-gl';
 
 const THREE = (window as any)['THREE'];
 const ImgScout = {
@@ -24,6 +25,7 @@ const ImgScout = {
         }),
         ...mapGetters('map', {
             tb: 'tb',
+            miniMap: 'miniMap',
         }),
     },
 })
@@ -35,7 +37,9 @@ export default class CharacterScout extends Vue {
     timer: any;
     mesh: any;
     map: any;
+    miniMap: any;
     account!: Account;
+    miniMapIcon: any;
 
     created() {
         const THREE = (window as any)['THREE'];
@@ -61,9 +65,20 @@ export default class CharacterScout extends Vue {
             });
 
             this.$watch('marker.route', (route: any) => {
-                this.travelTo(route);
+                if (route) {
+                    this.travelTo(route);
+                }
             });
         });
+    }
+
+    mounted() {
+        const el = document.createElement('div');
+        el.className = 'marker-user';
+
+        this.miniMapIcon = new MapboxGL.Marker(el)
+            .setLngLat([this.marker.position.lng, this.marker.position.lat])
+            .addTo(this.miniMap);
     }
 
     updatePosition(newP: { lat: number; lng: number }, oldP: { lat: number; lng: number }) {
@@ -78,6 +93,7 @@ export default class CharacterScout extends Vue {
             });
         }
 
+        this.miniMapIcon.setLngLat([newP.lng, newP.lat]);
         this.mesh.setCoords([newP.lng, newP.lat]);
         this.tb.repaint();
     }
@@ -128,6 +144,7 @@ export default class CharacterScout extends Vue {
     destroyed() {
         this.tb.remove(this.mesh);
         this.tb.repaint();
+        this.miniMapIcon.remove();
     }
 
     onClick() {

@@ -19,10 +19,25 @@
 .profile {
     position: relative;
     margin-bottom: 1rem;
+    max-width: 150px;
+}
+
+.profile .profile-name {
+    font-size: 14px;
+}
+
+.profile .profile-hp {
+    height: 5px;
 }
 
 .btn-circle.btn-sm {
     flex: 0 45px;
     height: 45px;
+}
+
+.profile-level {
+    width: 20px;
+    height: 20px;
+    font-size: 9px;
 }
 </style>
