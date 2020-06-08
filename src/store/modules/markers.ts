@@ -112,11 +112,31 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
     @Action
     public async spawn(account: Account) {
         const hash = Geohash.encode(account.position.lat, account.position.lng, 7);
+        debugger;
+        if (!account.scout) {
+            const snap = await firebase.db.ref(`scouts/`).push();
 
-        await firebase.db.ref(`markers/${hash}/${account.scout}`).set({
-            position: account.position,
-            ref: `scouts/${account.scout}`,
-        });
+            await firebase.db.ref(`scouts/${snap.key}`).set({
+                hitPoints: 100,
+                level: 1,
+                name: `${account.name}'s scout`,
+                race: 'wolf',
+                uid: account.id,
+                position: account.position,
+            });
+
+            await firebase.db.ref(`users/${account.id}/scout`).set(snap.key);
+
+            await firebase.db.ref(`markers/${hash}/${snap.key}`).set({
+                position: account.position,
+                ref: `scouts/${snap.key}`,
+            });
+        } else {
+            await firebase.db.ref(`markers/${hash}/${account.scout}`).set({
+                position: account.position,
+                ref: `scouts/${account.scout}`,
+            });
+        }
     }
 
     @Action

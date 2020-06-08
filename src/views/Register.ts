@@ -13,14 +13,14 @@ export default class Register extends Vue {
     email = '';
     password = '';
     passwordVerify = '';
-    position: any = null;
+    coords: any = null;
     userName = '';
     userRace = 'human';
     userClass = 'knight';
     loading = false;
 
     async mounted() {
-        this.position = await this.getPosition();
+        this.coords = await this.getCoords();
     }
 
     async register() {
@@ -28,7 +28,7 @@ export default class Register extends Vue {
             this.loading = true;
 
             try {
-                const hash = Geohash.encode(this.position.lat, this.position.lng, 7);
+                const hash = Geohash.encode(this.coords.lat, this.coords.lng, 7);
                 const neighbours = Geohash.neighbours(hash);
                 const hashes = [hash];
 
@@ -43,9 +43,10 @@ export default class Register extends Vue {
                     level: 1,
                     lockCamera: false,
                     name: this.userName,
+                    heading: 0,
                     position: {
-                        lat: this.position.lat || 52.52,
-                        lng: this.position.lng || 13.404954,
+                        lat: this.coords.lat || 52.52,
+                        lng: this.coords.lng || 13.404954,
                     },
                     race: this.userRace,
                     hashes,
@@ -70,11 +71,11 @@ export default class Register extends Vue {
         }
     }
 
-    getPosition() {
+    getCoords() {
         return new Promise((resolve, reject) => {
             navigator.geolocation.getCurrentPosition(
                 (r) => {
-                    resolve({ lat: r.coords.latitude, lng: r.coords.longitude });
+                    resolve({ heading: r.coords.heading, lat: r.coords.latitude, lng: r.coords.longitude });
                 },
                 (err) => {
                     reject(err.message);

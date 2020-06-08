@@ -50,8 +50,6 @@ export default class BaseInventory extends Vue {
     }
 
     spawnScout() {
-        console.log(this.account.scout);
-        debugger;
         this.$store.dispatch('markers/spawn', this.account);
     }
 }
