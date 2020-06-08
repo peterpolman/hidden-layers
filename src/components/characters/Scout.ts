@@ -5,6 +5,7 @@ import { mapGetters } from 'vuex';
 import Geohash from 'latlon-geohash';
 import firebase from '@/firebase';
 import { BButton } from 'bootstrap-vue';
+import { Account } from '@/models/Account';
 
 const THREE = (window as any)['THREE'];
 const ImgScout = {
@@ -18,6 +19,9 @@ const ImgScout = {
         'b-button': BButton,
     },
     computed: {
+        ...mapGetters('account', {
+            account: 'account',
+        }),
         ...mapGetters('map', {
             tb: 'tb',
         }),
@@ -31,12 +35,7 @@ export default class CharacterScout extends Vue {
     timer: any;
     mesh: any;
     map: any;
-
-    mounted() {
-        this.$watch('marker.route', (route: any) => {
-            this.travelTo(route);
-        });
-    }
+    account!: Account;
 
     created() {
         const THREE = (window as any)['THREE'];
@@ -57,18 +56,33 @@ export default class CharacterScout extends Vue {
             this.tb.add(this.mesh);
             this.tb.repaint();
 
-            this.$watch('marker.position', (position) => {
-                this.updatePosition(position);
+            this.$watch('marker.position', (position, oldPosition) => {
+                this.updatePosition(position, oldPosition);
+            });
+
+            this.$watch('marker.route', (route: any) => {
+                this.travelTo(route);
             });
         });
     }
 
-    updatePosition(position: { lat: number; lng: number }) {
-        this.mesh.setCoords([position.lng, position.lat]);
+    updatePosition(newP: { lat: number; lng: number }, oldP: { lat: number; lng: number }) {
+        const oldHash = Geohash.encode(oldP.lat, oldP.lng, 7);
+        const hash = Geohash.encode(newP.lat, newP.lng, 7);
+
+        if (oldHash !== hash) {
+            firebase.db.ref(`markers/${oldHash}/${this.marker.id}`).remove();
+            firebase.db.ref(`markers/${hash}/${this.marker.id}`).update({
+                position: newP,
+                ref: `scouts/${this.marker.id}`,
+            });
+        }
+
+        this.mesh.setCoords([newP.lng, newP.lat]);
         this.tb.repaint();
     }
 
-    travelTo(route: any) {
+    async travelTo(route: any) {
         const latLngPath = this.tb.utils.lnglatsToWorld(route.options.path);
         const path = new THREE.CatmullRomCurve3(latLngPath);
         const timeProgress = (route.now - route.start) / route.options.duration;
@@ -77,44 +91,38 @@ export default class CharacterScout extends Vue {
             const point = path.getPointAt(timeProgress);
             const lngLat = this.tb.utils.unprojectFromWorld(point);
             const position = { lng: lngLat[0], lat: lngLat[1] };
-            const oldHash = Geohash.encode(this.marker.position.lat, this.marker.position.lng, 7);
-            const hash = Geohash.encode(position.lat, position.lng, 7);
-            const tangent = path.getTangentAt(timeProgress).normalize();
-            const axis = new THREE.Vector3(0, 0, 0);
-            const up = new THREE.Vector3(0, 1, 0);
-            const radians = Math.acos(up.dot(tangent));
 
-            axis.crossVectors(up, tangent).normalize();
-
-            // Point the object in the right direction
-            this.mesh.setCoords([this.marker.position.lng, this.marker.position.lat]);
-            this.mesh._setObject({ quaternion: [axis, radians] });
-            this.tb.repaint();
+            await this.updateQuaternion(path, timeProgress);
 
             // Clears existing timer starts a new one
             window.clearTimeout(this.timer);
-            this.timer = window.setTimeout(() => {
-                // // Detect hash change for scout
-                if (oldHash !== hash) {
-                    // Remove the old record
-                    firebase.db.ref(`markers/${oldHash}/${this.marker.id}`).remove();
-                    firebase.db.ref(`markers/${hash}/${this.marker.id}`).update({
-                        position: position,
-                        ref: `scouts/${this.marker.id}`,
-                    });
-                }
 
-                // Update the scout position and route progress in time
-                firebase.db.ref(`scouts/${this.marker.id}`).update({ position: position });
-                firebase.db
-                    .ref(`scouts/${this.marker.id}/route`)
-                    .update({ now: firebase.database.ServerValue.TIMESTAMP });
-            }, 30);
+            if (this.account.scout === this.marker.id) {
+                this.timer = window.setTimeout(() => {
+                    // Update the scout position and route progress in time (deliberatly async)
+                    firebase.db.ref(`scouts/${this.marker.id}`).update({ position: position });
+                    firebase.db
+                        .ref(`scouts/${this.marker.id}/route`)
+                        .update({ now: firebase.database.ServerValue.TIMESTAMP });
+                }, 30);
+            }
         } else {
             firebase.db.ref(`scouts/${this.marker.id}/route`).remove();
 
             window.clearTimeout(this.timer);
         }
+    }
+
+    async updateQuaternion(path: any, timeProgress: number) {
+        const tangent = path.getTangentAt(timeProgress).normalize();
+        const axis = new THREE.Vector3(0, 0, 0);
+        const up = new THREE.Vector3(0, 1, 0);
+        const radians = Math.acos(up.dot(tangent));
+
+        axis.crossVectors(up, tangent).normalize();
+
+        this.mesh._setObject({ quaternion: [axis, radians] });
+        this.tb.repaint();
     }
 
     destroyed() {
