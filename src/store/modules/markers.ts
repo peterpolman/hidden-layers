@@ -114,10 +114,11 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
         this._all[id].selected = true;
     }
 
-    @Action
+    @Mutation
     public deselect() {
-        if (this.selected) {
-            this._all[this.selected.id].selected = false;
+        if (this._selected) {
+            this._all[this._selected.id].selected = false;
+            this._selected = null;
         }
     }
 

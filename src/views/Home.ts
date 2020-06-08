@@ -101,7 +101,7 @@ export default class Home extends Vue {
             }
         }
 
-        this.$store.dispatch('markers/deselect');
+        this.$store.commit('markers/deselect');
     }
 
     getUserData(object: any) {
