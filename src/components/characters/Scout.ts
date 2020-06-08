@@ -57,9 +57,9 @@ export default class CharacterScout extends Vue {
             this.tb.add(this.mesh);
             this.tb.repaint();
 
-            // this.$watch('marker.position', (position) => {
-            //     this.updatePosition(position);
-            // });
+            this.$watch('marker.position', (position) => {
+                this.updatePosition(position);
+            });
         });
     }
 

@@ -93,9 +93,13 @@ export default class Home extends Vue {
                     this.$store.commit('equipment/deactivate');
                     break;
             }
-        } else if (this.selected.race === 'wolf') {
-            this.$store.dispatch('account/moveScout', { from: this.selected.position, to: e.lngLat });
-            this.$store.dispatch('markers/deselect');
+        }
+
+        if (this.selected) {
+            if (this.selected.race === 'wolf') {
+                this.$store.dispatch('account/moveScout', { from: this.selected.position, to: e.lngLat });
+                this.$store.dispatch('markers/deselect');
+            }
         } else {
             this.$store.dispatch('markers/deselect');
         }
