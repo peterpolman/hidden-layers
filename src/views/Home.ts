@@ -98,11 +98,10 @@ export default class Home extends Vue {
         if (this.selected) {
             if (this.selected.race === 'wolf') {
                 this.$store.dispatch('account/moveScout', { from: this.selected.position, to: e.lngLat });
-                this.$store.dispatch('markers/deselect');
             }
-        } else {
-            this.$store.dispatch('markers/deselect');
         }
+
+        this.$store.dispatch('markers/deselect');
     }
 
     getUserData(object: any) {

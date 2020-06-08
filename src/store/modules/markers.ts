@@ -14,13 +14,14 @@ export interface MarkersModuleState {
     all: { [id: string]: User | Goblin | Ward | Loot };
     wards: Ward[];
     users: User[];
-    selected: User | Goblin | Ward | Loot | undefined;
+    selected: User | Goblin | Ward | Scout | Loot | undefined;
 }
 
 @Module({ namespaced: true })
 class MarkersModule extends VuexModule implements MarkersModuleState {
     private _all: { [id: string]: Goblin | User | Ward } = {};
     private listeners: any = {};
+    private _selected: any = null;
 
     get all(): any {
         return this._all;
@@ -44,10 +45,8 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
         });
     }
 
-    get selected(): User | Goblin | Ward | undefined {
-        return Object.values(this._all).find((char: any) => {
-            return char.selected;
-        });
+    get selected(): User | Goblin | Ward | Scout | undefined {
+        return this._selected;
     }
 
     @Mutation
@@ -108,9 +107,10 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
 
     @Mutation
     public select(id: number) {
-        if (this.selected) {
-            this._all[this.selected.id].selected = false;
+        if (this._selected) {
+            this._all[this._selected.id].selected = false;
         }
+        this._selected = this._all[id];
         this._all[id].selected = true;
     }
 

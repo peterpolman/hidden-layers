@@ -52,7 +52,7 @@ In order of appearance. No strings attached. Never really done and always a work
 -   [x] Loot System
 -   [x] Vison Wards
 -   [x] Minimap
--   [ ] Scouts
+-   [x] Scouts
 -   [ ] NPC Spawn Service
 -   [ ] Combat System
 -   [ ] Quest System
