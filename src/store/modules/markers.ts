@@ -190,7 +190,7 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
     }
 
     @Action
-    public async discover(firebaseUser: firebase.User) {
+    public async init(firebaseUser: firebase.User) {
         firebase.db.ref(`users/${firebaseUser.uid}/hashes`).on('child_added', (hashSnap: any) => {
             firebase.db.ref(`markers/${hashSnap.val()}`).on('child_added', async (markerSnap: any) => {
                 const marker = markerSnap.val();
