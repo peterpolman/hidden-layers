@@ -2,6 +2,7 @@ import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { Account } from '@/models/Account';
 import { Ward } from '@/models/Ward';
+import { Scout } from '@/models/Scout';
 
 const THREE = (window as any)['THREE'];
 const JSTS = require('jsts');
@@ -11,6 +12,7 @@ const JSTS = require('jsts');
     computed: {
         ...mapGetters('account', {
             account: 'account',
+            scout: 'scout',
         }),
         ...mapGetters('map', {
             tb: 'tb',
@@ -22,6 +24,7 @@ const JSTS = require('jsts');
 })
 export default class BaseFog extends Vue {
     account!: Account;
+    scout!: Scout;
     tb!: any;
     planeShape!: any;
     fog!: any;
@@ -33,20 +36,30 @@ export default class BaseFog extends Vue {
         });
     }
 
+    get positions() {
+        const userP = this.account ? [this.account.position] : [];
+        const scoutP = this.scout ? [this.scout.position] : [];
+        return userP.concat(scoutP).concat(this.wardPositions);
+    }
+
     mounted() {
         const ne = this.tb.utils.projectToWorld([180, 85]);
         const sw = this.tb.utils.projectToWorld([-180, -85]);
 
         this.planeShape = this.createPlane(ne, sw, 5);
 
-        this.updateFog([this.account.position].concat(this.wardPositions));
+        this.updateFog(this.positions);
 
         this.$watch('account.position', () => {
-            this.updateFog([this.account.position].concat(this.wardPositions));
+            this.updateFog(this.positions);
+        });
+
+        this.$watch('scout.position', () => {
+            this.updateFog(this.positions);
         });
 
         this.$watch('wardPositions', () => {
-            this.updateFog([this.account.position].concat(this.wardPositions));
+            this.updateFog(this.positions);
         });
     }
 
@@ -78,6 +91,7 @@ export default class BaseFog extends Vue {
     }
 
     updateFog(positions: any) {
+        console.log(positions);
         const visibility = [];
         const holes = positions.map((position: { lat: number; lng: number }) => {
             const p = this.tb.utils.projectToWorld([position.lng, position.lat]);

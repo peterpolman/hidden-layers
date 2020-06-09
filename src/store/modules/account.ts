@@ -2,6 +2,7 @@ import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 import { firebaseAction } from 'vuexfire';
 import firebase from '@/firebase';
 import { User } from '@/models/User';
+import { Scout } from '@/models/Scout';
 import { Account } from '@/models/Account';
 import Geohash from 'latlon-geohash';
 import axios from 'axios';
@@ -9,14 +10,20 @@ import config from '@/config.json';
 
 export interface AccountModuleState {
     account: Account | null;
+    scout: Account | null;
 }
 
 @Module({ namespaced: true })
 class AccountModule extends VuexModule implements AccountModuleState {
     private _data: any = null;
+    private _scout: any = null;
 
     get account(): any {
         return this._data ? new Account(this._data.uid, this._data) : null;
+    }
+
+    get scout(): any {
+        return this._scout ? new Scout(this._scout.id, this._scout) : null;
     }
 
     @Mutation
@@ -32,9 +39,18 @@ class AccountModule extends VuexModule implements AccountModuleState {
     }
 
     @Action
-    public async init(firebaseUser: firebase.User) {
+    public async initUser(firebaseUser: firebase.User) {
         const action = firebaseAction(async ({ bindFirebaseRef }) => {
             return bindFirebaseRef('_data', firebase.db.ref(`users/${firebaseUser.uid}`));
+        }) as any; // Call function that firebaseAction returns
+        return action(this.context);
+    }
+
+    @Action
+    public async initScout(firebaseUser: firebase.User) {
+        const action = firebaseAction(async ({ bindFirebaseRef }) => {
+            const snap = await firebase.db.ref(`users/${firebaseUser.uid}/scout`).once('value');
+            return bindFirebaseRef('_scout', firebase.db.ref(`scouts/${snap.val()}`));
         }) as any; // Call function that firebaseAction returns
         return action(this.context);
     }

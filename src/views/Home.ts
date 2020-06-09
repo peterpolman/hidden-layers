@@ -85,6 +85,7 @@ export default class Home extends Vue {
             switch (this.active.slug) {
                 case 'ward':
                     await this.$store.dispatch('map/addWard', { account: this.account, position: e.lngLat });
+
                     this.$store.dispatch('inventory/unequip', {
                         account: this.account,
                         item: this.active,

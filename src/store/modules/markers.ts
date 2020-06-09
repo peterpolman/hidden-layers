@@ -116,10 +116,10 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
 
     @Mutation
     public deselect() {
-        if (this._selected) {
+        if (this._selected && this._all[this._selected.id]) {
             this._all[this._selected.id].selected = false;
-            this._selected = null;
         }
+        this._selected = null;
     }
 
     @Action
@@ -176,8 +176,6 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
                     this.context.commit('removeMarker', refSnap.key);
                 }
             });
-
-            console.log('Hash added: ', firebaseUser.uid, hashSnap.val());
         });
 
         firebase.db.ref(`users/${firebaseUser.uid}/hashes`).on('child_removed', async (hashSnap: any) => {
@@ -188,8 +186,6 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
                     this.context.commit('removeMarker', key);
                 }
             });
-
-            console.log('Hash removed: ', firebaseUser.uid, hashSnap.val());
         });
     }
 }
