@@ -4,6 +4,10 @@ Just another **Browser-based Augmented Reality Massive Multiplayer Online Role P
 
 ![Hidden Layers UI](./public/demo.png 'Hidden Layers')
 
+## Community
+
+For development previews and updates of what is added to the repository [join the Discord!](https://discord.gg/dZr5hX).
+
 ## Project setup
 
 ```
