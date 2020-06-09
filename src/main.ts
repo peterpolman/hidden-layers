@@ -10,6 +10,7 @@ import router from './router';
 import store from './store';
 import firebase from './firebase';
 import './registerServiceWorker';
+import packageJson from '../package.json';
 
 import 'mapbox-gl/dist/mapbox-gl.css';
 import 'bootstrap/dist/css/bootstrap.css';
@@ -23,6 +24,8 @@ Vue.use(ModalPlugin);
 
 firebase.auth.onAuthStateChanged(() => {
     MapboxGL.accessToken = config.mapbox.key;
+
+    Vue.prototype.$version = packageJson.version;
 
     if (!app) {
         app = new Vue({

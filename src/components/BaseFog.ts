@@ -91,7 +91,6 @@ export default class BaseFog extends Vue {
     }
 
     updateFog(positions: any) {
-        console.log(positions);
         const visibility = [];
         const holes = positions.map((position: { lat: number; lng: number }) => {
             const p = this.tb.utils.projectToWorld([position.lng, position.lat]);
