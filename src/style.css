@@ -165,12 +165,18 @@ input[type='checkbox']:checked + label:after {
     position: fixed;
 }
 
-.mini-map .marker-user {
+.mini-map .minimap-user,
+.mini-map .minimap-scout,
+.mini-map .minimap-goblin {
     width: 5px;
     height: 5px;
     display: block;
-    background: red;
+    background: yellowgreen;
     border-radius: 50%;
+}
+
+.mini-map .minimap-goblin {
+    background: red;
 }
 
 .mini-map .btn-lock-camera {

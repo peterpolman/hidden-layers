@@ -4,6 +4,7 @@ declare module 'vue/types/vue' {
     interface Vue {
         $store: Store<any>;
         $map: any;
+        $timer: any;
         $stage: any;
         $mixers: any;
         $THREE: any;

@@ -1,6 +1,7 @@
 import { Vue, Component } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { BButton } from 'bootstrap-vue';
+import Geohash from 'latlon-geohash';
 
 import { User } from '@/models/User';
 import { Item } from '@/models/Item';
@@ -23,6 +24,13 @@ import BaseLoot from '@/components/BaseLoot';
 
 @Component({
     name: 'home',
+    timers: {
+        spawn: {
+            time: 5000,
+            repeat: true,
+            autostart: true,
+        },
+    },
     components: {
         'b-button': BButton,
         'base-map': BaseMap,
@@ -51,16 +59,43 @@ import BaseLoot from '@/components/BaseLoot';
         }),
         ...mapGetters('account', {
             account: 'account',
+            scout: 'scout',
         }),
     },
 })
 export default class Home extends Vue {
-    account!: Account;
     map!: any;
     tb!: any;
-    all!: { [id: string]: Goblin | User | Loot | Ward };
+    all!: { [id: string]: Goblin | User | Loot | Scout | Ward };
+    account!: Account;
+    scout!: Scout;
     selected!: Goblin | User | Scout;
     active!: Item;
+
+    spawn() {
+        const randomPosition = (bounds: any) => {
+            return {
+                lat: bounds.sw.lat + Math.random() * (bounds.ne.lat - bounds.sw.lat),
+                lng: bounds.sw.lon + Math.random() * (bounds.ne.lon - bounds.sw.lon),
+            };
+        };
+        const positions = [this.account.position, this.scout.position];
+
+        for (const i in positions) {
+            // 10% change to spawn a goblin
+            if (Math.random() < 0.1) {
+                const hash = Geohash.encode(positions[i].lat, positions[i].lng, 7);
+                const bounds = Geohash.bounds(hash);
+
+                this.$store.dispatch('markers/spawnNpc', {
+                    hash,
+                    position: randomPosition(bounds),
+                    race: 'goblin',
+                    level: 3,
+                });
+            }
+        }
+    }
 
     onMapClick(event: any) {
         const intersect = this.tb.queryRenderedFeatures(event.point)[0];

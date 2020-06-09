@@ -35,7 +35,7 @@ export default class CharacterUser extends Vue {
 
     mounted() {
         const el = document.createElement('div');
-        el.className = 'marker-user';
+        el.className = 'minimap-user';
 
         this.miniMapIcon = new MapboxGL.Marker(el)
             .setLngLat([this.marker.position.lng, this.marker.position.lat])

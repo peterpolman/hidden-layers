@@ -14,6 +14,7 @@ export interface MarkersModuleState {
     all: { [id: string]: User | Goblin | Ward | Loot };
     wards: Ward[];
     users: User[];
+    goblins: Goblin[];
     selected: User | Goblin | Ward | Scout | Loot | undefined;
 }
 
@@ -36,6 +37,12 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
     get users(): any {
         return Object.values(this._all).filter((marker: any) => {
             return marker.component === 'user';
+        });
+    }
+
+    get goblins(): any {
+        return Object.values(this._all).filter((marker: any) => {
+            return marker.component === 'goblin';
         });
     }
 
@@ -123,7 +130,7 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
     }
 
     @Action
-    public async spawn(account: Account) {
+    public async spawnScout(account: Account) {
         const hash = Geohash.encode(account.position.lat, account.position.lng, 7);
 
         if (!account.scout) {
@@ -150,6 +157,35 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
                 ref: `scouts/${account.scout}`,
             });
             await firebase.db.ref(`scouts/${account.scout}/position`).set(account.position);
+        }
+    }
+
+    @Action
+    async spawnNpc(payload: { hash: string; position: { lat: number; lng: number }; race: string; level: number }) {
+        const snap = await firebase.db.ref('markers').child(payload.hash).once('value');
+        const count = Object.values(snap.val()).filter((marker: any) => {
+            return marker.race === payload.race;
+        }).length;
+
+        // If less than 3 npcClass in geohash
+        if (count < 2) {
+            const goblin = {
+                id: await firebase.db.ref('npc').push().key,
+                hitPoints: 300,
+                position: payload.position,
+                race: payload.race,
+                level: payload.level,
+            };
+
+            // Set in npc database
+            firebase.db.ref(`npc/${goblin.id}`).set(goblin);
+            firebase.db.ref(`markers/${payload.hash}/${goblin.id}`).set({
+                ref: `npc/${goblin.id}`,
+                race: payload.race,
+                position: payload.position,
+            });
+
+            console.log(`A ${payload.race} is added to the database`, goblin);
         }
     }
 

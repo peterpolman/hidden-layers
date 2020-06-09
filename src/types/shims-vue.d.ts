@@ -6,3 +6,4 @@ declare module 'mapbox-gl';
 declare module 'latlon-geohash';
 declare module 'vuedraggable';
 declare module 'jsts';
+declare module 'vue-timers';

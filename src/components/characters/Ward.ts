@@ -48,7 +48,9 @@ export default class MarkerWard extends Vue {
             this.tb.add(this.mesh);
             this.tb.repaint();
 
-            this.$watch('marker.selected', () => this.remove());
+            this.$watch('marker.selected', () => {
+                return this.remove();
+            });
         });
     }
 

@@ -2,6 +2,7 @@ import { Vue } from 'vue-property-decorator';
 
 import App from './App.vue';
 import MapboxGL from 'mapbox-gl';
+import VueTimers from 'vue-timers';
 
 import { ModalPlugin } from 'bootstrap-vue';
 
@@ -21,6 +22,7 @@ let app: Vue;
 
 Vue.config.productionTip = false;
 Vue.use(ModalPlugin);
+Vue.use(VueTimers);
 
 firebase.auth.onAuthStateChanged(() => {
     MapboxGL.accessToken = config.mapbox.key;
