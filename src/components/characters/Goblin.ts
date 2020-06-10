@@ -36,4 +36,8 @@ export default class CharacterUser extends Vue {
             .setLngLat([this.marker.position.lng, this.marker.position.lat])
             .addTo(this.miniMap);
     }
+
+    destroyed() {
+        this.miniMapIcon.remove();
+    }
 }

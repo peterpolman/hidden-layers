@@ -216,12 +216,15 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
 
         firebase.db.ref(`users/${firebaseUser.uid}/hashes`).on('child_removed', async (hashSnap: any) => {
             const markerSnap = await firebase.db.ref(`markers/${hashSnap.val()}`).once('value');
+            const markers = markerSnap.val();
 
-            markerSnap.val().forEach((marker: any, key: string) => {
-                if (markerSnap.key !== firebaseUser.uid) {
-                    this.context.commit('removeMarker', key);
-                }
-            });
+            if (markers) {
+                Object.keys(markers).forEach((key: string) => {
+                    if (key !== firebaseUser.uid) {
+                        this.context.commit('removeMarker', key);
+                    }
+                });
+            }
         });
     }
 }
