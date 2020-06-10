@@ -5,54 +5,23 @@
             <h1>Nice to meet you!</h1>
             <h2>Authentication</h2>
             <div class="form-group">
-                <input
-                    required
-                    type="text"
-                    v-model="email"
-                    class="form-control"
-                    placeholder="E-mail"
-                />
+                <input required type="text" v-model="email" class="form-control" placeholder="E-mail" />
             </div>
             <div class="form-group">
-                <input
-                    required
-                    type="password"
-                    v-model="password"
-                    class="form-control"
-                    placeholder="******"
-                />
+                <input required type="password" v-model="password" class="form-control" placeholder="******" />
             </div>
             <div class="form-group">
-                <input
-                    required
-                    type="password"
-                    v-model="passwordVerify"
-                    class="form-control"
-                    placeholder="******"
-                />
+                <input required type="password" v-model="passwordVerify" class="form-control" placeholder="******" />
             </div>
 
             <h2>Personal</h2>
             <div class="form-group">
-                <input
-                    required
-                    type="text"
-                    v-model="userName"
-                    class="form-control"
-                    placeholder="Username"
-                />
+                <input required type="text" v-model="userName" class="form-control" placeholder="Username" />
             </div>
 
             <h2>Hero Race</h2>
             <div class="form-group">
-                <input
-                    name="race"
-                    class="form-radio"
-                    id="class-human"
-                    type="radio"
-                    value="human"
-                    v-model="userRace"
-                />
+                <input name="race" class="form-radio" id="class-human" type="radio" value="human" v-model="userRace" />
                 <label for="class-knight">Human</label>
             </div>
 
@@ -101,13 +70,7 @@
                 <strong>{{ coords.lng }}</strong>
             </div>
             <div class="form-group" v-if="!coords">Trying to get your position...</div>
-            <b-button
-                :disabled="!coords"
-                variant="primary"
-                block
-                class="mt-3"
-                type="submit"
-            >Create account</b-button>
+            <b-button :disabled="!coords" variant="primary" block class="mt-3" type="submit">Create account</b-button>
             <p>
                 ... or go back to
                 <router-link to="/login">Login</router-link>
