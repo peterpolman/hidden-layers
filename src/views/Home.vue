@@ -3,7 +3,7 @@
         <base-map @click="onMapClick($event)" />
         <base-fog v-if="tb" :account="account" />
 
-        <div class="map-ui" v-if="map">
+        <div class="map-ui" v-if="map && tb">
             <base-profile />
             <base-inventory />
             <base-action :main="equipment.main" :off="equipment.off" :target="selected" />

@@ -59,35 +59,35 @@ class AccountModule extends VuexModule implements AccountModuleState {
     public async setPosition(payload: { account: User; heading: number; position: { lat: number; lng: number } }) {
         const oldHash = Geohash.encode(this._data.position.lat, this._data.position.lng, 7);
         const hash = Geohash.encode(payload.position.lat, payload.position.lng, 7);
-        let hashes = this._data.hashes;
 
         // Remove the old record if they differ
         if (oldHash !== hash) {
+            const hashes: { [hash: string]: string } = {};
             const neighbours = Geohash.neighbours(hash);
 
-            await firebase.db.ref('markers').child(oldHash).child(this._data.uid).remove();
-            await firebase.db
-                .ref('markers')
-                .child(hash)
-                .child(this._data.uid)
-                .update({
-                    position: payload.position,
-                    ref: `users/${this._data.uid}`,
-                });
+            for (const direction in neighbours) {
+                const h = neighbours[direction];
 
-            hashes = [];
-            hashes.push(hash);
-
-            for (const n in neighbours) {
-                hashes.push(neighbours[n]);
+                hashes[h] = h;
             }
+
+            hashes[hash] = hash;
+
+            await firebase.db.ref(`markers/${oldHash}/${this._data.uid}`).remove();
+            await firebase.db.ref(`markers/${hash}/${this._data.uid}`).update({
+                position: payload.position,
+                ref: `users/${this._data.uid}`,
+            });
+            await firebase.db.ref(`users/${payload.account.id}`).update({
+                hashes,
+            });
+            console.log('User is added to this hash', hash);
         }
 
         // Set the new record
         await firebase.db.ref(`users/${payload.account.id}`).update({
             heading: payload.heading,
             position: payload.position,
-            hashes,
         });
     }
 

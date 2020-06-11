@@ -21,7 +21,7 @@ export interface MarkersModuleState {
 @Module({ namespaced: true })
 class MarkersModule extends VuexModule implements MarkersModuleState {
     private _all: { [id: string]: Goblin | User | Ward } = {};
-    private listeners: any = {};
+    private _listeners: any = {};
     private _selected: any = null;
 
     get all(): any {
@@ -42,7 +42,7 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
 
     get goblins(): any {
         return Object.values(this._all).filter((marker: any) => {
-            return marker.component === 'goblin';
+            return marker.race === 'goblin';
         });
     }
 
@@ -61,8 +61,8 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
         const subscribe = (root: string, marker: User | Goblin | Ward | Loot) => {
             Vue.set(this._all, marker.id, marker);
 
-            if (!this.listeners[marker.id]) {
-                this.listeners[marker.id] = firebase.db.ref(`${root}/${marker.id}`).on('child_changed', (s: any) => {
+            if (!this._listeners[marker.id]) {
+                this._listeners[marker.id] = firebase.db.ref(`${root}/${marker.id}`).on('child_changed', (s: any) => {
                     if (this._all[marker.id]) {
                         Vue.set(this._all[marker.id], s.key, s.val());
                         console.log(root + ' child changed: ', s.key, s.val());
@@ -106,8 +106,8 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
 
     @Mutation
     public removeMarker(id: string) {
-        if (this.listeners[id] && this.listeners[id].off) {
-            this.listeners[id].off();
+        if (this._listeners[id] && this._listeners[id].off) {
+            this._listeners[id].off();
         }
         Vue.delete(this._all, id);
     }
@@ -191,8 +191,10 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
 
     @Action
     public async init(firebaseUser: firebase.User) {
-        firebase.db.ref(`users/${firebaseUser.uid}/hashes`).on('child_added', (hashSnap: any) => {
-            firebase.db.ref(`markers/${hashSnap.val()}`).on('child_added', async (markerSnap: any) => {
+        firebase.db.ref(`users/${firebaseUser.uid}/hashes`).on('child_added', async (hashSnap: any) => {
+            const hash = hashSnap.val();
+
+            firebase.db.ref(`markers/${hash}`).on('child_added', async (markerSnap: any) => {
                 const marker = markerSnap.val();
                 const refRoot = marker.ref.split('/')[0];
                 const refSnap = await firebase.db.ref(marker.ref).once('value');
@@ -203,12 +205,17 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
                     marker: refSnap.val(),
                     refRoot,
                 });
+                console.log(`Marker added for hash`, refSnap.key, hash);
             });
 
-            firebase.db.ref(`markers/${hashSnap.val()}`).on('child_removed', async (markerSnap: any) => {
+            firebase.db.ref(`markers/${hash}`).on('child_removed', async (markerSnap: any) => {
                 const refSnap = await firebase.db.ref(markerSnap.val().ref).once('value');
 
-                if (refSnap.key !== firebaseUser.uid) {
+                if (
+                    refSnap.key !== firebaseUser.uid &&
+                    refSnap.key !== this.context.rootGetters['account/account'].scout
+                ) {
+                    // Also skip removal of the wards here
                     this.context.commit('removeMarker', refSnap.key);
                 }
             });
@@ -217,10 +224,15 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
         firebase.db.ref(`users/${firebaseUser.uid}/hashes`).on('child_removed', async (hashSnap: any) => {
             const markerSnap = await firebase.db.ref(`markers/${hashSnap.val()}`).once('value');
             const markers = markerSnap.val();
+            const hash = hashSnap.val();
 
+            // Stop listening for old marker reference
+            firebase.db.ref(`markers/${hash}`).off();
+
+            // If there are markers to remove remove them
             if (markers) {
                 Object.keys(markers).forEach((key: string) => {
-                    if (key !== firebaseUser.uid) {
+                    if (key !== firebaseUser.uid && key !== this.context.rootGetters['account/account'].scout) {
                         this.context.commit('removeMarker', key);
                     }
                 });

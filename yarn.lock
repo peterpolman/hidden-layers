@@ -1762,10 +1762,10 @@
     thread-loader "^2.1.3"
     webpack "^4.0.0"
 
-"@vue/cli-plugin-e2e-nightwatch@~4.4.1":
+"@vue/cli-plugin-e2e-nightwatch@~4.4.0":
   version "4.4.1"
-  resolved "https://registry.yarnpkg.com/@vue/cli-plugin-e2e-nightwatch/-/cli-plugin-e2e-nightwatch-4.4.1.tgz#408a3bd8abaac7f7fbaf6e8032c53a0ca1057455"
-  integrity sha512-6874oYjUVmaoeQPlyNf2IqeG/7hX0hbjvJg+cn1wKn//e8rQu5f2G3rNOAor5N9E8xUsXcKSj5fH7LqrHXgZGg==
+  resolved "https://registry.npm.taobao.org/@vue/cli-plugin-e2e-nightwatch/download/@vue/cli-plugin-e2e-nightwatch-4.4.1.tgz#408a3bd8abaac7f7fbaf6e8032c53a0ca1057455"
+  integrity sha1-QIo72Kuqx/f7r26AMsU6DKEFdFU=
   dependencies:
     "@vue/cli-shared-utils" "^4.4.1"
     deepmerge "^4.2.2"

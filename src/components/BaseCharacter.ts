@@ -103,6 +103,8 @@ export default class BaseCharacter extends Vue {
     destroyed() {
         this.tb.remove(this.mesh);
         this.tb.repaint();
+
+        console.log('Character destroyed', this.marker.id);
     }
 
     onClick() {

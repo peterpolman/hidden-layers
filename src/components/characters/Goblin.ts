@@ -21,7 +21,7 @@ const ImgGoblin = {
         }),
     },
 })
-export default class CharacterUser extends Vue {
+export default class CharacterGoblin extends Vue {
     @Prop() marker!: Goblin;
 
     img = ImgGoblin.goblin;
@@ -39,5 +39,6 @@ export default class CharacterUser extends Vue {
 
     destroyed() {
         this.miniMapIcon.remove();
+        console.log('Goblin removed!');
     }
 }

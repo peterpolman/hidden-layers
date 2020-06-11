@@ -81,15 +81,30 @@ export default class CharacterScout extends Vue {
             .addTo(this.miniMap);
     }
 
-    updatePosition(newP: { lat: number; lng: number }, oldP: { lat: number; lng: number }) {
+    async updatePosition(newP: { lat: number; lng: number }, oldP: { lat: number; lng: number }) {
         const oldHash = Geohash.encode(oldP.lat, oldP.lng, 7);
         const hash = Geohash.encode(newP.lat, newP.lng, 7);
 
         if (oldHash !== hash) {
+            const hashes: { [hash: string]: string } = {};
+            const neighbours = Geohash.neighbours(hash);
+
+            for (const direction in neighbours) {
+                const h = neighbours[direction];
+
+                hashes[h] = h;
+            }
+
+            hashes[hash] = hash;
+
             firebase.db.ref(`markers/${oldHash}/${this.marker.id}`).remove();
             firebase.db.ref(`markers/${hash}/${this.marker.id}`).update({
                 position: newP,
                 ref: `scouts/${this.marker.id}`,
+            });
+
+            await firebase.db.ref(`users/${this.marker.owner}`).update({
+                hashes,
             });
         }
 
