@@ -1,7 +1,7 @@
 import { Vue } from 'vue-property-decorator';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 import firebase from '@/firebase';
-import { Item } from '@/models/Item';
+import { Item, Weapon, Miscellaneous, Consumable, Ammo, Armor } from '@/models/Item';
 
 export interface EquipmentModuleState {
     equipment: { [slot: string]: Item | null };
@@ -18,25 +18,33 @@ class EquipmentModule extends VuexModule implements EquipmentModuleState {
         legs: null,
         feet: null,
     };
-    private _active: Item | null = null;
+    private _active: any = null;
 
     get equipment(): { [slot: string]: Item | null } {
         return this._equipment;
     }
 
-    get active(): Item | null {
+    get active(): any {
         return this._active;
     }
 
     @Mutation
     public async activate(item: Item) {
-        this._active = item;
+        const ItemType: any = {
+            weapon: Weapon,
+            miscellaneous: Miscellaneous,
+            consumable: Consumable,
+            armor: Armor,
+            ammo: Ammo,
+        };
+        this._active = new ItemType[item.type](item);
     }
 
     @Mutation
     public async deactivate() {
         if (this._active) {
             Vue.set(this._active, 'active', false);
+            this._active.active = false;
             this._active = null;
         }
     }

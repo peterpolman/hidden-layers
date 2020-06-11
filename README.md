@@ -57,8 +57,9 @@ In order of appearance. No strings attached. Never really done and always a work
 -   [x] Vison Wards
 -   [x] Minimap
 -   [x] Scouts
--   [ ] NPC Spawn Service
+-   [x] NPC Spawn Service
 -   [ ] Combat System
+-   [ ] Skins
 -   [ ] Quest System
 -   [ ] Skill System
 -   [ ] Merchants

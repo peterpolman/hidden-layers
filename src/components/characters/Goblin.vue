@@ -7,7 +7,7 @@
             Goblin
         </div>
         <div slot="progress">
-            <b-progress class="profile-hp" variant="success" :value="marker.hp" :max="100" />
+            <b-progress class="profile-hp" variant="success" :value="marker.hp" :max="marker.totalHitpoints" />
         </div>
     </base-character>
 </template>

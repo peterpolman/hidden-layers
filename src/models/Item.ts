@@ -36,9 +36,11 @@ export class Item {
     slot: string;
     component = 'item';
     active = false;
+    type: string;
 
     constructor(data: any) {
         this.id = data.id;
+        this.type = data.type;
         this.name = data.name;
         this.slug = data.slug;
         this.description = data.description;
@@ -50,5 +52,37 @@ export class Item {
 
     activate() {
         this.active = true;
+    }
+}
+
+export class Weapon extends Item {
+    damage: number;
+    speed: number;
+
+    constructor(data: any) {
+        super(data);
+
+        this.damage = data.damage || 10;
+        this.speed = data.speed || 1000;
+    }
+}
+export class Consumable extends Item {
+    constructor(data: any) {
+        super(data);
+    }
+}
+export class Miscellaneous extends Item {
+    constructor(data: any) {
+        super(data);
+    }
+}
+export class Ammo extends Item {
+    constructor(data: any) {
+        super(data);
+    }
+}
+export class Armor extends Item {
+    constructor(data: any) {
+        super(data);
     }
 }

@@ -9,7 +9,7 @@
                 <strong>{{ marker.name }}</strong>
             </div>
             <div class="profile-progress">
-                <b-progress class="profile-hp" variant="success" :value="marker.hp" :max="100" />
+                <b-progress class="profile-hp" variant="success" :value="marker.hp" :max="marker.totalHitpoints" />
             </div>
         </div>
     </div>

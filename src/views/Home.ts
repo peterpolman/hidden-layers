@@ -26,7 +26,7 @@ import BaseLoot from '@/components/BaseLoot';
     name: 'home',
     timers: {
         spawn: {
-            time: 5000,
+            time: 10000,
             repeat: true,
             autostart: true,
         },
@@ -73,23 +73,20 @@ export default class Home extends Vue {
     active!: Item;
 
     spawn() {
-        const randomPosition = (bounds: any) => {
-            return {
-                lat: bounds.sw.lat + Math.random() * (bounds.ne.lat - bounds.sw.lat),
-                lng: bounds.sw.lon + Math.random() * (bounds.ne.lon - bounds.sw.lon),
-            };
-        };
         const positions = [this.account.position, this.scout.position];
 
         for (const i in positions) {
-            // 10% change to spawn a goblin
+            // 10% chance every 10s to spawn a goblin
             if (Math.random() < 0.1) {
                 const hash = Geohash.encode(positions[i].lat, positions[i].lng, 7);
                 const bounds = Geohash.bounds(hash);
 
                 this.$store.dispatch('markers/spawnNpc', {
                     hash,
-                    position: randomPosition(bounds),
+                    position: {
+                        lat: bounds.sw.lat + Math.random() * (bounds.ne.lat - bounds.sw.lat),
+                        lng: bounds.sw.lon + Math.random() * (bounds.ne.lon - bounds.sw.lon),
+                    },
                     race: 'goblin',
                     level: 3,
                 });
@@ -126,9 +123,9 @@ export default class Home extends Vue {
                         item: this.active,
                         destroy: true,
                     });
-                    this.$store.commit('equipment/deactivate');
                     break;
             }
+            this.$store.commit('equipment/deactivate');
         }
 
         if (this.selected) {

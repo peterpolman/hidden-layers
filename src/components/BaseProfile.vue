@@ -11,7 +11,7 @@
                 <strong>{{ account.name }}</strong>
             </div>
             <div class="profile-progress">
-                <b-progress class="profile-hp" variant="success" :value="account.hp" :max="100" />
+                <b-progress class="profile-hp" variant="success" :value="account.hp" :max="account.totalHitpoints" />
                 <b-progress class="profile-xp" variant="warning" :value="account.xp" :max="100" />
             </div>
         </div>

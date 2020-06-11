@@ -1,6 +1,12 @@
 <template>
     <div class="ui-action">
-        <b-button v-if="main" @click="onMainClick()" class="btn-circle" :class="{ active: main.active }">
+        <b-button
+            v-if="main"
+            @click="onMainClick()"
+            :disabled="attacking"
+            class="btn-circle"
+            :class="{ active: main.active }"
+        >
             <img class="image" :src="img[main.slug]" :alt="main.name" />
         </b-button>
         <b-button

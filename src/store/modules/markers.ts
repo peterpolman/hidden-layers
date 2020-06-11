@@ -58,7 +58,7 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
 
     @Mutation
     public async addMarker(data: { id: string; position: { lat: number; lng: number }; marker: any; refRoot: string }) {
-        const subscribe = (root: string, marker: User | Goblin | Ward | Loot) => {
+        const subscribe = (root: string, marker: any) => {
             Vue.set(this._all, marker.id, marker);
 
             if (!this._listeners[marker.id]) {

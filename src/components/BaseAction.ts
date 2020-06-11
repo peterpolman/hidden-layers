@@ -4,7 +4,7 @@ import { BButton } from 'bootstrap-vue';
 import { User } from '@/models/User';
 import { Goblin } from '@/models/Enemies';
 import { Images } from '@/models/Images';
-import { Item } from '@/models/Item';
+import { Item, Weapon } from '@/models/Item';
 
 @Component({
     name: 'BaseAction',
@@ -15,8 +15,12 @@ import { Item } from '@/models/Item';
         ...mapGetters('account', {
             account: 'account',
         }),
+        ...mapGetters('markers', {
+            selected: 'selected',
+        }),
         ...mapGetters('equipment', {
             equipment: 'equipment',
+            active: 'active',
         }),
         ...mapGetters('map', {
             map: 'map',
@@ -33,14 +37,31 @@ export default class BaseAction extends Vue {
     equipment!: { [slot: string]: Item };
     account!: Account;
     img: Images = new Images();
+    selected: any;
+    active!: Weapon;
+    combatTimer: any;
+    attacking = false;
 
     onMainClick() {
         this.main.activate();
         this.$store.commit('equipment/activate', this.main);
+
+        if (this.selected && !this.attacking && this.main.type === 'weapon') {
+            this.attack(this.active, this.selected);
+        }
     }
 
     onOffClick() {
         this.main.activate();
         this.$store.commit('equipment/activate', this.off);
+    }
+
+    attack(weapon: Weapon, target: any) {
+        this.attacking = true;
+        this.combatTimer = window.setTimeout(() => {
+            target.ref.update({ hitPoints: target.hitPoints - weapon.damage });
+            window.clearTimeout(this.combatTimer);
+            this.attacking = false;
+        }, weapon.speed);
     }
 }
