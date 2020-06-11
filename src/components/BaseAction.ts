@@ -58,8 +58,18 @@ export default class BaseAction extends Vue {
 
     attack(weapon: Weapon, target: any) {
         this.attacking = true;
-        this.combatTimer = window.setTimeout(() => {
-            target.ref.update({ hitPoints: target.hitPoints - weapon.damage });
+        this.combatTimer = window.setTimeout(async () => {
+            if (target.ref) {
+                const hp = target.hitPoints - weapon.damage;
+                if (hp > 0) {
+                    await target.ref.update({ hitPoints: hp });
+                } else {
+                    this.$store.commit('markers/deselect');
+
+                    await this.$store.dispatch('markers/remove', target);
+                    await target.ref.remove();
+                }
+            }
             window.clearTimeout(this.combatTimer);
             this.attacking = false;
         }, weapon.speed);

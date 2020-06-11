@@ -130,6 +130,13 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
     }
 
     @Action
+    public async remove(marker: any) {
+        const hash = Geohash.encode(marker.position.lat, marker.position.lng, 7);
+
+        await firebase.db.ref(`markers/${hash}/${marker.id}`).remove();
+    }
+
+    @Action
     public async spawnScout(account: Account) {
         const hash = Geohash.encode(account.position.lat, account.position.lng, 7);
 
