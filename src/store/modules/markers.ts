@@ -191,7 +191,7 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
 
     @Action
     public async init(firebaseUser: firebase.User) {
-        firebase.db.ref(`users/${firebaseUser.uid}/hashes`).on('child_added', async (hashSnap: any) => {
+        firebase.db.ref(`users/${firebaseUser.uid}/visibility`).on('child_added', async (hashSnap: any) => {
             const hash = hashSnap.val();
 
             firebase.db.ref(`markers/${hash}`).on('child_added', async (markerSnap: any) => {
@@ -205,6 +205,7 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
                     marker: refSnap.val(),
                     refRoot,
                 });
+
                 console.log(`Marker added for hash`, refSnap.key, hash);
             });
 
@@ -221,7 +222,7 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
             });
         });
 
-        firebase.db.ref(`users/${firebaseUser.uid}/hashes`).on('child_removed', async (hashSnap: any) => {
+        firebase.db.ref(`users/${firebaseUser.uid}/visibility`).on('child_removed', async (hashSnap: any) => {
             const markerSnap = await firebase.db.ref(`markers/${hashSnap.val()}`).once('value');
             const markers = markerSnap.val();
             const hash = hashSnap.val();

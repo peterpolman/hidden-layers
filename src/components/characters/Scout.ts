@@ -103,8 +103,10 @@ export default class CharacterScout extends Vue {
                 ref: `scouts/${this.marker.id}`,
             });
 
-            await firebase.db.ref(`users/${this.marker.owner}`).update({
-                hashes,
+            await firebase.db.ref(`scouts/${this.marker.id}/hashes`).set(hashes);
+            await firebase.db.ref(`users/${this.account.id}/visibility`).set({
+                ...this.account.hashes,
+                ...hashes,
             });
         }
 

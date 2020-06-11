@@ -78,8 +78,10 @@ class AccountModule extends VuexModule implements AccountModuleState {
                 position: payload.position,
                 ref: `users/${this._data.uid}`,
             });
-            await firebase.db.ref(`users/${payload.account.id}`).update({
-                hashes,
+            await firebase.db.ref(`users/${payload.account.id}/hashes`).set(hashes);
+            await firebase.db.ref(`users/${payload.account.id}/visibility`).set({
+                ...this.scout.hashes,
+                ...hashes,
             });
             console.log('User is added to this hash', hash);
         }
