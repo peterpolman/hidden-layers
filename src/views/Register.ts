@@ -45,11 +45,12 @@ export default class Register extends Vue {
                     name: this.userName,
                     heading: 0,
                     position: {
-                        lat: this.coords.lat || 52.52,
-                        lng: this.coords.lng || 13.404954,
+                        lat: this.coords.lat,
+                        lng: this.coords.lng,
                     },
                     race: this.userRace,
                     hashes,
+                    visibility: hashes,
                 };
                 await this.$store.dispatch('account/register', {
                     account: {
