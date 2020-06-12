@@ -2,6 +2,7 @@ import { Component, Vue, Prop } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { BButton } from 'bootstrap-vue';
 import { Account } from '@/models/Account';
+import MapboxGL from 'mapbox-gl';
 
 @Component({
     name: 'BaseCharacter',
@@ -66,10 +67,37 @@ export default class BaseCharacter extends Vue {
                 this.updatePosition(position);
             });
 
+            this.$watch('marker.hitPoints', (newHP: number, oldHP: number) => {
+                this.updateHitpoints(newHP, oldHP);
+            });
+
             this.$watch('marker.heading', (heading) => {
                 this.updateHeading(heading);
             });
         });
+    }
+
+    hit: any;
+    hitTimer: any;
+
+    updateHitpoints(newHP: number, oldHP: number) {
+        const el = document.createElement('div');
+
+        el.classList.add(newHP > oldHP ? 'heal' : 'dmg');
+        el.classList.add('character-hit');
+        el.innerText = (newHP - oldHP).toString();
+
+        if (this.hit) {
+            this.hit.remove();
+        }
+        this.hit = new MapboxGL.Marker(el)
+            .setLngLat([this.marker.position.lng, this.marker.position.lat])
+            .addTo(this.map);
+
+        this.hitTimer = window.setTimeout(() => {
+            this.hit.remove();
+            window.clearTimeout(this.hitTimer);
+        }, 300);
     }
 
     updateHeading(heading: number) {
@@ -101,6 +129,8 @@ export default class BaseCharacter extends Vue {
     }
 
     destroyed() {
+        this.hit.remove();
+
         this.tb.remove(this.mesh);
         this.tb.repaint();
 

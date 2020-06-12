@@ -24,24 +24,24 @@ export interface InventoryModuleState {
 
 @Module({ namespaced: true })
 class InventoryModule extends VuexModule implements InventoryModuleState {
-    private _all: { [key: string]: Item } = {};
+    private _all: { [key: string]: any } = {};
 
-    get items(): Item[] {
+    get items(): any[] {
         return Object.values(this._all);
     }
 
     @Mutation
-    public async setItem(data: { key: number; item: Item }) {
+    public async setItem(data: { key: number; item: any }) {
         Vue.set(this._all, data.key, data.item);
     }
 
     @Mutation
-    public async removeItem(data: { key: number; item: Item }) {
+    public async removeItem(data: { key: number; item: any }) {
         Vue.delete(this._all, data.key);
     }
 
     @Mutation
-    public async changeOrder(payload: { account: Account; inventory: Item[] }) {
+    public async changeOrder(payload: { account: Account; inventory: any[] }) {
         const update: any = {};
         this._all = {};
 
@@ -73,7 +73,7 @@ class InventoryModule extends VuexModule implements InventoryModuleState {
 
             if (data) {
                 const s = await firebase.db.ref(`items/${data.id}`).once('value');
-
+                console.log(s.val());
                 this.context.commit('setItem', {
                     key: snap.key,
                     item: new Item({
@@ -146,15 +146,12 @@ class InventoryModule extends VuexModule implements InventoryModuleState {
 
     @Action
     public async equip(payload: { account: Account; item: Item }) {
-        // Check if item slot is populated
         const s = await firebase.db.ref(`equipment/${payload.account.id}/${payload.item.slot}`).once('value');
 
         if (s.exists()) {
-            // If so show an error
             alert('Another item is equipped already! Unequip this one first.');
         } else {
             await this.context.dispatch('remove', { ...payload, amount: 1 });
-            // Set the item for the slot in equipment
             await firebase.db.ref(`equipment/${payload.account.id}/${payload.item.slot}`).set(payload.item.id);
         }
     }

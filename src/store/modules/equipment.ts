@@ -8,6 +8,14 @@ export interface EquipmentModuleState {
     active: Item | null;
 }
 
+const ItemType: any = {
+    weapon: Weapon,
+    miscellaneous: Miscellaneous,
+    consumable: Consumable,
+    armor: Armor,
+    ammo: Ammo,
+};
+
 @Module({ namespaced: true })
 class EquipmentModule extends VuexModule implements EquipmentModuleState {
     private _equipment: { [slot: string]: Item | null } = {
@@ -29,15 +37,8 @@ class EquipmentModule extends VuexModule implements EquipmentModuleState {
     }
 
     @Mutation
-    public async activate(item: Item) {
-        const ItemType: any = {
-            weapon: Weapon,
-            miscellaneous: Miscellaneous,
-            consumable: Consumable,
-            armor: Armor,
-            ammo: Ammo,
-        };
-        this._active = new ItemType[item.type](item);
+    public async activate(item: any) {
+        this._active = item;
     }
 
     @Mutation
@@ -67,7 +68,7 @@ class EquipmentModule extends VuexModule implements EquipmentModuleState {
 
             this.context.commit('setItem', {
                 slot: snap.key,
-                item: new Item({
+                item: new ItemType[s.val().type]({
                     id: id,
                     amount: 1,
                     ...s.val(),

@@ -202,6 +202,24 @@ input[type='checkbox']:checked + label:after {
     right: 0;
 }
 
+.character-hit {
+    color: white;
+    font-weight: bold;
+    text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.75);
+    width: 20px;
+    font-size: 18px;
+    text-align: center;
+    transition: all 1.5s ease-in-out;
+}
+
+.character-hit.dmg {
+    color: red;
+}
+
+.character-hit.heal {
+    color: rgb(140, 198, 62);
+}
+
 .mapboxgl-ctrl-bottom-left,
 .mapboxgl-ctrl-bottom-right {
     display: none !important;

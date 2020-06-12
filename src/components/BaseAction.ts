@@ -4,7 +4,7 @@ import { BButton } from 'bootstrap-vue';
 import { User } from '@/models/User';
 import { Goblin } from '@/models/Enemies';
 import { Images } from '@/models/Images';
-import { Item, Weapon } from '@/models/Item';
+import { Item, Weapon, Consumable } from '@/models/Item';
 
 @Component({
     name: 'BaseAction',
@@ -38,9 +38,10 @@ export default class BaseAction extends Vue {
     account!: Account;
     img: Images = new Images();
     selected: any;
-    active!: Weapon;
+    active!: any;
     combatTimer: any;
     attacking = false;
+    consuming = false;
 
     onMainClick() {
         this.main.activate();
@@ -52,15 +53,20 @@ export default class BaseAction extends Vue {
     }
 
     onOffClick() {
-        this.main.activate();
+        this.off.activate();
         this.$store.commit('equipment/activate', this.off);
+
+        if (this.off.type === 'consumable') {
+            this.consume(this.active, this.selected || this.account);
+        }
     }
 
     attack(weapon: Weapon, target: any) {
         this.attacking = true;
         this.combatTimer = window.setTimeout(async () => {
             if (target.ref) {
-                const hp = target.hitPoints - weapon.damage;
+                const damage = weapon.damage + Math.floor(Math.random() * 10);
+                const hp = target.hitPoints - damage;
                 if (hp > 0) {
                     await target.ref.update({ hitPoints: hp });
                 } else {
@@ -73,5 +79,18 @@ export default class BaseAction extends Vue {
             window.clearTimeout(this.combatTimer);
             this.attacking = false;
         }, weapon.speed);
+    }
+
+    async consume(item: Consumable, target: any) {
+        this.consuming = true;
+        this.combatTimer = window.setTimeout(async () => {
+            if (target.ref) {
+                const update = item.increase ? target[item.stat] + item.increase : target[item.stat] - item.decrease;
+
+                await target.ref.child(item.stat).set(update);
+            }
+            window.clearTimeout(this.combatTimer);
+            this.consuming = false;
+        }, 1000);
     }
 }

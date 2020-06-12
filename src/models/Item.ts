@@ -66,11 +66,23 @@ export class Weapon extends Item {
         this.speed = data.speed || 1000;
     }
 }
+
 export class Consumable extends Item {
+    stat: string;
+    increase: number;
+    decrease: number;
+    duration: number;
+
     constructor(data: any) {
         super(data);
+
+        this.stat = data.stat;
+        this.increase = data.increase || 0;
+        this.decrease = data.decrease || 0;
+        this.duration = data.duration || 0;
     }
 }
+
 export class Miscellaneous extends Item {
     constructor(data: any) {
         super(data);

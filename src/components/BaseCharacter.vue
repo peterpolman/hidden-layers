@@ -4,9 +4,7 @@
             <img width="30" :src="img" />
         </b-button>
         <div class="profile-level">
-            <slot name="level">
-                ...
-            </slot>
+            <slot name="level">...</slot>
         </div>
         <div class="profile-info">
             <div class="profile-name">

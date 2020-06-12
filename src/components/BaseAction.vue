@@ -12,6 +12,7 @@
         <b-button
             v-if="off"
             @click="onOffClick()"
+            :disabled="consuming"
             class="btn btn-circle"
             :class="{ 'btn-sm': main, 'active': off.active }"
         >
