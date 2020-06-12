@@ -5,6 +5,7 @@ export class Ward {
     component = 'ward';
     selected = false;
     created: number;
+    visible = false;
 
     constructor(id: string, data: any) {
         this.id = id;

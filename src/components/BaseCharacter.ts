@@ -34,6 +34,8 @@ export default class BaseCharacter extends Vue {
     walkCycle: any;
     mesh: any;
     show = false;
+    hit: any;
+    hitTimer: any;
 
     created() {
         const THREE = (window as any)['THREE'];
@@ -61,7 +63,13 @@ export default class BaseCharacter extends Vue {
                 .setCoords([this.marker.position.lng, this.marker.position.lat]);
 
             this.tb.add(this.mesh);
+            this.mesh.visible = this.marker.visible;
+            console.log(this.marker.visible);
             this.tb.repaint();
+
+            this.$watch('marker.visible', (visible) => {
+                this.updateVisibility(visible);
+            });
 
             this.$watch('marker.position', (position) => {
                 this.updatePosition(position);
@@ -77,9 +85,6 @@ export default class BaseCharacter extends Vue {
         });
     }
 
-    hit: any;
-    hitTimer: any;
-
     updateHitpoints(newHP: number, oldHP: number) {
         const el = document.createElement('div');
 
@@ -90,6 +95,7 @@ export default class BaseCharacter extends Vue {
         if (this.hit) {
             this.hit.remove();
         }
+
         this.hit = new MapboxGL.Marker(el)
             .setLngLat([this.marker.position.lng, this.marker.position.lat])
             .addTo(this.map);
@@ -98,6 +104,14 @@ export default class BaseCharacter extends Vue {
             this.hit.remove();
             window.clearTimeout(this.hitTimer);
         }, 300);
+    }
+
+    updateVisibility(visible: boolean) {
+        console.log(visible);
+        if (this.tb) {
+            this.mesh.visible = visible;
+            this.tb.repaint();
+        }
     }
 
     updateHeading(heading: number) {

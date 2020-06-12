@@ -73,7 +73,7 @@ class InventoryModule extends VuexModule implements InventoryModuleState {
 
             if (data) {
                 const s = await firebase.db.ref(`items/${data.id}`).once('value');
-                console.log(s.val());
+
                 this.context.commit('setItem', {
                     key: snap.key,
                     item: new Item({

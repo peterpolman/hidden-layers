@@ -2,6 +2,7 @@ import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { Account } from '@/models/Account';
 import { BButton } from 'bootstrap-vue';
+import { Scout } from '@/models/Scout';
 
 const THREE = (window as any)['THREE'];
 const Threebox = (window as any)['Threebox'];
@@ -14,6 +15,7 @@ const Threebox = (window as any)['Threebox'];
     computed: {
         ...mapGetters('account', {
             account: 'account',
+            scout: 'scout',
         }),
         ...mapGetters('map', {
             map: 'map',
@@ -22,12 +24,13 @@ const Threebox = (window as any)['Threebox'];
             layers: 'layers',
         }),
         ...mapGetters('markers', {
-            markers: 'visible',
+            markers: 'all',
         }),
     },
 })
 export default class BaseMap extends Vue {
     account!: Account;
+    scout!: Scout;
     mixers!: any;
     map: any;
     miniMap: any;
@@ -103,9 +106,36 @@ export default class BaseMap extends Vue {
                     });
                 }
 
+                for (const id in this.markers) {
+                    if (this.markers[id].position) {
+                        const p = this.tb.projectToWorld([
+                            this.markers[id].position.lng,
+                            this.markers[id].position.lat,
+                        ]);
+                        const visibleByUser = this.account && this.isVisible(this.account.position, p, 4);
+                        const visibleByScout = this.scout && this.isVisible(this.scout.position, p, 3);
+
+                        this.markers[id].visible = visibleByUser || visibleByScout;
+                        console.log(id, this.markers[id].visible);
+                    }
+                }
+
                 this.tb.update();
             },
         });
+    }
+
+    isVisible(position: { lat: number; lng: number }, v2: any, radius: number) {
+        const v1 = this.tb.projectToWorld([position.lng, position.lat]);
+        const distanceVector = (vec1: any, vec2: any) => {
+            const dx = vec1.x - vec2.x;
+            const dy = vec1.y - vec2.y;
+            const dz = vec1.z - vec2.z;
+
+            return Math.sqrt(dx * dx + dy * dy + dz * dz);
+        };
+
+        return distanceVector(v1, v2) < radius;
     }
 
     async toggleLockCamera() {

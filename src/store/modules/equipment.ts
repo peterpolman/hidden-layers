@@ -45,6 +45,7 @@ class EquipmentModule extends VuexModule implements EquipmentModuleState {
     public async deactivate() {
         if (this._active) {
             Vue.set(this._active, 'active', false);
+
             this._active.active = false;
             this._active = null;
         }

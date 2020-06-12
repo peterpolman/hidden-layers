@@ -10,6 +10,7 @@ export class Character {
     position: { lat: number; lng: number };
     heading: number;
     totalHitpoints: number;
+    _visible = false;
 
     constructor(id: string, data: any) {
         this.id = id;
@@ -29,5 +30,13 @@ export class Character {
 
     get lvl() {
         return this.level;
+    }
+
+    get visible() {
+        return this._visible;
+    }
+
+    set visible(visible: boolean) {
+        this._visible = visible;
     }
 }
