@@ -63,7 +63,7 @@ export default class Register extends Vue {
                 this.loading = false;
             } catch (err) {
                 if (typeof err != 'undefined') {
-                    alert('Error during account registration.');
+                    alert('Error during account registration. ' + err);
                 }
                 this.loading = false;
             }

@@ -1,7 +1,7 @@
 <template>
     <base-character
         :img="img[marker.class]"
-        :object="`./objects/${marker.class}/${marker.class}.gltf`"
+        :object="`./objects/${marker.race}/${marker.race}.gltf`"
         :marker="marker"
         @update:position="updatePosition($event)"
     >

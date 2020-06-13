@@ -22,7 +22,7 @@ export default class Login extends Vue {
             this.loading = false;
         } catch (err) {
             if (typeof err != 'undefined') {
-                alert('Error during account authentication.');
+                alert('Error during account authentication. ' + err);
             }
             this.loading = false;
         }

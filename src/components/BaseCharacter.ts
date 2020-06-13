@@ -64,7 +64,6 @@ export default class BaseCharacter extends Vue {
 
             this.tb.add(this.mesh);
             this.mesh.visible = this.marker.visible;
-            console.log(this.marker.visible);
             this.tb.repaint();
 
             this.$watch('marker.visible', (visible) => {

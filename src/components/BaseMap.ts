@@ -116,7 +116,6 @@ export default class BaseMap extends Vue {
                         const visibleByScout = this.scout && this.isVisible(this.scout.position, p, 3);
 
                         this.markers[id].visible = visibleByUser || visibleByScout;
-                        console.log(id, this.markers[id].visible);
                     }
                 }
 
