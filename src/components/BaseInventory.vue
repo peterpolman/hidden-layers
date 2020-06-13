@@ -9,7 +9,7 @@
         <base-modal @close="isOpen = false" title="Inventory" id="inventory" v-if="inventory">
             <div slot="content">
                 <div class="modal-inventory">
-                    <draggable :options="{ delay: 100 }" v-model="inventory" ghost-class="item-sortable">
+                    <draggable :delay="100" v-model="inventory" ghost-class="item-sortable">
                         <base-item
                             v-for="item of inventory"
                             :equipped="false"
