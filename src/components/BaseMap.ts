@@ -87,12 +87,10 @@ export default class BaseMap extends Vue {
             type: 'custom',
             renderingMode: '3d',
             onAdd: (map: any, mbxContext: any) => {
-                const ambientLight = new THREE.AmbientLight(0xffffff, 1);
-                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.65);
+                const ambientLight = new THREE.AmbientLight(0xffffff, 1.4);
                 const tb = new Threebox(map, mbxContext);
 
                 tb.add(ambientLight);
-                tb.add(directionalLight);
 
                 this.$store.commit('map/addThreebox', tb);
             },

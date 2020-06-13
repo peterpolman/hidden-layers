@@ -1,5 +1,5 @@
 <template>
-    <base-character :img="img" object="./objects/zombie/zombie.gltf" :marker="marker">
+    <base-character :img="img" object="./objects/goblin/goblin.gltf" :marker="marker">
         <div slot="level">{{ marker.lvl }}</div>
         <div slot="name">Goblin</div>
         <div slot="progress">
