@@ -37,19 +37,19 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.5);
 }
 .btn-circle .image {
     width: 35px;
     height: 35px;
 }
 .btn-circle.btn-sm {
-    width: 30px;
-    height: 30px;
+    width: 40px;
+    height: 40px;
     position: absolute;
     bottom: 0;
     left: 50px;
 }
-
 .btn-circle.btn-sm .image {
     width: 20px;
     height: 20px;

@@ -165,8 +165,8 @@ class InventoryModule extends VuexModule implements InventoryModuleState {
     }
 
     @Action
-    public async drop(payload: { account: Account; item: Item }) {
-        const lootHash = Geohash.encode(payload.account.position.lat, payload.account.position.lng, 9);
+    public async place(payload: { position: { lat: number; lng: number }; item: Item }) {
+        const lootHash = Geohash.encode(payload.position.lat, payload.position.lng, 9);
         const lootBounds = Geohash.bounds(lootHash);
         const lootPosition = randomPosition(lootBounds);
         const hash = Geohash.encode(lootPosition.lat, lootPosition.lng, 7);
@@ -181,8 +181,12 @@ class InventoryModule extends VuexModule implements InventoryModuleState {
             position: lootPosition,
             ref: `loot/${snap.key}`,
         });
+    }
 
-        return await this.context.dispatch('remove', { ...payload, amount: payload.item.amount });
+    @Action
+    public async drop(payload: { account: Account; item: Item }) {
+        await this.context.dispatch('place', { position: payload.account.position, item: payload.item });
+        await this.context.dispatch('remove', { ...payload, amount: payload.item.amount });
     }
 
     @Action

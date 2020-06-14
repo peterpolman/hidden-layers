@@ -74,6 +74,13 @@ export default class BaseAction extends Vue {
 
                     await this.$store.dispatch('markers/remove', target);
                     await target.ref.remove();
+                    await this.$store.dispatch('inventory/place', {
+                        position: target.position,
+                        item: new Item({
+                            amount: 25,
+                            id: '-M8fjDoqeLMlz6xGrM-C',
+                        }),
+                    });
                 }
             }
             window.clearTimeout(this.combatTimer);
