@@ -63,6 +63,10 @@ export default class BaseFog extends Vue {
         });
     }
 
+    render() {
+        return;
+    }
+
     jstsPoly(path: any) {
         const geometryFactory = new JSTS.geom.GeometryFactory();
         const jstsPath = this.convertToJSTSPath(path);

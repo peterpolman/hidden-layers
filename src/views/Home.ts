@@ -11,7 +11,7 @@ import { Loot } from '@/models/Loot';
 import { Account } from '@/models/Account';
 import { Scout } from '@/models/Scout';
 
-import BaseFog from '@/components/BaseFog.vue';
+import BaseFog from '@/components/BaseFog';
 import BaseMap from '@/components/BaseMap.vue';
 import BaseAction from '@/components/BaseAction.vue';
 import BaseProfile from '@/components/BaseProfile.vue';

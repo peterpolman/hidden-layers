@@ -58,9 +58,10 @@ In order of appearance. No strings attached. Never really done and always a work
 -   [x] Minimap
 -   [x] Scouts
 -   [x] NPC Spawn Service
--   [ ] Combat System
--   [ ] Skins
+-   [x] Combat System
+-   [x] Skins
 -   [ ] Quest System
 -   [ ] Skill System
 -   [ ] Merchants
+-   [ ] Backstories
 -   [ ] Trading System

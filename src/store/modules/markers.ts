@@ -58,6 +58,7 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
 
     @Mutation
     public async addMarker(data: { id: string; position: { lat: number; lng: number }; marker: any; refRoot: string }) {
+        const MarkerTypeMap: any = { users: User, scouts: Scout, npc: Goblin, wards: Ward };
         const subscribe = (root: string, marker: any) => {
             Vue.set(this._all, marker.id, marker);
 
@@ -65,42 +66,28 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
                 this._listeners[marker.id] = firebase.db.ref(`${root}/${marker.id}`).on('child_changed', (s: any) => {
                     if (this._all[marker.id]) {
                         Vue.set(this._all[marker.id], s.key, s.val());
+
                         console.log(root + ' child changed: ', s.key, s.val());
                     }
                 });
             }
         };
 
-        switch (data.refRoot) {
-            case 'users':
-                subscribe(data.refRoot, new User(data.id, data.marker));
-                break;
-            case 'scouts':
-                subscribe(data.refRoot, new Scout(data.id, data.marker));
-                break;
-            case 'npc':
-                subscribe(data.refRoot, new Goblin(data.id, data.marker));
-                break;
-            case 'wards':
-                subscribe(data.refRoot, new Ward(data.id, data.marker));
-                break;
-            case 'loot':
-                subscribe(
-                    data.refRoot,
-                    new Loot(
-                        data.id,
-                        data.position,
-                        new Item({
-                            id: data.marker.id,
-                            amount: data.marker.amount,
-                            ...(await firebase.db.ref(`items/${data.marker.id}`).once('value')).val(),
-                        }),
-                    ),
-                );
-                break;
-            default:
-                console.log('Can not subscribe to this refRoot', data.refRoot);
-                break;
+        if (data.refRoot === 'loot') {
+            subscribe(
+                data.refRoot,
+                new Loot(
+                    data.id,
+                    data.position,
+                    new Item({
+                        id: data.marker.id,
+                        amount: data.marker.amount,
+                        ...(await firebase.db.ref(`items/${data.marker.id}`).once('value')).val(),
+                    }),
+                ),
+            );
+        } else {
+            subscribe(data.refRoot, new MarkerTypeMap[data.refRoot](data.id, data.marker));
         }
     }
 

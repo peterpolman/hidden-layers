@@ -74,6 +74,7 @@ export default class BaseLoot extends Vue {
 
     destroyed() {
         this.tb.remove(this.mesh);
+        this.$store.commit('markers/deselect');
         this.tb.repaint();
     }
 
