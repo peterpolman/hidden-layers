@@ -5,6 +5,7 @@ import { User } from '@/models/User';
 import { Goblin } from '@/models/Enemies';
 import { Images } from '@/models/Images';
 import { Item, Weapon, Consumable } from '@/models/Item';
+import firebase from '@/firebase';
 
 @Component({
     name: 'BaseAction',
@@ -61,7 +62,7 @@ export default class BaseAction extends Vue {
         }
     }
 
-    attack(weapon: Weapon, target: any) {
+    async attack(weapon: Weapon, target: any) {
         this.attacking = true;
         this.combatTimer = window.setTimeout(async () => {
             if (target.ref) {
@@ -74,13 +75,28 @@ export default class BaseAction extends Vue {
 
                     await this.$store.dispatch('markers/remove', target);
                     await target.ref.remove();
+
                     await this.$store.dispatch('inventory/place', {
                         position: target.position,
                         item: new Item({
-                            amount: 25,
+                            amount: Math.floor(Math.random() * 20) + 5,
                             id: '-M8fjDoqeLMlz6xGrM-C',
                         }),
                     });
+
+                    if (Math.random() < 0.25) {
+                        const snap = await firebase.db.ref(`items`).once('value');
+                        const keys = Object.keys(snap.val());
+                        const index = Math.floor(Math.random() * keys.length);
+
+                        await this.$store.dispatch('inventory/place', {
+                            position: target.position,
+                            item: new Item({
+                                amount: 1,
+                                id: keys[index],
+                            }),
+                        });
+                    }
                 }
             }
             window.clearTimeout(this.combatTimer);
@@ -88,7 +104,7 @@ export default class BaseAction extends Vue {
         }, weapon.speed);
     }
 
-    async consume(item: Consumable, target: any) {
+    consume(item: Consumable, target: any) {
         this.consuming = true;
         this.combatTimer = window.setTimeout(async () => {
             if (target.ref) {

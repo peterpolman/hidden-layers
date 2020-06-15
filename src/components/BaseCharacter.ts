@@ -106,7 +106,6 @@ export default class BaseCharacter extends Vue {
     }
 
     updateVisibility(visible: boolean) {
-        console.log(visible);
         if (this.tb) {
             this.mesh.visible = visible;
             this.tb.repaint();
@@ -142,12 +141,12 @@ export default class BaseCharacter extends Vue {
     }
 
     destroyed() {
-        this.hit.remove();
+        if (this.hit) {
+            this.hit.remove();
+        }
 
         this.tb.remove(this.mesh);
         this.tb.repaint();
-
-        console.log('Character destroyed', this.marker.id);
     }
 
     onClick() {
