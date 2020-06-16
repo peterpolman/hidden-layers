@@ -1,6 +1,6 @@
 import { Component, Vue, Prop } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
-import { BButton } from 'bootstrap-vue';
+import { BProgress, BButton } from 'bootstrap-vue';
 import { User } from '@/models/User';
 import { Goblin } from '@/models/Enemies';
 import { Images } from '@/models/Images';
@@ -11,6 +11,7 @@ import firebase from '@/firebase';
     name: 'BaseAction',
     components: {
         'b-button': BButton,
+        'b-progress': BProgress,
     },
     computed: {
         ...mapGetters('account', {
@@ -62,8 +63,20 @@ export default class BaseAction extends Vue {
         }
     }
 
+    timer: any;
+    time = 0;
+
     async attack(weapon: Weapon, target: any) {
         this.attacking = true;
+        this.timer = window.setInterval(() => {
+            this.time += weapon.speed / 100;
+
+            if (this.time > weapon.speed) {
+                window.clearInterval(this.timer);
+                this.time = 0;
+                console.log('cleared');
+            }
+        }, 1);
         this.combatTimer = window.setTimeout(async () => {
             if (target.ref) {
                 const damage = weapon.damage + Math.floor(Math.random() * 10);

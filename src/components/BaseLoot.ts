@@ -56,6 +56,7 @@ export default class BaseLoot extends Vue {
             this.mesh = this.tb
                 .Object3D({ obj: gltf.scene, units: 'meters' })
                 .setCoords([this.marker.position.lng, this.marker.position.lat]);
+            this.mesh.rotation.z = Math.floor(Math.random() * 360);
 
             this.tb.add(this.mesh);
             this.tb.repaint();
