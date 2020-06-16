@@ -58,6 +58,8 @@ export default class CharacterScout extends Vue {
                 .setCoords([this.marker.position.lng, this.marker.position.lat]);
 
             this.tb.add(this.mesh);
+            this.mesh.rotation.z = Math.floor(Math.random() * 360);
+
             this.tb.repaint();
 
             this.$watch('marker.position', (position, oldPosition) => {

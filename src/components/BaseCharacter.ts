@@ -64,6 +64,8 @@ export default class BaseCharacter extends Vue {
 
             this.tb.add(this.mesh);
             this.mesh.visible = this.marker.visible;
+            this.mesh.rotation.z = Math.floor(Math.random() * 360);
+
             this.tb.repaint();
 
             this.$watch('marker.visible', (visible) => {
