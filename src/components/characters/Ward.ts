@@ -35,7 +35,7 @@ export default class MarkerWard extends Vue {
 
         loader.load('./objects/items/ward.gltf', (gltf: any) => {
             gltf.scene.scale.set(1.5, 1.5, 1.5);
-            gltf.scene.rotation.z = 180 * 0.0174533;
+            gltf.scene.rotation.x = 180 * 0.0174533;
             gltf.scene.userData = {
                 id: this.marker.id,
                 position: this.marker.position,

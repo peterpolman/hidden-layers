@@ -31,11 +31,12 @@ const ImgAccountClass = {
 })
 export default class BaseProfile extends Vue {
     account!: Account;
+    miniMap!: any;
     map!: any;
     imgAccountClass = ImgAccountClass;
 
     onProfileClick() {
-        this.map.setCenter([this.account.position.lng, this.account.position.lat]);
+        this.miniMap.setCenter([this.account.position.lng, this.account.position.lat]);
         this.$bvModal.show('equipment');
     }
 }

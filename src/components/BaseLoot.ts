@@ -38,7 +38,6 @@ export default class BaseLoot extends Vue {
 
         loader.load(`./objects/items/${this.marker.item.slug}.gltf`, (gltf: any) => {
             gltf.scene.scale.set(1.5, 1.5, 1.5);
-            gltf.scene.rotation.z = 180 * 0.0174533;
             gltf.scene.userData = {
                 id: this.marker.id,
                 position: this.marker.position,

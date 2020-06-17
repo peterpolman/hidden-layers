@@ -106,9 +106,11 @@ export default class Home extends Vue {
 
     handleMeshClick(object: any) {
         if (object.name !== 'fog') {
-            const data = this.getUserData(object).userData;
+            const data = this.getUserData(object);
 
-            this.$store.commit('markers/select', data.id);
+            if (data && data.userData) {
+                this.$store.commit('markers/select', data.userData.id);
+            }
         }
     }
 
@@ -146,6 +148,8 @@ export default class Home extends Vue {
             return object.parent.parent;
         } else if (typeof object.parent.parent.parent.userData.id != 'undefined') {
             return object.parent.parent.parent;
+        } else {
+            return null;
         }
     }
 }
