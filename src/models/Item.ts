@@ -93,6 +93,11 @@ export class Ammo extends Item {
         super(data);
     }
 }
+export class Money extends Item {
+    constructor(data: any) {
+        super(data);
+    }
+}
 export class Armor extends Item {
     constructor(data: any) {
         super(data);

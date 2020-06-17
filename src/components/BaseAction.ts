@@ -6,6 +6,7 @@ import { Goblin } from '@/models/Enemies';
 import { Images } from '@/models/Images';
 import { Item, Weapon, Consumable } from '@/models/Item';
 import firebase from '@/firebase';
+import { Scout } from '@/models/Scout';
 
 @Component({
     name: 'BaseAction',
@@ -32,7 +33,7 @@ import firebase from '@/firebase';
     },
 })
 export default class BaseAction extends Vue {
-    @Prop() target!: Goblin | User;
+    @Prop() target!: Goblin | User | Scout;
     @Prop() main!: any | Item;
     @Prop() off!: any | Item;
 

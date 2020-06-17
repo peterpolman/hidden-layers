@@ -149,11 +149,16 @@ class InventoryModule extends VuexModule implements InventoryModuleState {
         const s = await firebase.db.ref(`equipment/${payload.account.id}/${payload.item.slot}`).once('value');
 
         if (s.exists()) {
-            alert('Another item is equipped already! Unequip this one first.');
-        } else {
-            await this.context.dispatch('remove', { ...payload, amount: 1 });
-            await firebase.db.ref(`equipment/${payload.account.id}/${payload.item.slot}`).set(payload.item.id);
+            const current = this.context.rootGetters['equipment/equipment'][payload.item.slot];
+
+            await this.context.dispatch('unequip', {
+                account: payload.account,
+                item: current,
+                destroy: false,
+            });
         }
+        await this.context.dispatch('remove', { ...payload, amount: 1 });
+        await firebase.db.ref(`equipment/${payload.account.id}/${payload.item.slot}`).set(payload.item.id);
     }
 
     @Action

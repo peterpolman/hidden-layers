@@ -121,6 +121,8 @@ export default class BaseCharacter extends Vue {
 
                     this.slots[slot].position.set(0, 0, 0);
                     this.slots[slot].rotation.x = 90 * 0.0174533;
+
+                    this.tb.repaint();
                 }
             });
         } else {
@@ -132,7 +134,6 @@ export default class BaseCharacter extends Vue {
                 this.slots[slot] = null;
             }
         }
-        this.tb.repaint();
     }
 
     updateHitpoints(newHP: number, oldHP: number) {

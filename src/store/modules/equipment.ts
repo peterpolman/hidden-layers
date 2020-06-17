@@ -1,7 +1,7 @@
 import { Vue } from 'vue-property-decorator';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 import firebase from '@/firebase';
-import { Item, Weapon, Miscellaneous, Consumable, Ammo, Armor } from '@/models/Item';
+import { Item, Weapon, Miscellaneous, Consumable, Ammo, Armor, Money } from '@/models/Item';
 
 export interface EquipmentModuleState {
     equipment: { [slot: string]: Item | null };
@@ -14,6 +14,7 @@ const ItemType: any = {
     consumable: Consumable,
     armor: Armor,
     ammo: Ammo,
+    money: Money,
 };
 
 @Module({ namespaced: true })
