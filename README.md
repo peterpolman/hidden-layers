@@ -6,7 +6,7 @@ Just another **Browser-based Augmented Reality Massive Multiplayer Online Role P
 
 ## Credits
 
-Built with a a lot fun, thanks to:
+Built with a lot fun! Many thanks go to:
 
 -   [Three.js](https://github.com/mrdoob/three.js)
 -   [Threebox](https://github.com/peterqliu/threebox)
@@ -30,21 +30,22 @@ In order of appearance. No strings attached. Never really done and always a work
 -   [x] Firebase/Vuex integration
 -   [x] Mapbox implementation
 -   [x] Threebox implementation
--   [x] Geohash/Marker store
--   [x] Fog of war
+-   [x] Geohashed/Marker store
+-   [x] Fog of War
 -   [x] Item Factory
 -   [x] Inventory System
 -   [x] Equipment System
 -   [x] Registration
--   [x] Geo positioning System
+-   [x] World Positioning System
 -   [x] Loot System
 -   [x] Vison Wards
 -   [x] Minimap
 -   [x] Scouts
--   [x] NPC Spawn Service
--   [x] Combat System
+-   [x] Spawn Service
+-   [x] Attack System
 -   [x] Skins
 -   [x] Wearable items
+-   [ ] Defend System
 -   [ ] Quest System
 -   [ ] Skill System
 -   [ ] Merchants

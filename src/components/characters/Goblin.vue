@@ -1,14 +1,25 @@
 <template>
-    <base-character :img="img" object="./objects/goblin/goblin.gltf" :marker="marker">
-        <div slot="level">{{ marker.lvl }}</div>
-        <div slot="name">Goblin</div>
-        <div slot="progress">
-            <b-progress class="profile-hp" variant="success" :value="marker.hp" :max="marker.totalHitpoints" />
+    <div class="profile" v-show="marker.selected">
+        <b-button @click="onClick()" class="btn-circle">
+            <img width="30" :src="img" />
+        </b-button>
+        <div class="profile-level">{{ marker.lvl }}</div>
+        <div class="profile-info">
+            <div class="profile-name">
+                <strong>Goblin</strong>
+            </div>
+            <div class="profile-progress">
+                <b-progress class="profile-hp" variant="success" :value="marker.hp" :max="marker.totalHitpoints" />
+            </div>
         </div>
-    </base-character>
+    </div>
 </template>
 <script src="./Goblin.ts" lang="ts"></script>
 <style>
+.profile {
+    position: relative;
+    margin-bottom: 1rem;
+}
 .image {
     width: auto;
     height: 25px;

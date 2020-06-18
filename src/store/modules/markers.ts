@@ -124,6 +124,28 @@ class MarkersModule extends VuexModule implements MarkersModuleState {
     }
 
     @Action
+    public async setPosition(payload: { id: string; position: any }) {
+        const marker = this._all[payload.id];
+        const oldHash = Geohash.encode(marker.position.lat, marker.position.lng, 7);
+        const hash = Geohash.encode(payload.position.lat, payload.position.lng, 7);
+
+        if (oldHash !== hash) {
+            firebase.db.ref(`markers/${oldHash}/${payload.id}`).remove();
+            firebase.db.ref(`markers/${hash}/${payload.id}`).update({
+                position: payload.position,
+                ref: `npc/${payload.id}`,
+            });
+        }
+
+        await firebase.db.ref(`npc/${payload.id}/position`).set(payload.position);
+    }
+
+    @Action
+    public async setQuaternion(payload: { id: string; quaternion: any }) {
+        await firebase.db.ref(`npc/${payload.id}/quaternion`).set(payload.quaternion);
+    }
+
+    @Action
     public async spawnScout(account: Account) {
         const hash = Geohash.encode(account.position.lat, account.position.lng, 7);
 
