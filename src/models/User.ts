@@ -17,4 +17,8 @@ export class User extends Character {
     get xp() {
         return this.experiencePoints;
     }
+
+    get maxXP() {
+        return 100 * this.level;
+    }
 }

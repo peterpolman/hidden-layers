@@ -106,6 +106,22 @@ class AccountModule extends VuexModule implements AccountModuleState {
     }
 
     @Action
+    public async updateExperiencepoints(target: any) {
+        const xp = 100 + (target.level - this._data.level) * 10;
+        const newXP = this._data.experiencePoints + xp;
+        const maxXP = this._data.level * 100;
+
+        if (newXP < maxXP) {
+            await firebase.db.ref(`users/${this._data.uid}/experiencePoints`).set(newXP);
+        } else {
+            const diff = xp - (maxXP - this._data.experiencePoints);
+
+            await firebase.db.ref(`users/${this._data.uid}/level`).set(this._data.level + 1);
+            await firebase.db.ref(`users/${this._data.uid}/experiencePoints`).set(diff);
+        }
+    }
+
+    @Action
     public login({ email, password }: { email: string; password: string }) {
         return firebase.auth.signInWithEmailAndPassword(email, password);
     }

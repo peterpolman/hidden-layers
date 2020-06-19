@@ -70,6 +70,7 @@ export default class BaseAction extends Vue {
         const die = async (t: any) => {
             await this.$store.dispatch('markers/remove', target);
             await t.ref.remove();
+            await this.$store.dispatch('account/updateExperiencepoints', target);
         };
         const dropLoot = async (t: any) => {
             const snap = await firebase.db.ref(`items`).once('value');

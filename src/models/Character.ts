@@ -9,7 +9,6 @@ export class Character {
     component: string;
     position: { lat: number; lng: number };
     heading: number;
-    totalHitpoints: number;
     _visible = false;
 
     constructor(id: string, data: any) {
@@ -21,7 +20,10 @@ export class Character {
         this.component = data.race;
         this.position = data.position;
         this.heading = data.heading;
-        this.totalHitpoints = 100 * data.level;
+    }
+
+    get totalHitpoints() {
+        return 100 * this.level;
     }
 
     get hp() {

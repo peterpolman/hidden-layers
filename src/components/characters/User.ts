@@ -23,6 +23,7 @@ const ImgAccountClass = {
         }),
         ...mapGetters('map', {
             miniMap: 'miniMap',
+            map: 'map',
         }),
     },
 })
@@ -32,6 +33,10 @@ export default class CharacterUser extends Vue {
     img = ImgAccountClass;
     miniMap: any;
     miniMapIcon: any;
+    map: any;
+
+    impactMarkers: any = {};
+    impactTimers: any = {};
 
     mounted() {
         const el = document.createElement('div');
@@ -40,6 +45,47 @@ export default class CharacterUser extends Vue {
         this.miniMapIcon = new MapboxGL.Marker(el)
             .setLngLat([this.marker.position.lng, this.marker.position.lat])
             .addTo(this.miniMap);
+
+        this.$watch('marker.experiencePoints', (newXP: number, oldXP: number) => {
+            this.updateExperiencepoints(newXP, oldXP);
+        });
+
+        this.$watch('marker.level', (newLVL: number, oldLVL: number) => {
+            this.updateLevel(newLVL, oldLVL);
+        });
+    }
+
+    updateLevel(newLvl: number, oldLvl: number) {
+        const propValue = `${newLvl - oldLvl} Level up!`;
+
+        this.showImpact(propValue, 'lvl');
+    }
+
+    updateExperiencepoints(newXP: number, oldXP: number) {
+        const propValue = `XP: +${newXP - oldXP}`;
+
+        this.showImpact(propValue, 'xp');
+    }
+
+    showImpact(value: string, type: string) {
+        const el = document.createElement('div');
+
+        el.classList.add(type);
+        el.classList.add('character-hit');
+        el.innerText = value;
+
+        if (this.impactMarkers[type]) {
+            this.impactMarkers[type].remove();
+        }
+
+        this.impactMarkers[type] = new MapboxGL.Marker(el)
+            .setLngLat([this.marker.position.lng, this.marker.position.lat])
+            .addTo(this.map);
+
+        this.impactTimers[type] = window.setTimeout(() => {
+            this.impactMarkers[type].remove();
+            window.clearTimeout(this.impactTimers[type]);
+        }, 300);
     }
 
     updatePosition(position: any) {

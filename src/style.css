@@ -212,6 +212,14 @@ input[type='checkbox']:checked + label:after {
     transition: all 1.5s ease-in-out;
 }
 
+.character-hit.lvl {
+    color: green;
+}
+
+.character-hit.xp {
+    color: yellow;
+}
+
 .character-hit.dmg {
     color: red;
 }

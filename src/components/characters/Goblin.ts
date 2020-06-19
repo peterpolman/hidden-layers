@@ -128,7 +128,7 @@ export default class CharacterGoblin extends Vue {
             });
 
             this.$watch('marker.selected', (selected) => {
-                return selected ? this.greet() : null;
+                return selected ? this.talk() : null;
             });
         });
     }
@@ -152,11 +152,18 @@ export default class CharacterGoblin extends Vue {
     }
 
     updateHitpoints(newHP: number, oldHP: number) {
+        const propValue = newHP - oldHP;
+        const color = newHP > oldHP ? 'heal' : 'dmg';
+
+        this.showImpact(propValue, color);
+    }
+
+    showImpact(propValue: number, color: string) {
         const el = document.createElement('div');
 
-        el.classList.add(newHP > oldHP ? 'heal' : 'dmg');
+        el.classList.add(color);
         el.classList.add('character-hit');
-        el.innerText = (newHP - oldHP).toString();
+        el.innerText = propValue.toString();
 
         if (this.hit) {
             this.hit.remove();
@@ -220,12 +227,17 @@ export default class CharacterGoblin extends Vue {
         this.$store.dispatch('markers/setQuaternion', { id: this.marker.id, quaternion: [axis, radians] });
     }
 
-    greet() {
+    talk() {
         const greeting = this.greetings[Math.floor(Math.random() * this.greetings.length)];
+
+        this.showSpeech(greeting);
+    }
+
+    showSpeech(speech: string) {
         const el = document.createElement('div');
 
         el.className = 'speech-bubble';
-        el.innerText = greeting;
+        el.innerText = speech;
 
         this.reset();
 
@@ -236,7 +248,7 @@ export default class CharacterGoblin extends Vue {
         this.speechMarkerTimer = window.setTimeout(() => {
             this.reset();
             this.move(this.account.position);
-        }, 3000);
+        }, 2000);
     }
 
     reset() {
