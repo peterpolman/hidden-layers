@@ -1,111 +1,111 @@
 {
-  "name": "hidden-layers",
-  "version": "0.2.25",
-  "private": true,
-  "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "test:unit": "vue-cli-service test:unit",
-    "test:e2e": "vue-cli-service test:e2e",
-    "lint": "vue-cli-service lint",
-    "deploy": "npm version patch; vue-cli-service build; firebase deploy;"
-  },
-  "dependencies": {
-    "@types/node": "13.1.8",
-    "axios": "^0.19.2",
-    "bootstrap": "^4.5.0",
-    "bootstrap-vue": "^2.15.0",
-    "core-js": "^3.6.4",
-    "firebase": "^7.14.5",
-    "jsts": "^2.2.3",
-    "latlon-geohash": "^2.0.0",
-    "mapbox-gl": "^1.10.1",
-    "register-service-worker": "^1.7.1",
-    "vue": "^2.6.11",
-    "vue-class-component": "^7.2.3",
-    "vue-property-decorator": "^8.4.2",
-    "vue-router": "^3.3.2",
-    "vue-timers": "^2.0.4",
-    "vuedraggable": "^2.23.2",
-    "vuex": "^3.4.0",
-    "vuex-module-decorators": "^0.17.0",
-    "vuexfire": "^3.2.2"
-  },
-  "devDependencies": {
-    "@types/jest": "^25.2.3",
-    "@typescript-eslint/eslint-plugin": "^3.0.2",
-    "@typescript-eslint/parser": "^3.0.2",
-    "@vue/cli-plugin-babel": "~4.4.1",
-    "@vue/cli-plugin-e2e-nightwatch": "~4.4.0",
-    "@vue/cli-plugin-eslint": "~4.4.1",
-    "@vue/cli-plugin-pwa": "~4.4.1",
-    "@vue/cli-plugin-router": "~4.4.1",
-    "@vue/cli-plugin-typescript": "~4.4.1",
-    "@vue/cli-plugin-unit-jest": "~4.4.1",
-    "@vue/cli-plugin-vuex": "~4.4.1",
-    "@vue/cli-service": "~4.4.1",
-    "@vue/eslint-config-prettier": "^6.0.0",
-    "@vue/eslint-config-typescript": "^5.0.2",
-    "@vue/test-utils": "1.0.3",
-    "chromedriver": "83.0.0",
-    "eslint": "^7.1.0",
-    "eslint-plugin-prettier": "^3.1.1",
-    "eslint-plugin-vue": "^6.2.2",
-    "geckodriver": "^1.19.1",
-    "node-sass": "^4.12.0",
-    "prettier": "^2.0.5",
-    "sass-loader": "^8.0.2",
-    "typescript": "~3.9.3",
-    "vue-template-compiler": "^2.6.11"
-  },
-  "eslintConfig": {
-    "root": true,
-    "env": {
-      "node": true
+    "name": "hidden-layers",
+    "version": "0.2.25",
+    "private": true,
+    "scripts": {
+        "serve": "vue-cli-service serve",
+        "build": "vue-cli-service build",
+        "test:unit": "vue-cli-service test:unit",
+        "test:e2e": "vue-cli-service test:e2e",
+        "lint": "vue-cli-service lint",
+        "deploy": "npm version patch; vue-cli-service build; firebase deploy;"
     },
-    "extends": [
-      "plugin:vue/essential",
-      "eslint:recommended",
-      "@vue/typescript/recommended",
-      "@vue/prettier",
-      "@vue/prettier/@typescript-eslint"
-    ],
-    "parserOptions": {
-      "ecmaVersion": 2020
+    "dependencies": {
+        "@types/node": "13.1.8",
+        "axios": "^0.19.2",
+        "bootstrap": "^4.5.0",
+        "bootstrap-vue": "^2.15.0",
+        "core-js": "^3.6.4",
+        "firebase": "^7.14.5",
+        "jsts": "^2.2.3",
+        "latlon-geohash": "^2.0.0",
+        "mapbox-gl": "^1.10.1",
+        "register-service-worker": "^1.7.1",
+        "vue": "^2.6.11",
+        "vue-class-component": "^7.2.3",
+        "vue-property-decorator": "^8.4.2",
+        "vue-router": "^3.3.2",
+        "vue-timers": "^2.0.4",
+        "vuedraggable": "^2.23.2",
+        "vuex": "^3.4.0",
+        "vuex-module-decorators": "^0.17.0",
+        "vuexfire": "^3.2.2"
     },
-    "rules": {
-      "no-debugger": "off",
-      "no-var-requires": "off",
-      "@typescript-eslint/no-explicit-any": "off",
-      "@typescript-eslint/explicit-module-boundary-types": "off",
-      "@typescript-eslint/no-var-requires": "off"
+    "devDependencies": {
+        "@types/jest": "^25.2.3",
+        "@typescript-eslint/eslint-plugin": "^3.0.2",
+        "@typescript-eslint/parser": "^3.0.2",
+        "@vue/cli-plugin-babel": "~4.4.1",
+        "@vue/cli-plugin-e2e-nightwatch": "~4.4.0",
+        "@vue/cli-plugin-eslint": "~4.4.1",
+        "@vue/cli-plugin-pwa": "~4.4.1",
+        "@vue/cli-plugin-router": "~4.4.1",
+        "@vue/cli-plugin-typescript": "~4.4.1",
+        "@vue/cli-plugin-unit-jest": "~4.4.1",
+        "@vue/cli-plugin-vuex": "~4.4.1",
+        "@vue/cli-service": "~4.4.1",
+        "@vue/eslint-config-prettier": "^6.0.0",
+        "@vue/eslint-config-typescript": "^5.0.2",
+        "@vue/test-utils": "1.0.3",
+        "chromedriver": "83.0.0",
+        "eslint": "^7.1.0",
+        "eslint-plugin-prettier": "^3.1.1",
+        "eslint-plugin-vue": "^6.2.2",
+        "geckodriver": "^1.19.1",
+        "node-sass": "^4.12.0",
+        "prettier": "^2.0.5",
+        "sass-loader": "^8.0.2",
+        "typescript": "~3.9.3",
+        "vue-template-compiler": "^2.6.11"
     },
-    "overrides": [
-      {
-        "files": [
-          "**/__tests__/*.{j,t}s?(x)",
-          "**/tests/unit/**/*.spec.{j,t}s?(x)"
-        ],
+    "eslintConfig": {
+        "root": true,
         "env": {
-          "jest": true
-        }
-      }
-    ]
-  },
-  "prettier": {
-    "tabWidth": 4,
-    "singleQuote": true,
-    "bracketSpacing": true,
-    "printWidth": 120,
-    "trailingComma": "all",
-    "quoteProps": "consistent"
-  },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not dead"
-  ],
-  "jest": {
-    "preset": "@vue/cli-plugin-unit-jest/presets/typescript-and-babel"
-  }
+            "node": true
+        },
+        "extends": [
+            "plugin:vue/essential",
+            "eslint:recommended",
+            "@vue/typescript/recommended",
+            "@vue/prettier",
+            "@vue/prettier/@typescript-eslint"
+        ],
+        "parserOptions": {
+            "ecmaVersion": 2020
+        },
+        "rules": {
+            "no-debugger": "off",
+            "no-var-requires": "off",
+            "@typescript-eslint/no-explicit-any": "off",
+            "@typescript-eslint/explicit-module-boundary-types": "off",
+            "@typescript-eslint/no-var-requires": "off"
+        },
+        "overrides": [
+            {
+                "files": [
+                    "**/__tests__/*.{j,t}s?(x)",
+                    "**/tests/unit/**/*.spec.{j,t}s?(x)"
+                ],
+                "env": {
+                    "jest": true
+                }
+            }
+        ]
+    },
+    "prettier": {
+        "tabWidth": 4,
+        "singleQuote": true,
+        "bracketSpacing": true,
+        "printWidth": 120,
+        "trailingComma": "all",
+        "quoteProps": "consistent"
+    },
+    "browserslist": [
+        "> 1%",
+        "last 2 versions",
+        "not dead"
+    ],
+    "jest": {
+        "preset": "@vue/cli-plugin-unit-jest/presets/typescript-and-babel"
+    }
 }

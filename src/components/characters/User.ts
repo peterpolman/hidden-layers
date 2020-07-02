@@ -62,7 +62,7 @@ export default class CharacterUser extends Vue {
     }
 
     updateExperiencepoints(newXP: number, oldXP: number) {
-        const propValue = `XP: +${newXP - oldXP}`;
+        const propValue = `+${newXP - oldXP} XP`;
 
         this.showImpact(propValue, 'xp');
     }

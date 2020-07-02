@@ -1,25 +1,13 @@
 <template>
     <div class="ui-action">
-        <b-button
-            v-if="main"
-            @click="onMainClick()"
-            :disabled="attacking"
-            class="btn-circle"
-            :class="{ active: main.active }"
-        >
+        <b-button v-if="main" @click="onMainClick()" class="btn-circle">
             <img class="image" :src="img[main.slug]" :alt="main.name" />
         </b-button>
-        <b-button
-            v-if="off"
-            @click="onOffClick()"
-            :disabled="consuming"
-            class="btn btn-circle"
-            :class="{ 'btn-sm': main, 'active': off.active }"
-        >
+        <b-button v-if="off" @click="onOffClick()" class="btn btn-circle" :class="{ 'btn-sm': main }">
             <img class="image" :src="img[off.slug]" :alt="off.name" />
         </b-button>
-        <div v-if="main && main.speed && time !== 0" class="action-speed">
-            <div :style="{ width: `${(time / main.speed) * 100}%` }" class="progress"></div>
+        <div class="action-speed" :class="activated ? 'in' : 'out'">
+            <div :style="{ 'transition-duration': `${active ? active.speed : 0}ms` }" class="progress"></div>
         </div>
     </div>
 </template>
@@ -38,6 +26,7 @@
     height: 5px;
     overflow: hidden;
     border-radius: 5px;
+    opacity: 0;
 }
 .action-speed .progress {
     background: #fdc539;
@@ -46,8 +35,23 @@
     position: absolute;
     top: 0px;
     left: 0px;
-    width: 0%;
+    transition-duration: 0ms;
 }
+.action-speed.in {
+    opacity: 1;
+}
+.action-speed.in .progress {
+    width: 100%;
+    transition-property: width;
+    transition-timing-function: linear;
+}
+.action-speed.out .progress {
+    width: 0%;
+    transition-property: width;
+    transition-timing-function: linear;
+    transition-duration: 0ms !important;
+}
+
 .ui-action {
     bottom: 1rem;
     left: 1rem;

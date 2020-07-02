@@ -45,6 +45,8 @@ In order of appearance. No strings attached. Never really done and always a work
 -   [x] Attack System
 -   [x] Skins
 -   [x] Wearable items
+-   [x] Experience Points
+-   [x] Moving NPC
 -   [ ] Defend System
 -   [ ] Quest System
 -   [ ] Skill System

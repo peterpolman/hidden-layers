@@ -72,6 +72,7 @@ export class Consumable extends Item {
     increase: number;
     decrease: number;
     duration: number;
+    speed: number;
 
     constructor(data: any) {
         super(data);
@@ -80,6 +81,7 @@ export class Consumable extends Item {
         this.increase = data.increase || 0;
         this.decrease = data.decrease || 0;
         this.duration = data.duration || 0;
+        this.speed = data.speed || 0;
     }
 }
 
