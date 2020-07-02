@@ -1,10 +1,10 @@
 <template>
     <div class="ui-action">
         <b-button v-if="main" @click="onMainClick()" class="btn-circle">
-            <img class="image" :src="img[main.slug]" :alt="main.name" />
+            <img class="image" :src="require(`../assets/img/${main.image}.png`)" :alt="main.name" />
         </b-button>
         <b-button v-if="off" @click="onOffClick()" class="btn btn-circle" :class="{ 'btn-sm': main }">
-            <img class="image" :src="img[off.slug]" :alt="off.name" />
+            <img class="image" :src="require(`../assets/img/${off.image}.png`)" :alt="off.name" />
         </b-button>
         <div class="action-speed" :class="activated ? 'in' : 'out'">
             <div :style="{ 'transition-duration': `${active ? active.speed : 0}ms` }" class="progress"></div>

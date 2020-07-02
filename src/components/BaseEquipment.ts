@@ -6,11 +6,6 @@ import draggable from 'vuedraggable';
 import { Item } from '@/models/Item';
 import { Account } from '@/models/Account';
 
-const ImgItems = {
-    backpack: require('../assets/img/backpack.png'),
-    backpackOpen: require('../assets/img/backpack_open.png'),
-};
-
 @Component({
     name: 'BaseEquipment',
     components: {
@@ -31,7 +26,6 @@ const ImgItems = {
     },
 })
 export default class BaseEquipment extends Vue {
-    img = ImgItems;
     isOpen = false;
     items!: Item[];
     account!: Account;

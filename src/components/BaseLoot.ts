@@ -36,7 +36,7 @@ export default class BaseLoot extends Vue {
         const THREE = (window as any)['THREE'];
         const loader = new THREE.GLTFLoader();
 
-        loader.load(`./objects/items/${this.marker.item.slug}.gltf`, (gltf: any) => {
+        loader.load(`./objects/items/${this.marker.item.id}.gltf`, (gltf: any) => {
             gltf.scene.scale.set(1.5, 1.5, 1.5);
             gltf.scene.userData = {
                 id: this.marker.id,

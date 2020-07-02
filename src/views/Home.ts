@@ -116,7 +116,7 @@ export default class Home extends Vue {
 
     async handleMapClick(e: any) {
         if (this.active) {
-            switch (this.active.slug) {
+            switch (this.active.id) {
                 case 'ward':
                     await this.$store.dispatch('map/addWard', { account: this.account, position: e.lngLat });
 

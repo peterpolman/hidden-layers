@@ -28,7 +28,7 @@ const Rarity = [
 export class Item {
     id: string;
     name: string;
-    slug: string;
+    image: string;
     description: string;
     amount: number;
     rarity: { name: string; color: string };
@@ -40,9 +40,9 @@ export class Item {
 
     constructor(data: any) {
         this.id = data.id;
+        this.image = data.image;
         this.type = data.type;
         this.name = data.name;
-        this.slug = data.slug;
         this.description = data.description;
         this.amount = data.amount;
         this.rarity = Rarity[data.rarity];
@@ -58,12 +58,14 @@ export class Item {
 export class Weapon extends Item {
     damage: number;
     speed: number;
+    armor: number;
 
     constructor(data: any) {
         super(data);
 
-        this.damage = data.damage || 10;
-        this.speed = data.speed || 1000;
+        this.damage = data.damage;
+        this.armor = data.armor;
+        this.speed = data.speed;
     }
 }
 

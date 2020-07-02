@@ -1,10 +1,10 @@
 <template>
     <div class="ui-inventory">
         <b-button class="btn-square" @click="open()">
-            <img class="image" :src="img[isOpen ? 'backpackOpen' : 'backpack']" />
+            <img class="image" :src="require(`../assets/img/${isOpen ? 'BackpackOpen' : 'Backpack'}.png`)" />
         </b-button>
         <b-button class="btn-square" @click="spawnScout()">
-            <img class="image" :src="img.scout" />
+            <img class="image" :src="require('../assets/img/wolf-0.png')" />
         </b-button>
         <base-modal @close="isOpen = false" title="Inventory" id="inventory" v-if="inventory">
             <div slot="content">

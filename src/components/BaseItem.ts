@@ -2,7 +2,6 @@ import { Component, Vue, Prop } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { Item } from '@/models/Item';
 import { Account } from '@/models/Account';
-import { Images } from '@/models/Images';
 import { BButton, BPopover } from 'bootstrap-vue';
 
 @Component({
@@ -26,7 +25,6 @@ export default class BaseItem extends Vue {
     @Prop() dropable!: boolean;
 
     account!: Account;
-    img: Images = new Images();
 
     equip() {
         this.$store.dispatch('inventory/equip', { account: this.account, item: this.item });

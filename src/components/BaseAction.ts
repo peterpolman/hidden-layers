@@ -3,7 +3,6 @@ import { mapGetters } from 'vuex';
 import { BProgress, BButton } from 'bootstrap-vue';
 import { User } from '@/models/User';
 import { Goblin } from '@/models/Enemies';
-import { Images } from '@/models/Images';
 import { Item, Weapon, Consumable } from '@/models/Item';
 import firebase from '@/firebase';
 import { Scout } from '@/models/Scout';
@@ -39,11 +38,10 @@ export default class BaseAction extends Vue {
 
     equipment!: { [slot: string]: Item };
     account!: Account;
-    img: Images = new Images();
     selected: any;
+    activated = false;
     active!: any;
     combatTimer: any;
-    activated = false;
     time = 0;
     actionTimer: any;
 
@@ -114,7 +112,7 @@ export default class BaseAction extends Vue {
             position: target.position,
             item: new Item({
                 amount: Math.floor(Math.random() * 20) + 5,
-                id: '-M8fjDoqeLMlz6xGrM-C',
+                id: 'coin',
             }),
         });
 

@@ -111,7 +111,7 @@ export default class BaseCharacter extends Vue {
         const bone = this.mesh.getObjectByName(slot);
 
         if (item) {
-            this.loader.load(`./objects/items/${item.slug}.gltf`, (gltf: any) => {
+            this.loader.load(`./objects/items/${item.id}.gltf`, (gltf: any) => {
                 this.slots[slot] = this.tb.Object3D({ obj: gltf.scene, units: 'meters' });
 
                 if (bone) {

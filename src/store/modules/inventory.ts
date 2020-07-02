@@ -1,7 +1,7 @@
 import { Vue } from 'vue-property-decorator';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 import firebase from '@/firebase';
-import { Item } from '@/models/Item';
+import { Item, Weapon, Miscellaneous, Consumable, Armor, Ammo, Money } from '@/models/Item';
 import { Loot } from '@/models/Loot';
 import { Account } from '@/models/Account';
 import Geohash from 'latlon-geohash';
@@ -16,6 +16,15 @@ const randomPosition = (bounds: any) => {
         lat: x_min + Math.random() * (x_max - x_min),
         lng: y_min + Math.random() * (y_max - y_min),
     };
+};
+
+const ItemType: any = {
+    weapon: Weapon,
+    miscellaneous: Miscellaneous,
+    consumable: Consumable,
+    armor: Armor,
+    ammo: Ammo,
+    money: Money,
 };
 
 export interface InventoryModuleState {
@@ -46,9 +55,9 @@ class InventoryModule extends VuexModule implements InventoryModuleState {
         this._all = {};
 
         payload.inventory.forEach((item: Item) => {
-            this._all[item.slug] = item;
+            this._all[item.id] = item;
 
-            update[item.slug] = {
+            update[item.id] = {
                 id: item.id,
                 amount: item.amount,
             };
@@ -59,15 +68,7 @@ class InventoryModule extends VuexModule implements InventoryModuleState {
 
     @Action
     public async init(firebaseUser: firebase.User) {
-        // firebase.db.ref(`items`).push().set({
-        //     name: 'Vision Ward',
-        //     slug: 'ward',
-        //     value: 50,
-        //     description: '',
-        //     rarity: 1,
-        //     slot: 'main',
-        // });
-
+        // firebase.db.ref(`inventory/${firebaseUser.uid}/swordWood`).set({ id: 'swordWood', amount: 5 });
         firebase.db.ref(`inventory/${firebaseUser.uid}`).on('child_added', async (snap: any) => {
             const data = snap.val();
 
@@ -76,7 +77,7 @@ class InventoryModule extends VuexModule implements InventoryModuleState {
 
                 this.context.commit('setItem', {
                     key: snap.key,
-                    item: new Item({
+                    item: new ItemType[s.val().type]({
                         id: data.id,
                         amount: data.amount,
                         ...s.val(),
@@ -116,14 +117,14 @@ class InventoryModule extends VuexModule implements InventoryModuleState {
 
     @Action
     public async add(payload: { account: Account; item: Item; amount: number }) {
-        const snap = await firebase.db.ref(`inventory/${payload.account.id}/${payload.item.slug}`).once('value');
+        const snap = await firebase.db.ref(`inventory/${payload.account.id}/${payload.item.id}`).once('value');
 
         if (snap.exists()) {
-            await firebase.db.ref(`inventory/${payload.account.id}/${payload.item.slug}/`).update({
+            await firebase.db.ref(`inventory/${payload.account.id}/${payload.item.id}/`).update({
                 amount: snap.val().amount + payload.amount,
             });
         } else {
-            return await firebase.db.ref(`inventory/${payload.account.id}/${payload.item.slug}`).set({
+            return await firebase.db.ref(`inventory/${payload.account.id}/${payload.item.id}`).set({
                 id: payload.item.id,
                 amount: payload.amount,
             });
@@ -132,15 +133,15 @@ class InventoryModule extends VuexModule implements InventoryModuleState {
 
     @Action
     public async remove(payload: { account: Account; item: Item; amount: number }) {
-        const snap = await firebase.db.ref(`inventory/${payload.account.id}/${payload.item.slug}`).once('value');
+        const snap = await firebase.db.ref(`inventory/${payload.account.id}/${payload.item.id}`).once('value');
         const inventoryItem = snap.val();
 
         if (inventoryItem.amount > payload.amount) {
-            await firebase.db.ref(`inventory/${payload.account.id}/${payload.item.slug}/`).update({
+            await firebase.db.ref(`inventory/${payload.account.id}/${payload.item.id}/`).update({
                 amount: inventoryItem.amount - payload.amount,
             });
         } else {
-            await firebase.db.ref(`inventory/${payload.account.id}/${payload.item.slug}`).remove();
+            await firebase.db.ref(`inventory/${payload.account.id}/${payload.item.id}`).remove();
         }
     }
 
