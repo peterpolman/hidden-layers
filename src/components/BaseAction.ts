@@ -112,7 +112,7 @@ export default class BaseAction extends Vue {
             position: target.position,
             item: new Item({
                 amount: Math.floor(Math.random() * 20) + 5,
-                id: 'coin',
+                id: 'coinStack',
             }),
         });
 
